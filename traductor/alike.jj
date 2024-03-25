@@ -1,0 +1,516 @@
+//*****************************************************************
+// File:   cl.jj
+// Author: Procesadores de Lenguajes-University of Zaragoza
+// Date:   julio 2023
+// Coms:   compilar mediante "ant"
+//*****************************************************************
+
+options {
+	IGNORE_CASE = true;
+	COMMON_TOKEN_ACTION = true;
+}
+
+PARSER_BEGIN(alike)
+
+package traductor;
+
+//...
+
+import lib.symbolTable.*;
+import lib.attributes.*;
+import lib.symbolTable.exceptions.*;
+import java.util.ArrayList;
+
+public class alike { 
+
+
+	static SymbolTable st;
+
+	private static void initSymbolTable() {
+		boolean b;
+		String[] palsRes = {
+	    	"array","boolean","character","integer","procedure","if","then","elsif","else","end",
+			"while","loop","begin","ref","of","is","not","put_line","put","return","and","or",
+			"mod","skip_line","function","null","get","true","false","int2char","char2int"
+		};
+
+		st.insertReservedWords(palsRes);
+	}
+
+   public static void main(String[] args) {
+	   alike parser = null;
+
+	   st = new SymbolTable();
+	   initSymbolTable();
+	   
+	   try {
+		   if(args.length == 0) {
+			   parser = new alike(System.in);
+		   }
+		   else {
+			   parser = new alike(new java.io.FileInputStream(args[0]));
+		   }
+		   //Programa es el símbolo inicial de la gramática
+		   parser.Programa();
+		   //...
+		   System.out.println("***** Análisis terminado con éxito *****");
+	   }
+	   catch (java.io.FileNotFoundException e) {
+		   System.err.println ("Fichero " + args[0] + " no encontrado.");
+	   }
+	   catch (TokenMgrError e) {
+		   System.err.println("LEX_ERROR: " + e.getMessage());
+	   }
+	   catch (ParseException e) {
+            System.err.println("PARSER_ERROR: " + e.getMessage());
+        }
+	   //...
+   }
+}
+PARSER_END(alike)
+
+TOKEN_MGR_DECLS : {
+	static void CommonTokenAction(Token token) {
+		System.err.println("(" + token.beginLine + ", "
+					+ token.beginColumn + "): "+ alikeConstants.tokenImage[token.kind] + " " + token.image);
+	}
+
+}
+
+SPECIAL_TOKEN : {
+	< tCOMMENT: (<COMMENT>) >
+}
+
+TOKEN : {
+	< #LETTER: (["a"-"z","A"-"Z"]) >
+|	< #DIGIT: ["0"-"9"] >
+|	< #CHAR: (~["\\"]) >
+|	< #STRING: (~["\\","\""]|("\"\""))+ >
+|	< #COMMENT: ("--")(~["\n"])*("\n") >
+}
+
+TOKEN : {
+	< tBOOL: "boolean" >
+|	< tCHAR: "character" >
+|	< tINT: "integer" >
+|	< tARRAY: "array" >
+|	< tPROC: "procedure" >
+|	< tIF:	"if" >
+|	< tTHEN: "then" >
+|	< tELSIF: "elsif" >
+|	< tELSE: "else" >
+|	< tENDIF: "end"(" ")+"if"> 
+| 	< tEND: "end" >
+|	< tWHILE: "while" >
+|	< tLOOP: "loop" >
+|	< tENDLOOP: "end loop" >
+|	< tBEGIN: "begin" >
+|	< tREF: "ref" >
+|	< tOF: "of" >
+|	< tIS: "is" >
+|	< tNOT: "not" >
+| 	< tPC: ";" >
+|	< tPLINE: "put_line" >
+|	< tPUT: "put" >
+|	< tRETURN: "return" >
+|	< tAP: "(" >
+|	< tCP: ")" >
+|	< tASIG: ":=" >
+|	< tGE: ">=" >
+|	< tLE: "<=" >
+|	< tNEQ: "/=" >
+|	< tEQ: "=" >
+|	< tGT: ">" >
+|	< tLS: "<" >
+|	< tDP: ":" >
+|	< tAND: "and" >
+|	< tOR: "or" >
+|	< tADD: "+" >
+|	< tSUB: "-" >
+|	< tDIV: "/" >
+|	< tMUL: "*" >
+|	< tCOMA: "," >
+|	< tMOD: "mod" >
+|	< tSKIP: "skip_line" >
+|	< tFUNC : "function" >
+|	< tNULL : "null" >
+|	< tGET : "get" >
+|	< tTRUE : "true" >
+|	< tFALSE : "false" >
+|	< tINT2CHAR : "int2char" >
+|	< tCHAR2INT : "char2int" >
+|	< tCONST_CHAR : ("'")(< CHAR >)("'") >
+|	< tCONST_INT : ("-")?(< DIGIT >)+ >
+|	< tCONST_STRING : ("\"")(< STRING >)*("\"") >
+| 	< tID: (< LETTER >| "_")+(< DIGIT >| "_" | < LETTER >)* > 
+}
+
+SKIP : 
+{
+	" "
+|	"\t"
+|	"\n"
+|	"\r" 
+}
+
+
+
+
+
+//------------ Símbolo inicial de la gramática. Para análisis léxico no hace falta más
+void Programa():
+{
+	Attributes at = new Attributes();
+} 
+{
+	<tPROC>
+	<tID>
+	<tIS>
+	( declaracion_variables(at) )?
+	( (declaracion_procs_funcs(at))+ )?
+	<tBEGIN>
+	instrucciones()
+	<tEND>
+	<tPC>
+	{
+
+	}
+}
+
+void declaracion_procedimiento():
+{}
+{
+	cabecera_procedimiento()
+	( declaracion_variables() )?
+	( declaracion_procs_funcs() )?
+	<tBEGIN>
+	instrucciones()
+	<tEND>
+	<tPC>
+}
+
+void declaracion_funcion():
+{}
+{
+	cabecera_funcion()
+	( declaracion_variables() )?
+	( declaracion_procs_funcs() )?
+	<tBEGIN>
+	instrucciones()
+	<tEND>
+	<tPC>
+}
+
+void declaracion_procs_funcs():
+{}
+{
+	declaracion_procedimiento()
+	| declaracion_funcion()
+}
+
+void instrucciones():
+{}
+{
+	(instruccion()(";"))+
+}
+
+
+void declaracion_variables():
+{
+
+}
+{
+	( declaracion_var() ";")+
+}
+
+void declaracion_var():
+{
+	Attributes at1 = new Attributes();
+	Attributes at2 = new Attributes();
+	ArrayList<Token> tokens;
+}
+{
+		tokens = lista_ids()
+		<tDP>
+		(	
+		<tREF>
+			{
+				at1.parClass = Symbol.ParameterClass.REF;
+			}
+		)?
+		tipo_variable(at1,at2)
+		{	
+			if(at1.parClass==Symbol.ParameterClass.NONE)at1.parClass=Symbol.ParameterClass.VAL;
+			for(Token t : tokens)
+			{
+				Symbol S = null;
+
+				
+
+				if(at1.type == Symbol.Types.BOOL) S = new SymbolBool(t.image, at1.parClass);
+				if(at1.type == Symbol.Types.CHAR) S = new SymbolChar(t.image, at1.parClass);
+				if(at1.type == Symbol.Types.INT) S = new SymbolInt(t.image, at1.parClass);
+				if(at1.type == Symbol.Types.ARRAY) 
+				{
+					S = new SymbolArray(t.image, at1.inicio,at1.fin,at2.type);
+				}
+				
+				try {
+					st.insertSymbol(S);
+				} catch (AlreadyDefinedSymbolException e)
+				{
+					System.err.println("Error semantico. Simbolo ya existente");
+				}
+			}
+		}
+}
+
+ArrayList<Token> lista_ids():
+{
+	ArrayList<Token> tokens = new ArrayList<Token>();
+	Token t;
+}
+{
+	(
+		t=<tID>
+			{
+				if(!st.isReservedWord(t.image))
+				{
+					tokens.add(t);
+				}
+				else
+				{
+					throw new ErrorSemantico("ID no valido. Es una palabra reservada");
+				}
+			}
+	)
+	(
+		<tCOMA>
+		t=<tID>
+			{
+				if(!st.isReservedWord(t.image)) tokens.add(t);
+				else throw new ErrorSemantico("ID no valido. Es una palabra reservada");
+			}
+	)*
+		{
+			return tokens;
+		}
+}
+
+void lista_ids_o_string_o_inv():
+{
+
+}
+{
+	expresion() (<tCOMA> expresion())*
+}
+
+
+void cabecera_procedimiento():
+{
+
+}
+{
+	<tPROC>
+	<tID>
+	(<tAP> parametros_formales() <tCP>)?
+	<tIS>
+}
+
+void cabecera_funcion():
+{
+	Attributes at1 = new Attributes();
+	Attributes at2 = new Attributes();
+}
+{
+	<tFUNC>
+	<tID>
+	(<tAP> parametros_formales() <tCP>)?
+	<tRETURN>
+	tipo_variable(at1,at2)
+	<tIS>
+}
+
+void parametros_formales(): 
+{
+
+}
+{
+	declaracion_var() (<tPC> declaracion_var())*
+}
+
+
+void instruccion() :
+{
+
+} 
+{
+		inst_leer()
+	|   inst_saltar_linea()
+	|	inst_escribir()
+	|   inst_escribir_linea()
+	|   inst_invocacion_o_asignacion()
+	|   inst_if()
+	|   inst_while()
+	|   inst_return()
+	|   inst_null()
+}
+
+void inst_leer():{}{<tGET> <tAP> lista_ids() <tCP>}
+
+void inst_saltar_linea():{}{<tSKIP>}
+
+void inst_escribir():{}{<tPUT> <tAP> lista_ids_o_string_o_inv()  <tCP>}
+
+void inst_escribir_linea():{}{<tPLINE> ((<tAP> lista_ids_o_string_o_inv() <tCP>))?}
+
+void inst_invocacion_o_asignacion():{}{
+	<tID> (<tAP> (function_call()) <tCP>)? (<tASIG> expresion())?
+}
+
+
+void inv_funcion():{}{(expresion() (<tCOMA> expresion())*)}
+
+void inst_if():{}{<tIF> expresion() <tTHEN> instrucciones() ((<tELSIF> expresion() <tTHEN> instrucciones())* (<tELSE> instrucciones())?) <tENDIF>} 
+
+void inst_while():{}{<tWHILE> expresion() <tLOOP> instrucciones() <tENDLOOP>}
+
+void inst_return():{}{<tRETURN> expresion()}
+
+void inst_null():{}{<tNULL>}
+
+void expresion():
+{
+
+}
+{
+    relacion()
+	( ((<tAND> | <tOR>) relacion())+ )?
+}
+
+void relacion():
+{
+
+}
+{
+    expresion_simple()
+ 	( operador_relacional() expresion_simple() )?
+}
+
+void operador_relacional():
+{
+	
+}
+{    
+	<tEQ>
+	| <tLS> 
+	| <tGT> 
+	| <tLE> 
+	| <tGE> 
+	| <tNEQ>
+}
+
+void expresion_simple():
+{}
+{
+	( <tADD> |	<tSUB> )? 
+    termino()
+	( ( <tADD> | <tSUB> ) termino() )*
+}
+
+void termino():
+{}
+{
+    factor() ( operador_multiplicativo() factor() )*
+}
+
+void operador_multiplicativo():
+{}
+{
+    <tMUL> | <tMOD> | <tDIV>
+}
+
+void factor():
+{}
+{
+    primario()
+|   <tNOT>  primario()
+}
+
+void primario() :
+{ }
+{
+	<tAP> expresion() <tCP>
+|   <tINT2CHAR> <tAP> expresion() <tCP>
+|   <tCHAR2INT> <tAP> expresion() <tCP>
+|   <tID> (<tAP> (function_call()) <tCP>)? 
+|   <tCONST_INT>
+|   <tCONST_CHAR>
+|   <tCONST_STRING>
+|   <tTRUE>
+|   <tFALSE>
+}
+
+void variable() :
+{ }
+{
+	indexacion() 
+}
+
+void function_call() :
+{ }
+{
+ (expresion() ((<tCOMA>) expresion())* )
+}
+
+void indexacion():
+{ }
+{
+	expresion_simple()
+}
+
+void tipo_variable(Attributes at1, Attributes at2):
+{ 
+	Token i;
+}
+{
+	< tARRAY >
+	<tAP>
+	i = < tCONST_INT >
+		{
+			at1.inicio = Integer.parseInt(i.image);
+			
+			//at.parList.add(new Symbol(i.image,Symbol.Types.INT));
+			
+		}
+	("..")
+	i = < tCONST_INT >
+		{
+			at1.fin = Integer.parseInt(i.image);
+			// at.parList.add(new Symbol(i.image,Symbol.Types.INT));
+			at1.type = Symbol.Types.ARRAY;
+		}
+	<tCP>
+	 <tOF> tipo_variable_simple(at2)
+|   tipo_variable_simple(at1)
+}
+
+void tipo_variable_simple(Attributes at):
+{
+
+}
+{
+		< tBOOL > 
+			{
+				at.type = Symbol.Types.BOOL;
+			}
+	|	< tCHAR >
+			{
+				at.type = Symbol.Types.CHAR;
+			}
+	|	< tINT >
+			{
+				at.type = Symbol.Types.INT;
+			}
+}
+
