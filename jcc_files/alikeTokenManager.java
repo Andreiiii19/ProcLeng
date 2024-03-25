@@ -7,6 +7,7 @@ import lib.symbolTable.*;
 import lib.attributes.*;
 import lib.symbolTable.exceptions.*;
 import java.util.ArrayList;
+import lib.errores.*;
 
 /** Token Manager. */
 @SuppressWarnings ("unused")
@@ -1018,7 +1019,6 @@ public static Token getNextToken()
       jjmatchedPos = -1;
       matchedToken = jjFillToken();
       matchedToken.specialToken = specialToken;
-      CommonTokenAction(matchedToken);
       return matchedToken;
    }
 
@@ -1038,7 +1038,6 @@ public static Token getNextToken()
       {
          matchedToken = jjFillToken();
          matchedToken.specialToken = specialToken;
-         CommonTokenAction(matchedToken);
          return matchedToken;
       }
       else
