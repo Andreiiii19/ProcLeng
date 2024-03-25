@@ -459,7 +459,7 @@ void expresion():
 
 void relacion():
 {
-
+	Attributes atTypes = new Attributes();
 }
 {
     expresion_simple()
