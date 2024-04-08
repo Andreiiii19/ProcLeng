@@ -21,6 +21,7 @@ import lib.attributes.*;
 import lib.symbolTable.exceptions.*;
 import java.util.ArrayList;
 import lib.errores.*;
+import lib.tools.SemanticFunctions;
 
 public class alike { 
 
@@ -42,7 +43,7 @@ public class alike {
 
    public static void main(String[] args) {
 	   alike parser = null;
-
+	   SemanticFunctions sf = new SemanticFunctions();
 	   initSymbolTable();
 	   
 	   try {
@@ -193,15 +194,8 @@ void declaracion_procedimiento():
 	<tEND>
 	<tPC> 
 	{
-		try {
-			st.removeBlock();
-			Symbol S = new SymbolProcedure(name.image,att.parList);
-			st.insertSymbol(S);
-		}catch (AlreadyDefinedSymbolException ex)
-		{
-			System.err.println("Error semantico. Simbolo ya existente");
-		}
-		
+		System.err.println("Bloque" + name.image + "terminado \n" + st.toString());
+		st.removeBlock();
 	}
 }
 
@@ -217,23 +211,19 @@ void declaracion_funcion():
 	( declaracion_variables() )?
 	( declaracion_procs_funcs() )?
 	<tBEGIN>
+	{
+		
+	}
 	instrucciones()
 	<tEND>
 	<tPC>
 	{
-		try{
-			st.removeBlock();
-			if(atType.type == Symbol.Types.ARRAY)
-			{
-				throw new ErrorSemantico("No se permiten funciones con retorno de vectores");
-			}
-			Symbol S = new SymbolFunction(name.image,atts.parList,atType.type);
-			st.insertSymbol(S);
-		}catch (AlreadyDefinedSymbolException ex)
+		System.err.println("Bloque " + name.image + " terminado \n"+ st.toString());
+		st.removeBlock();
+		if(atType.type == Symbol.Types.ARRAY)
 		{
-			System.err.println("Error semantico. Simbolo ya existente");
+			throw new ErrorSemantico("No se permiten funciones con retorno de vectores");
 		}
-		
 	}
 }
 
@@ -353,10 +343,17 @@ Token cabecera_procedimiento(Attributes att):
 }
 {
 	<tPROC>
-	{
-		st.insertBlock();
-	}
 	name = <tID>
+	{
+		try {
+			Symbol S = new SymbolProcedure(name.image,att.parList);
+			st.insertSymbol(S);
+			st.insertBlock();
+		}catch (AlreadyDefinedSymbolException ex)
+		{
+			System.err.println("Error semantico. Simbolo ya existente");
+		}
+	}
 	(<tAP> 
 	parametros_formales(att)
 	<tCP>)?
@@ -372,10 +369,18 @@ Token cabecera_funcion(Attributes atType,Attributes atIsArray,Attributes atts):
 }
 {
 	<tFUNC>
-	{
-		st.insertBlock();
-	}
 	name = <tID>
+	{
+		try{ 
+			Symbol S = new SymbolFunction(name.image,atts.parList,atType.type);
+			st.insertSymbol(S);
+			st.insertBlock();
+		} catch (AlreadyDefinedSymbolException ex)
+		{
+			System.err.println("Error semantico. Simbolo ya existente");
+		}
+		
+	}
 	(<tAP> parametros_formales(atts) <tCP>)?
 	<tRETURN>
 	tipo_variable(atType,atIsArray)
@@ -392,10 +397,16 @@ void parametros_formales(Attributes att):
 {
 	symbols = declaracion_var()
 	{
-		for(Symbol S : symbols)
-		{
-			att.parList.add(S);
-		}
+		// try {
+			for(Symbol S : symbols)
+			{
+				att.parList.add(S);
+		// 		st.insertSymbol(S);
+			}
+		// } catch (AlreadyDefinedSymbolException ex)
+		// {
+		// 	System.err.println("Error semantico. Simbolo ya existente");
+		// }
 	}
 	(<tPC> 
 	symbols = declaracion_var()
@@ -403,6 +414,7 @@ void parametros_formales(Attributes att):
 		for(Symbol S : symbols)
 		{
 			att.parList.add(S);
+			// st.insertSymbol(S);
 		}
 	}
 	)*
@@ -448,22 +460,40 @@ void inst_return():{}{<tRETURN> expresion()}
 
 void inst_null():{}{<tNULL>}
 
-void expresion():
-{
 
+Attributes expresion():
+{
+	Attributes att=new Attributes(),att2 = new Attributes();
 }
 {
-    relacion()
-	( ((<tAND> | <tOR>) relacion())+ )?
+    relacion(att)
+	( ((<tAND> | <tOR>) relacion(att2)
+	{
+		// if(att.type!=Symbol.Types.BOOL||att2.type!=Symbol.Types.BOOL)
+		// {
+		// 	throw new ErrorSemantico("(and,or)) solo acepta booleanos");
+		// }
+	}
+	)+ )?
+	{
+		// ( 2+3+4) + 5 + (2+3)
+		// Expresion
+		//  (2+3+4)
+		//   5
+		//  (2+3)
+		System.err.println("Expresion: " + att);	
+		return att;
+	}
 }
 
-void relacion():
+void relacion(Attributes att):
 {
-	Attributes atTypes = new Attributes();
+	//Attributes atTypes = new Attributes();
+	Attributes att2 = new Attributes();
 }
 {
-    expresion_simple()
- 	( operador_relacional() expresion_simple() )?
+    expresion_simple(att)
+ 	( operador_relacional() expresion_simple(att2) )?
 }
 
 void operador_relacional():
@@ -471,26 +501,45 @@ void operador_relacional():
 	
 }
 {    
-	<tEQ>
-	| <tLS> 
-	| <tGT> 
-	| <tLE> 
-	| <tGE> 
-	| <tNEQ>
+	<tEQ>    // Char,bool,int
+	| <tLS>  // Int
+	| <tGT>  // Int
+	| <tLE>  // Int
+	| <tGE>  // Int
+	| <tNEQ> // Char,bool,int
 }
 
-void expresion_simple():
-{}
+void expresion_simple(Attributes att):
+{
+	Attributes att2 = new Attributes();
+}
 {
 	( <tADD> |	<tSUB> )? 
-    termino()
-	( ( <tADD> | <tSUB> ) termino() )*
+    termino(att)
+	( ( <tADD> | <tSUB> ) termino(att2) 
+	{
+		// if(att.type!=Symbol.Types.INT||att2.type!=Symbol.Types.INT)
+		// {
+		// 	throw new ErrorSemantico("(+,-) solo acepta integers");
+		// }
+	})*
 }
 
-void termino():
-{}
+void termino(Attributes att):
 {
-    factor() ( operador_multiplicativo() factor() )*
+	Attributes att2 = new Attributes();
+}
+{
+    factor(att) 
+	( operador_multiplicativo() factor(att2)
+	{
+		// if(att.type!=Symbol.Types.INT||att2.type!=Symbol.Types.INT)
+		// {
+		// 	throw new ErrorSemantico("(*,%,/) solo acepta integers");
+		// }
+	}
+	
+	)*
 }
 
 void operador_multiplicativo():
@@ -499,25 +548,168 @@ void operador_multiplicativo():
     <tMUL> | <tMOD> | <tDIV>
 }
 
-void factor():
+void factor(Attributes att):
 {}
 {
-    primario()
-|   <tNOT>  primario()
+    primario(att)
+|   <tNOT>  primario(att)
+	{
+		// if(att.type!=Symbol.Types.BOOL)
+		// {
+		// 	throw new ErrorSemantico("not solo acepta booleanos");
+		// }
+	}
 }
 
-void primario() :
-{ }
+void primario(Attributes att) :
+{ 
+	Attributes at = new Attributes();
+	Token t;
+	Symbol S;
+}
 {
-	<tAP> expresion() <tCP>
-|   <tINT2CHAR> <tAP> expresion() <tCP>
-|   <tCHAR2INT> <tAP> expresion() <tCP>
-|   <tID> (<tAP> (function_call()) <tCP>)? 
-|   <tCONST_INT>
-|   <tCONST_CHAR>
-|   <tCONST_STRING>
-|   <tTRUE>
-|   <tFALSE>
+	<tAP> at = expresion() <tCP> 
+	{
+		att.atts.add(at);
+	}
+|   <tINT2CHAR> <tAP> at = expresion() <tCP> 
+	{
+		for (Attributes a : at.atts)
+		{
+			if(a.type!=Symbol.Types.INT)
+			{
+				throw new ErrorSemantico("int2char solo acepta enteros");
+			}
+		}
+	}
+|   <tCHAR2INT> <tAP> at = expresion() <tCP> 
+{
+	for (Attributes a : at.atts)
+	{
+		if(a.type!=Symbol.Types.CHAR)
+		{
+			throw new ErrorSemantico("char2int solo acepta caracteres");
+		}
+	}
+}
+|   t=<tID> (<tAP> (function_call()) <tCP>)?  
+	{
+		try
+		{
+			S = st.getSymbol(t.image);
+			System.err.println("Encontrado " + S);
+			at.type = S.type;
+			at.code = (t.image);
+			at.nivel = st.level;
+			att.atts.add(at);
+
+			if(atts.type==Symbol.Types.UNDEFINED)
+			{
+				atts.type = at.type;
+			}
+			else if(atts.type!=at.type)
+			{
+				throw new ErrorSemantico("Error de tipos");
+			}
+			
+			System.err.println("Añadido " + at);
+			
+		}
+		catch(SymbolNotFoundException ex)
+		{
+			throw new ErrorSemantico(t.image + " no existe.");
+		}
+
+	}
+|   t= <tCONST_INT> 
+    {
+		at.type = Symbol.Types.INT;
+		at.code = (t.image);
+		at.nivel = st.level;
+		att.atts.add(at);
+		if(atts.type==Symbol.Types.UNDEFINED)
+		{
+			atts.type = at.type;
+		}
+		else if(atts.type!=at.type)
+		{
+			throw new ErrorSemantico("Error de tipos");
+		}
+		System.err.println("Añadido " + at);
+		
+	}
+|   t= <tCONST_CHAR> 
+	{
+		//CAMBIARLO INVOCACION A FUNCION
+		at.type = Symbol.Types.CHAR;
+		at.code = (t.image);
+		at.nivel = st.level;
+		att.atts.add(at);
+		if(atts.type==Symbol.Types.UNDEFINED)
+		{
+			atts.type = at.type;
+		}
+		else if(atts.type!=at.type)
+		{
+			throw new ErrorSemantico("Error de tipos");
+		}
+		System.err.println("Añadido " + at);
+		
+	}
+|   t= <tCONST_STRING> 
+	{
+		at.type = Symbol.Types.STRING;
+		at.code = (t.image);
+		at.nivel = st.level;
+		att.atts.add(at);
+		/*if(atts.type==Symbol.Types.UNDEFINED)
+		{
+			atts.type = at.type;
+		}
+		else if(atts.type!=at.type)
+		{
+			throw new ErrorSemantico("Error de tipos");
+		}*/
+		System.err.println("Añadido " + at);
+		
+	}
+|   t= <tTRUE>	
+	{
+		at.type = Symbol.Types.BOOL;
+		at.code = "true";
+		at.nivel = st.level;
+		att.atts.add(at);
+		if(atts.type==Symbol.Types.UNDEFINED)
+		{
+			atts.type = at.type;
+		}
+		else if(atts.type!=at.type)
+		{
+			throw new ErrorSemantico("Error de tipos");
+		}
+		System.err.println("Añadido " + at);
+		
+	}
+|   t= <tFALSE> 
+	{
+		at.type = Symbol.Types.BOOL;
+		at.code = "false";
+		at.nivel = st.level;
+		att.atts.add(at);
+
+		if(atts.type==Symbol.Types.UNDEFINED)
+		{
+			atts.type = at.type;
+		}
+		else if(atts.type!=at.type)
+		{
+			throw new ErrorSemantico("Error de tipos");
+		}
+
+		System.err.println("Añadido " + at);
+		
+	}
+
 }
 
 void variable() :
@@ -533,9 +725,11 @@ void function_call() :
 }
 
 void indexacion():
-{ }
+{ 
+	Attributes at = new Attributes();
+}
 {
-	expresion_simple()
+	expresion_simple(at)
 }
 
 void tipo_variable(Attributes atTypes, Attributes atIsArray):

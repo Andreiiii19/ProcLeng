@@ -13,6 +13,7 @@ public class Attributes implements Cloneable {
     public String code;
     public int inicio;
     public int fin;
+    public ArrayList<Attributes> atts;
     
 
     public Attributes() {
@@ -21,6 +22,7 @@ public class Attributes implements Cloneable {
         this.parList = new ArrayList<Symbol>();
         this.nivel = -1;
         this.code = "";
+        this.atts = new ArrayList<Attributes>();
     }
 
     public Attributes clone() {
@@ -33,7 +35,12 @@ public class Attributes implements Cloneable {
     }
     
     public String toString() {
-        return "Type: " + type + " ParClass: " + parClass + " Nivel: " + nivel + " Code: " + code;
+        String atris = "";
+        for (Attributes a : atts) {
+            atris += "\t" + a.toString();
+        }
+        return "Type: " + type + " ParClass: " + parClass + " Nivel: " + nivel + " Code: " + code + "\n" + atris;
+         
     }
 
 

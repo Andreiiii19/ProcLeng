@@ -9,6 +9,7 @@ import lib.attributes.*;
 import lib.symbolTable.exceptions.*;
 import java.util.ArrayList;
 import lib.errores.*;
+import lib.tools.SemanticFunctions;
 
 public class alike implements alikeConstants {
 
@@ -30,7 +31,7 @@ public class alike implements alikeConstants {
 
    public static void main(String[] args) {
            alike parser = null;
-
+           SemanticFunctions sf = new SemanticFunctions();
            initSymbolTable();
 
            try {
@@ -139,14 +140,8 @@ public class alike implements alikeConstants {
     instrucciones();
     jj_consume_token(tEND);
     jj_consume_token(tPC);
-try {
-                        st.removeBlock();
-                        Symbol S = new SymbolProcedure(name.image,att.parList);
-                        st.insertSymbol(S);
-                }catch (AlreadyDefinedSymbolException ex)
-                {
-                        System.err.println("Error semantico. Simbolo ya existente");
-                }
+System.err.println("Bloque" + name.image + "terminado \n" + st.toString());
+                st.removeBlock();
 }
 
   static final public void declaracion_funcion() throws ParseException {Attributes atType = new Attributes();
@@ -174,20 +169,15 @@ try {
       ;
     }
     jj_consume_token(tBEGIN);
+
     instrucciones();
     jj_consume_token(tEND);
     jj_consume_token(tPC);
-try{
-                        st.removeBlock();
-                        if(atType.type == Symbol.Types.ARRAY)
-                        {
-                                {if (true) throw new ErrorSemantico("No se permiten funciones con retorno de vectores");}
-                        }
-                        Symbol S = new SymbolFunction(name.image,atts.parList,atType.type);
-                        st.insertSymbol(S);
-                }catch (AlreadyDefinedSymbolException ex)
+System.err.println("Bloque " + name.image + " terminado \n"+ st.toString());
+                st.removeBlock();
+                if(atType.type == Symbol.Types.ARRAY)
                 {
-                        System.err.println("Error semantico. Simbolo ya existente");
+                        {if (true) throw new ErrorSemantico("No se permiten funciones con retorno de vectores");}
                 }
 }
 
@@ -347,8 +337,15 @@ if(!st.isReservedWord(t.image)) tokens.add(t);
 
   static final public Token cabecera_procedimiento(Attributes att) throws ParseException {Token name;
     jj_consume_token(tPROC);
-st.insertBlock();
     name = jj_consume_token(tID);
+try {
+                        Symbol S = new SymbolProcedure(name.image,att.parList);
+                        st.insertSymbol(S);
+                        st.insertBlock();
+                }catch (AlreadyDefinedSymbolException ex)
+                {
+                        System.err.println("Error semantico. Simbolo ya existente");
+                }
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tAP:{
       jj_consume_token(tAP);
@@ -367,8 +364,15 @@ st.insertBlock();
 
   static final public Token cabecera_funcion(Attributes atType,Attributes atIsArray,Attributes atts) throws ParseException {Token name;
     jj_consume_token(tFUNC);
-st.insertBlock();
     name = jj_consume_token(tID);
+try{
+                        Symbol S = new SymbolFunction(name.image,atts.parList,atType.type);
+                        st.insertSymbol(S);
+                        st.insertBlock();
+                } catch (AlreadyDefinedSymbolException ex)
+                {
+                        System.err.println("Error semantico. Simbolo ya existente");
+                }
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tAP:{
       jj_consume_token(tAP);
@@ -389,10 +393,17 @@ st.insertBlock();
 
   static final public void parametros_formales(Attributes att) throws ParseException {ArrayList<Symbol> symbols;
     symbols = declaracion_var();
-for(Symbol S : symbols)
-                {
-                        att.parList.add(S);
-                }
+// try {
+                        for(Symbol S : symbols)
+                        {
+                                att.parList.add(S);
+                // 		st.insertSymbol(S);
+                        }
+                // } catch (AlreadyDefinedSymbolException ex)
+                // {
+                // 	System.err.println("Error semantico. Simbolo ya existente");
+                // }
+
     label_6:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -409,6 +420,7 @@ for(Symbol S : symbols)
 for(Symbol S : symbols)
                 {
                         att.parList.add(S);
+                        // st.insertSymbol(S);
                 }
     }
 }
@@ -585,8 +597,8 @@ for(Symbol S : symbols)
     jj_consume_token(tNULL);
 }
 
-  static final public void expresion() throws ParseException {
-    relacion();
+  static final public Attributes expresion() throws ParseException {Attributes att=new Attributes(),att2 = new Attributes();
+    relacion(att);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tAND:
     case tOR:{
@@ -606,7 +618,8 @@ for(Symbol S : symbols)
           jj_consume_token(-1);
           throw new ParseException();
         }
-        relacion();
+        relacion(att2);
+
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
         case tAND:
         case tOR:{
@@ -624,10 +637,19 @@ for(Symbol S : symbols)
       jj_la1[26] = jj_gen;
       ;
     }
+// ( 2+3+4) + 5 + (2+3)
+                // Expresion
+                //  (2+3+4)
+                //   5
+                //  (2+3)
+                System.err.println("Expresion: " + att);
+                {if ("" != null) return att;}
+    throw new Error("Missing return statement in function");
 }
 
-  static final public void relacion() throws ParseException {
-    expresion_simple();
+  static final public void relacion(Attributes att) throws ParseException {//Attributes atTypes = new Attributes();
+        Attributes att2 = new Attributes();
+    expresion_simple(att);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tGE:
     case tLE:
@@ -636,7 +658,7 @@ for(Symbol S : symbols)
     case tGT:
     case tLS:{
       operador_relacional();
-      expresion_simple();
+      expresion_simple(att2);
       break;
       }
     default:
@@ -678,7 +700,7 @@ for(Symbol S : symbols)
     }
 }
 
-  static final public void expresion_simple() throws ParseException {
+  static final public void expresion_simple(Attributes att) throws ParseException {Attributes att2 = new Attributes();
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tADD:
     case tSUB:{
@@ -702,7 +724,7 @@ for(Symbol S : symbols)
       jj_la1[30] = jj_gen;
       ;
     }
-    termino();
+    termino(att);
     label_10:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -729,12 +751,13 @@ for(Symbol S : symbols)
         jj_consume_token(-1);
         throw new ParseException();
       }
-      termino();
+      termino(att2);
+
     }
 }
 
-  static final public void termino() throws ParseException {
-    factor();
+  static final public void termino(Attributes att) throws ParseException {Attributes att2 = new Attributes();
+    factor(att);
     label_11:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -749,7 +772,8 @@ for(Symbol S : symbols)
         break label_11;
       }
       operador_multiplicativo();
-      factor();
+      factor(att2);
+
     }
 }
 
@@ -774,7 +798,7 @@ for(Symbol S : symbols)
     }
 }
 
-  static final public void factor() throws ParseException {
+  static final public void factor(Attributes att) throws ParseException {
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tAP:
     case tTRUE:
@@ -785,12 +809,13 @@ for(Symbol S : symbols)
     case tCONST_INT:
     case tCONST_STRING:
     case tID:{
-      primario();
+      primario(att);
       break;
       }
     case tNOT:{
       jj_consume_token(tNOT);
-      primario();
+      primario(att);
+
       break;
       }
     default:
@@ -800,30 +825,47 @@ for(Symbol S : symbols)
     }
 }
 
-  static final public void primario() throws ParseException {
+  static final public void primario(Attributes att) throws ParseException {Attributes at = new Attributes();
+        Token t;
+        Symbol S;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tAP:{
       jj_consume_token(tAP);
-      expresion();
+      at = expresion();
       jj_consume_token(tCP);
+att.atts.add(at);
       break;
       }
     case tINT2CHAR:{
       jj_consume_token(tINT2CHAR);
       jj_consume_token(tAP);
-      expresion();
+      at = expresion();
       jj_consume_token(tCP);
+for (Attributes a : at.atts)
+                {
+                        if(a.type!=Symbol.Types.INT)
+                        {
+                                {if (true) throw new ErrorSemantico("int2char solo acepta enteros");}
+                        }
+                }
       break;
       }
     case tCHAR2INT:{
       jj_consume_token(tCHAR2INT);
       jj_consume_token(tAP);
-      expresion();
+      at = expresion();
       jj_consume_token(tCP);
+for (Attributes a : at.atts)
+        {
+                if(a.type!=Symbol.Types.CHAR)
+                {
+                        {if (true) throw new ErrorSemantico("char2int solo acepta caracteres");}
+                }
+        }
       break;
       }
     case tID:{
-      jj_consume_token(tID);
+      t = jj_consume_token(tID);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case tAP:{
         jj_consume_token(tAP);
@@ -835,26 +877,67 @@ for(Symbol S : symbols)
         jj_la1[36] = jj_gen;
         ;
       }
+try
+                {
+                        S = st.getSymbol(t.image);
+                        System.err.println("Encontrado " + S);
+                        at.type = S.type;
+                        at.code = (t.image);
+                        at.nivel = st.level;
+                        att.atts.add(at);
+                        System.err.println("A\u00f1adido " + at);
+
+                }
+                catch(SymbolNotFoundException ex)
+                {
+                        {if (true) throw new ErrorSemantico(t.image + " no existe.");}
+                }
       break;
       }
     case tCONST_INT:{
-      jj_consume_token(tCONST_INT);
+      t = jj_consume_token(tCONST_INT);
+at.type = Symbol.Types.INT;
+                at.code = (t.image);
+                at.nivel = st.level;
+                att.atts.add(at);
+                System.err.println("A\u00f1adido " + at);
       break;
       }
     case tCONST_CHAR:{
-      jj_consume_token(tCONST_CHAR);
+      t = jj_consume_token(tCONST_CHAR);
+//CAMBIARLO INVOCACION A FUNCION
+                at.type = Symbol.Types.CHAR;
+                at.code = (t.image);
+                at.nivel = st.level;
+                att.atts.add(at);
+                System.err.println("A\u00f1adido " + at);
       break;
       }
     case tCONST_STRING:{
-      jj_consume_token(tCONST_STRING);
+      t = jj_consume_token(tCONST_STRING);
+at.type = Symbol.Types.STRING;
+                at.code = (t.image);
+                at.nivel = st.level;
+                att.atts.add(at);
+                System.err.println("A\u00f1adido " + at);
       break;
       }
     case tTRUE:{
-      jj_consume_token(tTRUE);
+      t = jj_consume_token(tTRUE);
+at.type = Symbol.Types.BOOL;
+                at.code = "true";
+                at.nivel = st.level;
+                att.atts.add(at);
+                System.err.println("A\u00f1adido " + at);
       break;
       }
     case tFALSE:{
-      jj_consume_token(tFALSE);
+      t = jj_consume_token(tFALSE);
+at.type = Symbol.Types.BOOL;
+                at.code = "false";
+                at.nivel = st.level;
+                att.atts.add(at);
+                System.err.println("A\u00f1adido " + at);
       break;
       }
     default:
@@ -886,8 +969,8 @@ for(Symbol S : symbols)
     }
 }
 
-  static final public void indexacion() throws ParseException {
-    expresion_simple();
+  static final public void indexacion() throws ParseException {Attributes at = new Attributes();
+    expresion_simple(at);
 }
 
   static final public void tipo_variable(Attributes atTypes, Attributes atIsArray) throws ParseException {Token i;

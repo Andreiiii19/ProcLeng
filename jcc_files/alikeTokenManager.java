@@ -8,6 +8,7 @@ import lib.attributes.*;
 import lib.symbolTable.exceptions.*;
 import java.util.ArrayList;
 import lib.errores.*;
+import lib.tools.SemanticFunctions;
 
 /** Token Manager. */
 @SuppressWarnings ("unused")

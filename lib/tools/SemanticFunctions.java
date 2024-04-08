@@ -24,4 +24,11 @@ public class SemanticFunctions {
 	}
 
 	//COMPLETAR
+
+	public void check_expresion(ArrayList<Attributes> atts) throws ErrorSemantico
+	{
+		
+	}
 }
+
+
