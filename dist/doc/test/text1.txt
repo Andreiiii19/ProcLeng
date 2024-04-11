@@ -273,8 +273,8 @@ begin
 	if p='X' then
 		return false;
 	elsif p='O' then
-    return true;
-  else
+    	return true;
+  	else
 		put_line("Ficha invalida.");
 		return playerElection;
 	end if;

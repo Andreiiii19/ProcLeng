@@ -35,12 +35,18 @@ public class Attributes implements Cloneable {
     }
     
     public String toString() {
+        return toString(0);
+    }
+
+    private String toString(int depth) {
+        if (depth > 10) { // limit recursion depth to 10
+            return "Recursion depth limit reached";
+        }
         String atris = "";
         for (Attributes a : atts) {
-            atris += "\t" + a.toString();
+            atris += "\n" + "\t".repeat(depth + 1) + a.toString(depth + 1);
         }
         return "Type: " + type + " ParClass: " + parClass + " Nivel: " + nivel + " Code: " + code + "\n" + atris;
-         
     }
 
 

@@ -7,7 +7,7 @@
 
 options {
 	IGNORE_CASE = true;
-	COMMON_TOKEN_ACTION = false;
+	COMMON_TOKEN_ACTION = true;
 }
 
 PARSER_BEGIN(alike)
@@ -313,6 +313,7 @@ ArrayList<Token> lista_ids():
 				{
 					throw new ErrorSemantico("ID no valido. Es una palabra reservada");
 				}
+
 			}
 	)
 	(
@@ -324,16 +325,36 @@ ArrayList<Token> lista_ids():
 			}
 	)*
 		{
+			System.err.println("Lista de ids ");
 			return tokens;
 		}
 }
 
-void lista_ids_o_string_o_inv():
+void lista_ids_o_string_o_inv(Attributes att):
 {
-
+	Attributes at = new Attributes();
 }
 {
-	expresion() (<tCOMA> expresion())*
+	expresion(at)
+	{
+		att.atts.add(at.clone());
+		at = new Attributes();
+	}
+	(<tCOMA> expresion(at) 
+	{
+		att.atts.add(at.clone());
+		at = new Attributes();
+	})*
+	{
+		att.type = att.atts.get(0).type;
+		String _code="";
+		for (Attributes a : att.atts)
+		{
+			_code += a.code + ",";
+		}
+		att.code = _code;
+		att.nivel = st.level;
+	}
 }
 
 
@@ -423,57 +444,179 @@ void parametros_formales(Attributes att):
 
 void instruccion() :
 {
+	Attributes att = new Attributes();	
+}
+{
+		inst_leer(att)
+	|   inst_saltar_linea(att)
+	|	inst_escribir(att)
+	|   inst_escribir_linea(att)
+	|   inst_invocacion_o_asignacion(att)
+	|   inst_if(att)
+	|   inst_while(att)
+	|   inst_return(att)
+	|   inst_null(att)
+}
 
+void inst_leer(Attributes att):{}{<tGET> <tAP> lista_ids() <tCP>{System.err.println("Expresion: " + att);}}
+
+void inst_saltar_linea(Attributes att):{}{<tSKIP>{System.err.println("Expresion: " + att);}}
+
+void inst_escribir(Attributes att):{}{<tPUT> <tAP> lista_ids_o_string_o_inv(att)  <tCP>{System.err.println("Expresion: " + att);}}
+
+void inst_escribir_linea(Attributes att):{}{<tPLINE> ((<tAP> lista_ids_o_string_o_inv(att) <tCP>))?{System.err.println("Expresion: " + att);}}
+
+void inst_invocacion_o_asignacion(Attributes att):
+{
+	Attributes at = new Attributes();
+	Attributes at2 = new Attributes();
+	Token t;
+}
+{
+	{System.err.println("Invocacion o asignacion");}
+	t = <tID>
+	{
+		Symbol S = st.getSymbol(t.image);
+		System.err.println("Encontrado " + S);
+			// System.err.println("Token id " + t.image);
+			// System.err.println("Function call");
+		at2.type = S.type;
+		at2.code = (t.image);
+		at2.nivel = st.level;
+		att.atts.add(at2.clone());
+		at = new Attributes();
+	} 
+	(<tAP> (function_call(at)) 
+	{
+		att.code = at.code;
+		att.atts.add(at.clone());
+		at = new Attributes();
+	} 
+	<tCP>)? 	
+	(<tASIG> expresion(at) 
+	{
+		att.atts.add(at.clone());
+		at = new Attributes();
+	}
+	)?
+	{
+		String _code="";
+		int size = att.atts.size();
+		for (int i = 0; i < size; i++) {
+			Attributes a = att.atts.get(i);
+			_code += a.code;
+			if (i < size - 1) { // if this is not the last element
+				_code += ",";
+			}
+		}
+		att.code = _code;
+		att.type = att.atts.get(0).type;
+		System.err.println("Expresion/es de inv o asignacion: " + att);}
+}
+
+
+// void inv_funcion(Attributes att):
+// {
+// 	Attributes at = new Attributes();
+// }
+// {
+// 	(expresion(at) 
+// 	{
+// 		att.atts.add(at.clone());
+// 	}
+// 	(<tCOMA> expresion(at)
+// 	{
+// 		att.atts.add(at.clone());
+// 	}
+// 	)*)
+// 	{System.err.println("Expresion/es de inv a funcion: " + att);}
+// }
+
+void inst_if(Attributes att):
+{
+	Attributes at = new Attributes();
+}
+{
+	<tIF> expresion(at)
+	{
+		att.atts.add(at.clone());
+		at = new Attributes();
+	}
+	<tTHEN> instrucciones() ((<tELSIF> expresion(at)
+	{
+		att.atts.add(at.clone());
+		at = new Attributes();
+	}
+	<tTHEN> instrucciones())* (<tELSE> instrucciones())?) <tENDIF>
+	{
+		String _code="";
+		int size = att.atts.size();
+		for (int i = 0; i < size; i++) {
+			Attributes a = att.atts.get(i);
+			_code += a.code;
+			if (i < size - 1) { // if this is not the last element
+				_code += ",";
+			}
+		}
+		att.code = _code;
+		System.err.println("Expresion/es de ifs condiciones: " + att);
+	}
 } 
+
+void inst_while(Attributes att):
 {
-		inst_leer()
-	|   inst_saltar_linea()
-	|	inst_escribir()
-	|   inst_escribir_linea()
-	|   inst_invocacion_o_asignacion()
-	|   inst_if()
-	|   inst_while()
-	|   inst_return()
-	|   inst_null()
+	Attributes at = new Attributes();
+}
+{
+	<tWHILE> expresion(at)
+	{
+		att.type = at.type;
+		att.atts.add(at.clone());
+		at = new Attributes();
+		String _code="";
+		int size = att.atts.size();
+		for (int i = 0; i < size; i++) {
+			Attributes a = att.atts.get(i);
+			_code += a.code;
+			if (i < size - 1) { // if this is not the last element
+				_code += ",";
+			}
+		}
+		att.code = _code;
+
+	}
+	<tLOOP> instrucciones() <tENDLOOP>
+	{
+		System.err.println("Expresion while condicion: " + att);
+	}
 }
 
-void inst_leer():{}{<tGET> <tAP> lista_ids() <tCP>}
-
-void inst_saltar_linea():{}{<tSKIP>}
-
-void inst_escribir():{}{<tPUT> <tAP> lista_ids_o_string_o_inv()  <tCP>}
-
-void inst_escribir_linea():{}{<tPLINE> ((<tAP> lista_ids_o_string_o_inv() <tCP>))?}
-
-void inst_invocacion_o_asignacion():{}{
-	<tID> (<tAP> (function_call()) <tCP>)? (<tASIG> expresion())?
+void inst_return(Attributes att):{
+	Attributes at = new Attributes();
+}
+{
+	<tRETURN> expresion(at)
+	{
+		att.atts.add(at.clone());
+		at = new Attributes();
+	}
 }
 
-
-void inv_funcion():{}{(expresion() (<tCOMA> expresion())*)}
-
-void inst_if():{}{<tIF> expresion() <tTHEN> instrucciones() ((<tELSIF> expresion() <tTHEN> instrucciones())* (<tELSE> instrucciones())?) <tENDIF>} 
-
-void inst_while():{}{<tWHILE> expresion() <tLOOP> instrucciones() <tENDLOOP>}
-
-void inst_return():{}{<tRETURN> expresion()}
-
-void inst_null():{}{<tNULL>}
+void inst_null(Attributes att):{}{<tNULL>{System.err.println("Expresion null");}	}
 
 
-Attributes expresion():
+void expresion(Attributes att):
 {
-	Attributes att=new Attributes(),att2 = new Attributes();
+	Boolean esBool = false; 
 }
 {
     relacion(att)
-	( ((<tAND> | <tOR>) relacion(att2)
+	( ((<tAND> | <tOR>) 
 	{
-		// if(att.type!=Symbol.Types.BOOL||att2.type!=Symbol.Types.BOOL)
-		// {
-		// 	throw new ErrorSemantico("(and,or)) solo acepta booleanos");
-		// }
+		att.type = Symbol.Types.BOOL;
+		esBool = true;
 	}
+	relacion(att) //{att.type = Symbol.Types.BOOL}
 	)+ )?
 	{
 		// ( 2+3+4) + 5 + (2+3)
@@ -481,19 +624,50 @@ Attributes expresion():
 		//  (2+3+4)
 		//   5
 		//  (2+3)
-		System.err.println("Expresion: " + att);	
-		return att;
+		if(esBool)
+		{
+			// for(Attributes a : att.atts)
+			// {
+			// 	if(a.type!=Symbol.Types.BOOL)
+			// 	{
+			// 		throw new ErrorSemantico("Error de tipos");
+			// 	}
+			// }
+		} else {
+			// att.type = att.atts.get(0).type;
+		}
+		String _code="";
+		int size = att.atts.size();
+		for (int i = 0; i < size; i++) {
+			Attributes a = att.atts.get(i);
+			_code += a.code;
+			if (i < size - 1) { // if this is not the last element
+				_code += ",";
+			}
+		}
+		att.code = _code;
 	}
 }
 
 void relacion(Attributes att):
 {
 	//Attributes atTypes = new Attributes();
-	Attributes att2 = new Attributes();
+	Boolean tieneOp = false;
 }
 {
     expresion_simple(att)
- 	( operador_relacional() expresion_simple(att2) )?
+ 	( operador_relacional()
+	{
+		tieneOp = true;
+	}
+	expresion_simple(att) )? 
+
+	{
+		if(tieneOp)
+		{
+			att.type = Symbol.Types.BOOL;
+		}
+	}
 }
 
 void operador_relacional():
@@ -511,12 +685,11 @@ void operador_relacional():
 
 void expresion_simple(Attributes att):
 {
-	Attributes att2 = new Attributes();
 }
 {
 	( <tADD> |	<tSUB> )? 
     termino(att)
-	( ( <tADD> | <tSUB> ) termino(att2) 
+	( ( <tADD> | <tSUB> ) termino(att) 
 	{
 		// if(att.type!=Symbol.Types.INT||att2.type!=Symbol.Types.INT)
 		// {
@@ -527,11 +700,10 @@ void expresion_simple(Attributes att):
 
 void termino(Attributes att):
 {
-	Attributes att2 = new Attributes();
 }
 {
     factor(att) 
-	( operador_multiplicativo() factor(att2)
+	( operador_multiplicativo() factor(att)
 	{
 		// if(att.type!=Symbol.Types.INT||att2.type!=Symbol.Types.INT)
 		// {
@@ -549,31 +721,43 @@ void operador_multiplicativo():
 }
 
 void factor(Attributes att):
-{}
+{
+	Attributes a = new Attributes();
+}
 {
     primario(att)
 |   <tNOT>  primario(att)
 	{
-		// if(att.type!=Symbol.Types.BOOL)
-		// {
-		// 	throw new ErrorSemantico("not solo acepta booleanos");
-		// }
+		
+		a.code = "not";
+		a.type = Symbol.Types.BOOL;
+		a.nivel = st.level;
+		ArrayList<Attributes> newList = new ArrayList<>();
+		newList.add(a);
+		newList.addAll(att.atts);
+		att.atts = newList;
 	}
 }
 
 void primario(Attributes att) :
 { 
 	Attributes at = new Attributes();
+
 	Token t;
 	Symbol S;
 }
 {
-	<tAP> at = expresion() <tCP> 
+	<tAP> expresion(at) <tCP> 
 	{
-		att.atts.add(at);
+		att.atts.add(at.clone());
+		at = new Attributes();
 	}
-|   <tINT2CHAR> <tAP> at = expresion() <tCP> 
+|   <tINT2CHAR> <tAP> expresion(at) <tCP> 
 	{
+		at.type = Symbol.Types.CHAR;
+		at.code = "int2char(" + at.code + ")";
+		att.atts.add(at.clone());
+		at = new Attributes();
 		for (Attributes a : at.atts)
 		{
 			if(a.type!=Symbol.Types.INT)
@@ -582,37 +766,56 @@ void primario(Attributes att) :
 			}
 		}
 	}
-|   <tCHAR2INT> <tAP> at = expresion() <tCP> 
-{
-	for (Attributes a : at.atts)
+|   <tCHAR2INT> <tAP> expresion(at) <tCP> 
 	{
-		if(a.type!=Symbol.Types.CHAR)
+		at.type = Symbol.Types.INT;
+		at.code = "char2int(" + at.code + ")";
+		att.atts.add(at.clone());
+		at = new Attributes();
+		for (Attributes a : at.atts)
 		{
-			throw new ErrorSemantico("char2int solo acepta caracteres");
+			if(a.type!=Symbol.Types.CHAR)
+			{
+				throw new ErrorSemantico("char2int solo acepta caracteres");
+			}
 		}
 	}
-}
-|   t=<tID> (<tAP> (function_call()) <tCP>)?  
+|   t=<tID> ((<tAP> (function_call(at)) <tCP> {
+
+	}))?  
 	{
 		try
 		{
 			S = st.getSymbol(t.image);
-			System.err.println("Encontrado " + S);
+			// System.err.println("Encontrado " + S);
+			// System.err.println("Token id " + t.image);
+			// System.err.println("Function call");
 			at.type = S.type;
 			at.code = (t.image);
 			at.nivel = st.level;
-			att.atts.add(at);
+			att.atts.add(at.clone());
+			String _code="";
+			int size = att.atts.size();
+			for (int i = 0; i < size; i++) {
+				Attributes a = att.atts.get(i);
+				_code += a.code;
+				if (i < size - 1) { // if this is not the last element
+					_code += ",";
+				}
+			}
+			att.code = _code;
+			at = new Attributes();
 
-			if(atts.type==Symbol.Types.UNDEFINED)
+			if(att.type==Symbol.Types.UNDEFINED)
 			{
-				atts.type = at.type;
+				att.type = at.type;
 			}
-			else if(atts.type!=at.type)
-			{
-				throw new ErrorSemantico("Error de tipos");
-			}
+			// else if(att.type!=at.type)
+			// {
+			// 	throw new ErrorSemantico("Error de tipos");
+			// }
 			
-			System.err.println("Añadido " + at);
+			// System.err.println("Añadido " + at);
 			
 		}
 		catch(SymbolNotFoundException ex)
@@ -626,16 +829,18 @@ void primario(Attributes att) :
 		at.type = Symbol.Types.INT;
 		at.code = (t.image);
 		at.nivel = st.level;
-		att.atts.add(at);
-		if(atts.type==Symbol.Types.UNDEFINED)
-		{
-			atts.type = at.type;
-		}
-		else if(atts.type!=at.type)
-		{
-			throw new ErrorSemantico("Error de tipos");
-		}
-		System.err.println("Añadido " + at);
+		att.atts.add(at.clone());
+		att.type = at.type;
+		at = new Attributes();
+		// if(att.type==Symbol.Types.UNDEFINED)
+		// {
+		// 	att.type = at.type;
+		// }
+		// else if(att.type!=at.type)
+		// {
+		// 	throw new ErrorSemantico("Error de tipos");
+		// }
+		// System.err.println("Añadido " + at);
 		
 	}
 |   t= <tCONST_CHAR> 
@@ -644,16 +849,18 @@ void primario(Attributes att) :
 		at.type = Symbol.Types.CHAR;
 		at.code = (t.image);
 		at.nivel = st.level;
-		att.atts.add(at);
-		if(atts.type==Symbol.Types.UNDEFINED)
+		att.atts.add(at.clone());
+		att.type = at.type;
+		at = new Attributes();
+		if(att.type==Symbol.Types.UNDEFINED)
 		{
-			atts.type = at.type;
+			att.type = at.type;
 		}
-		else if(atts.type!=at.type)
-		{
-			throw new ErrorSemantico("Error de tipos");
-		}
-		System.err.println("Añadido " + at);
+		// else if(att.type!=at.type)
+		// {
+		// 	throw new ErrorSemantico("Error de tipos");
+		// }
+		// System.err.println("Añadido " + at);
 		
 	}
 |   t= <tCONST_STRING> 
@@ -661,7 +868,9 @@ void primario(Attributes att) :
 		at.type = Symbol.Types.STRING;
 		at.code = (t.image);
 		at.nivel = st.level;
-		att.atts.add(at);
+		att.atts.add(at.clone());
+		att.type = at.type;
+		at = new Attributes();
 		/*if(atts.type==Symbol.Types.UNDEFINED)
 		{
 			atts.type = at.type;
@@ -670,7 +879,7 @@ void primario(Attributes att) :
 		{
 			throw new ErrorSemantico("Error de tipos");
 		}*/
-		System.err.println("Añadido " + at);
+		// System.err.println("Añadido " + at);
 		
 	}
 |   t= <tTRUE>	
@@ -678,16 +887,18 @@ void primario(Attributes att) :
 		at.type = Symbol.Types.BOOL;
 		at.code = "true";
 		at.nivel = st.level;
-		att.atts.add(at);
-		if(atts.type==Symbol.Types.UNDEFINED)
+		att.atts.add(at.clone());
+		att.type = at.type;
+		at = new Attributes();
+		if(att.type==Symbol.Types.UNDEFINED)
 		{
-			atts.type = at.type;
+			att.type = at.type;
 		}
-		else if(atts.type!=at.type)
-		{
-			throw new ErrorSemantico("Error de tipos");
-		}
-		System.err.println("Añadido " + at);
+		// else if(att.type!=at.type)
+		// {
+		// 	throw new ErrorSemantico("Error de tipos");
+		// }
+		// System.err.println("Añadido " + at);
 		
 	}
 |   t= <tFALSE> 
@@ -695,42 +906,64 @@ void primario(Attributes att) :
 		at.type = Symbol.Types.BOOL;
 		at.code = "false";
 		at.nivel = st.level;
-		att.atts.add(at);
-
-		if(atts.type==Symbol.Types.UNDEFINED)
+		att.atts.add(at.clone());
+		att.type = at.type;
+		at = new Attributes();
+		if(att.type==Symbol.Types.UNDEFINED)
 		{
-			atts.type = at.type;
+			att.type = at.type;
 		}
-		else if(atts.type!=at.type)
-		{
-			throw new ErrorSemantico("Error de tipos");
-		}
+		// else if(att.type!=at.type)
+		// {
+		// 	throw new ErrorSemantico("Error de tipos");
+		// }
 
-		System.err.println("Añadido " + at);
+		// System.err.println("Añadido " + at);
 		
 	}
 
 }
 
-void variable() :
-{ }
-{
-	indexacion() 
-}
 
-void function_call() :
-{ }
-{
- (expresion() ((<tCOMA>) expresion())* )
-}
-
-void indexacion():
+void function_call(Attributes att) :
 { 
-	Attributes at = new Attributes();
+	Attributes att2 = new Attributes();
+  	// Attributes att2 = new Attributes();
 }
 {
-	expresion_simple(at)
+ ( expresion(att2)
+ {
+	att.type = att2.type;
+	att.atts.add(att2.clone());
+	att.type = att2.type;
+	att2 = new Attributes();
+ 	// System.err.println("Añadido " + att);
+ 	// System.err.println("Añadido " + att);
+ } 
+ ((<tCOMA>) expresion(att2)
+ {
+	att.atts.add(att2.clone());
+	att.type = att2.type;
+	att2 = new Attributes();
+	// System.err.println("Añadido " + att);
+	// System.err.println("Añadido " + att);
 }
+)* 
+ ) 
+ {
+	String _code="";
+		int size = att.atts.size();
+		for (int i = 0; i < size; i++) {
+			Attributes a = att.atts.get(i);
+			_code += a.code;
+			if (i < size - 1) { // if this is not the last element
+				_code += ",";
+			}
+		}
+		att.code = _code;	
+ }
+}
+
 
 void tipo_variable(Attributes atTypes, Attributes atIsArray):
 { 
