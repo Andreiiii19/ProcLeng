@@ -320,7 +320,11 @@ begin
 		end if;
 		
 		esTurnoIA := not esTurnoIA;
-			
+		cJugador := int2char(char2int(cJugador)+1);
 	end loop;
+
+	if not esTurnoIA and '0'=1 then
+		put_line("La IA ha ganado.");
+	end if;
 	
 end;

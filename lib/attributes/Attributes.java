@@ -7,6 +7,7 @@ import lib.symbolTable.Symbol;
 
 public class Attributes implements Cloneable {
     public Symbol.Types type;
+    public Symbol.Types extraType;
     public Symbol.ParameterClass parClass;
     public ArrayList<Symbol> parList;
     public int nivel;
@@ -18,6 +19,7 @@ public class Attributes implements Cloneable {
 
     public Attributes() {
         this.type = Symbol.Types.UNDEFINED;
+        this.extraType = Symbol.Types.UNDEFINED;
         this.parClass = Symbol.ParameterClass.NONE;
         this.parList = new ArrayList<Symbol>();
         this.nivel = -1;
@@ -39,14 +41,14 @@ public class Attributes implements Cloneable {
     }
 
     private String toString(int depth) {
-        if (depth > 10) { // limit recursion depth to 10
+        if (depth > 1000) { // limit recursion depth to 10
             return "Recursion depth limit reached";
         }
         String atris = "";
         for (Attributes a : atts) {
             atris += "\n" + "\t".repeat(depth + 1) + a.toString(depth + 1);
         }
-        return "Type: " + type + " ParClass: " + parClass + " Nivel: " + nivel + " Code: " + code + "\n" + atris;
+        return "Type: " + type + " Type extra: " + extraType + " ParClass: " + parClass + " Parlist: " +parList+ " Nivel: " + nivel + " Code: " + code + "\n" + atris;
     }
 
 

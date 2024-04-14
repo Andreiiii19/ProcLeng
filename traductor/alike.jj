@@ -27,6 +27,7 @@ public class alike {
 
 
 	static SymbolTable st;
+	static SemanticFunctions sf = new SemanticFunctions();
 
 	private static void initSymbolTable() {
 		boolean b;
@@ -41,9 +42,10 @@ public class alike {
 		st.insertReservedWords(palsRes);
 	}
 
+
+
    public static void main(String[] args) {
 	   alike parser = null;
-	   SemanticFunctions sf = new SemanticFunctions();
 	   initSymbolTable();
 	   
 	   try {
@@ -55,7 +57,7 @@ public class alike {
 		   }
 		   //Programa es el símbolo inicial de la gramática
 		   parser.Programa();
-		   //System.out.println(st.toString());
+		   System.out.println(st.toString());
 		   //...
 		   System.out.println("***** Análisis terminado con éxito *****");
 	   }
@@ -68,6 +70,10 @@ public class alike {
 	   catch (ParseException e) {
             System.err.println("PARSER_ERROR: " + e.getMessage());
         }
+		catch (ErrorSemantico e) {
+			System.err.println("SEMANTIC_ERROR: " + e.getMessage());
+			System.err.println("***** Análisis parado por un error *****");
+		}
 	   //...
    }
 }
@@ -144,7 +150,7 @@ TOKEN : {
 |	< tINT2CHAR : "int2char" >
 |	< tCHAR2INT : "char2int" >
 |	< tCONST_CHAR : ("'")(< CHAR >)("'") >
-|	< tCONST_INT : ("-")?(< DIGIT >)+ >
+|	< tCONST_INT : (< DIGIT >)+ >
 |	< tCONST_STRING : ("\"")(< STRING >)*("\"") >
 | 	< tID: (< LETTER >| "_")+(< DIGIT >| "_" | < LETTER >)* > 
 }
@@ -348,13 +354,7 @@ void lista_ids_o_string_o_inv(Attributes att):
 	})*
 	{
 		att.type = att.atts.get(0).type;
-		String _code="";
-		for (Attributes a : att.atts)
-		{
-			_code += a.code + ",";
-		}
-		att.code = _code;
-		att.nivel = st.level;
+		
 	}
 }
 
@@ -480,45 +480,34 @@ void inst_invocacion_o_asignacion(Attributes att):
 	Token t;
 }
 {
-	{System.err.println("Invocacion o asignacion");}
 	t = <tID>
 	{
-		Symbol S = st.getSymbol(t.image);
-		System.err.println("Encontrado " + S);
-			// System.err.println("Token id " + t.image);
-			// System.err.println("Function call");
-		at2.type = S.type;
-		at2.code = (t.image);
-		at2.nivel = st.level;
-		att.atts.add(at2.clone());
-		at = new Attributes();
+		try {
+			Symbol S = st.getSymbol(t.image);
+			sf.cambiarTipos(at2, S);
+			sf.asignar_valores(att,at2,t.image,S.type, S.parClass, st.level);
+		} catch (SymbolNotFoundException ex)
+		{
+			throw new ErrorSemantico(t.image + " no existe.");
+		}
 	} 
-	(<tAP> (function_call(at)) 
+	(<tAP> (function_call(at2)) 
 	{
-		att.code = at.code;
-		att.atts.add(at.clone());
-		at = new Attributes();
+		sf.checkTypeFunctionCall(at2);
 	} 
 	<tCP>)? 	
 	(<tASIG> expresion(at) 
 	{
-		att.atts.add(at.clone());
+		sf.add_to_atts(att,at);
+		sf.heredar_valores(att,at);
+		sf.checkTypesAsignacion(at,at2);
 		at = new Attributes();
+		at2 = new Attributes();
 	}
 	)?
 	{
-		String _code="";
-		int size = att.atts.size();
-		for (int i = 0; i < size; i++) {
-			Attributes a = att.atts.get(i);
-			_code += a.code;
-			if (i < size - 1) { // if this is not the last element
-				_code += ",";
-			}
-		}
-		att.code = _code;
-		att.type = att.atts.get(0).type;
-		System.err.println("Expresion/es de inv o asignacion: " + att);}
+		System.err.println("Expresion/es de inv o asignacion: " + att);
+	}
 }
 
 
@@ -546,36 +535,29 @@ void inst_if(Attributes att):
 {
 	<tIF> expresion(at)
 	{
-		att.atts.add(at);
-		//at = new Attributes();
+		sf.add_to_atts(att,at);
+		sf.heredar_valores(att,at);
+		at = new Attributes();
 
-		if(at.type!=Symbol.Types.BOOL)
-		{
-			throw new ErrorSemantico("Solo se admiten expresiones booleanas: "+at.type);
-		}
+		// if(at.type!=Symbol.Types.BOOL)
+		// {
+		// 	throw new ErrorSemantico("Solo se admiten expresiones booleanas: "+at.type);
+		// }
 	}
 	<tTHEN> instrucciones() ((<tELSIF> expresion(at)
 	{
-		att.atts.add(at);
-		//at = new Attributes();
+		sf.add_to_atts(att,at);
+		sf.heredar_valores(att,at);
+		at = new Attributes();
 
-		if(at.type!=Symbol.Types.BOOL)
-		{
-			throw new ErrorSemantico("Solo se admiten expresiones booleanas: "+at.type);
-		}
+		// if(at.type!=Symbol.Types.BOOL)
+		// {
+		// 	throw new ErrorSemantico("Solo se admiten expresiones booleanas: "+at.type);
+		// }
 	}
 	<tTHEN> instrucciones())* (<tELSE> instrucciones())?) <tENDIF>
 	{
-		String _code="";
-		int size = att.atts.size();
-		for (int i = 0; i < size; i++) {
-			Attributes a = att.atts.get(i);
-			_code += a.code;
-			if (i < size - 1) { // if this is not the last element
-				_code += ",";
-			}
-		}
-		att.code = _code;
+		
 		System.err.println("Expresion/es de ifs condiciones: " + att);
 	}
 } 
@@ -587,25 +569,8 @@ void inst_while(Attributes att):
 {
 	<tWHILE> expresion(at)
 	{
-		att.type = at.type;
-		att.atts.add(at);
-		//at = new Attributes();
-		String _code="";
-		int size = att.atts.size();
-		for (int i = 0; i < size; i++) {
-			Attributes a = att.atts.get(i);
-			_code += a.code;
-			if (i < size - 1) { // if this is not the last element
-				_code += ",";
-			}
-		}
-		att.code = _code;
-
-		if(at.type!=Symbol.Types.BOOL)
-		{
-			throw new ErrorSemantico("Solo se admiten expresiones booleanas: "+at.type);
-		}
-
+		sf.add_to_atts(att,at);
+		sf.heredar_valores(att,at);
 	}
 	<tLOOP> instrucciones() <tENDLOOP>
 	{
@@ -633,13 +598,23 @@ void expresion(Attributes att):
 	Attributes at = new Attributes();
 }
 {
-    relacion(at){if(att.type==Symbol.Types.UNDEFINED){att.type=at.type;}att.atts.add(at);at = new Attributes();}
+    relacion(at)
+	{
+		sf.add_to_atts(att,at);
+		sf.heredar_valores(att,at);
+		at = new Attributes();
+	}
 	( ((<tAND> | <tOR>) 
 	{
 		att.type = Symbol.Types.BOOL;
 		esBool = true;
 	}
-	relacion(at) {att.atts.add(at);at = new Attributes();}
+	relacion(at) 
+	{
+		sf.add_to_atts(att,at);
+		sf.heredar_valores(att,at);
+		
+	}
 	)+ )?
 	{
 		// ( 2+3+4) + 5 + (2+3)
@@ -651,26 +626,24 @@ void expresion(Attributes att):
 		{
 			 for(Attributes a : att.atts)
 			 {
-				//System.out.print(a.type + " ");
-			 	if(a.type!=Symbol.Types.BOOL)
-			 	{
-			 		throw new ErrorSemantico("Error de tipos");
-			 	}
+				System.err.println(a.type);
+				if(a.type == Symbol.Types.FUNCTION){
+					if(a.extraType!=Symbol.Types.BOOL)
+					{
+						throw new ErrorSemantico("Error de tipos");
+					}
+				} else{
+					if(a.type!=Symbol.Types.BOOL)
+					{
+						throw new ErrorSemantico("Error de tipos");
+					}
+				}
 			 }
 			 //System.out.println();
 		} else {
 			 att.type = att.atts.get(0).type;
 		}
-		String _code="";
-		int size = att.atts.size();
-		for (int i = 0; i < size; i++) {
-			Attributes a = att.atts.get(i);
-			_code += a.code;
-			if (i < size - 1) { // if this is not the last element
-				_code += ",";
-			}
-		}
-		att.code = _code;
+		
 	}
 }
 
@@ -681,11 +654,20 @@ void relacion(Attributes att):
 	Attributes at = new Attributes();
 }
 {
-    expresion_simple(at){if(att.type==Symbol.Types.UNDEFINED){att.type=at.type;}
-	att.atts.add(at);at = new Attributes();}
+    expresion_simple(at)
+	{
+		sf.add_to_atts(att,at);
+		sf.heredar_valores(att,at);
+		at = new Attributes();
+	}
  	( tieneOpInts = operador_relacional()
-	expresion_simple(at){att.atts.add(at);at = new Attributes();} )? 
-
+	expresion_simple(at)
+	{
+		sf.add_to_atts(att,at);
+		sf.heredar_valores(att,at);
+		
+	} 
+	)? 
 	{
 		if(tieneOpInts!=null)
 		{
@@ -697,9 +679,31 @@ void relacion(Attributes att):
 			 		if(a.type!=Symbol.Types.INT)
 			 		{
 			 			throw new ErrorSemantico("Error de tipos. Se esperaban integers en relacion: "+
-						a.type);
+						att);
 			 		}
 			 	}
+			} else {
+				if(at.type != Symbol.Types.UNDEFINED) 
+				{
+					Attributes a2 = att.atts.get(att.atts.size()-2);
+					if(a2.type == Symbol.Types.FUNCTION || a2.type == Symbol.Types.ARRAY)
+					{
+						if(a2.extraType!=at.type)
+						{
+							throw new ErrorSemantico("Error de tipos. Se esperaban el mismo tipo en relacion: " + a2.extraType + " y "+ at.type);
+						}
+					} else if(at.type == Symbol.Types.FUNCTION || at.type == Symbol.Types.ARRAY)
+					{
+						if(a2.type!=at.extraType)
+						{
+							throw new ErrorSemantico("Error de tipos. Se esperaban el mismo tipo en relacion: " + a2.type + " y "+ at.extraType);
+						}
+					}
+					else if(a2.type!=at.type)
+					{
+						throw new ErrorSemantico("Error de tipos. Se esperaban el mismo tipo en relacion: " + a2.type + " y "+ at.type);
+					}
+				}
 			}
 		}
 	}
@@ -724,12 +728,22 @@ void expresion_simple(Attributes att):
 	Attributes at = new Attributes();
 }
 {
-	(( <tADD> |	<tSUB> ){esInt=true;att.type=Symbol.Types.INT;})? 
-    termino(at){if(att.type==Symbol.Types.UNDEFINED){att.type=at.type;} att.atts.add(at);at = new Attributes();}
-	( ( <tADD> | <tSUB> ) termino(at) 
+	(( <tADD> |	<tSUB> )
 	{
-		att.atts.add(at);at = new Attributes();
-
+		esInt=true;att.type=Symbol.Types.INT;
+	})? 
+    termino(at)
+	{
+		sf.add_to_atts(att,at);
+		sf.heredar_valores(att,at); 
+		at = new Attributes();
+	}
+	( ( <tADD> | <tSUB> ) 
+	termino(at) 
+	{	
+		sf.add_to_atts(att,at);
+		sf.heredar_valores(att,at);
+		at = new Attributes();
 		att.type = Symbol.Types.INT;
 		for(Attributes a : att.atts)
 		{
@@ -739,12 +753,6 @@ void expresion_simple(Attributes att):
 			}
 		}
 	})*
-	{
-		if(esInt&&att.atts.get(0).type!=Symbol.Types.INT)
-		{
-			throw new ErrorSemantico(att.atts.get(0).type + "");
-		}
-	}
 }
 
 void termino(Attributes att):
@@ -752,12 +760,18 @@ void termino(Attributes att):
 	Attributes at = new Attributes();
 }
 {
-    factor(at) {if(att.type==Symbol.Types.UNDEFINED){att.type=at.type;}
-	att.type=at.type;att.atts.add(at);at = new Attributes();}
+    factor(at) 
+	{
+		sf.add_to_atts(att,at);
+		sf.heredar_valores(att,at);
+		at = new Attributes();
+	}
 	( operador_multiplicativo() factor(at)
 	{
+		sf.add_to_atts(att,at);
+		sf.heredar_valores(att,at);
 		att.type = Symbol.Types.INT;
-		att.atts.add(at);at = new Attributes();
+		at = new Attributes();
 		
 		for(Attributes a : att.atts)
 		{
@@ -782,18 +796,24 @@ void factor(Attributes att):
 	Attributes at = new Attributes();
 }
 {
-    primario(at) {if(att.type==Symbol.Types.UNDEFINED){att.type=at.type;}
-	att.atts.add(at);at = new Attributes();}
+    primario(at) 
+	{
+		sf.add_to_atts(att,at);
+		sf.heredar_valores(att,at);
+		at = new Attributes();
+		
+	}
+
 |   <tNOT>  primario(at)
 	{
 		att.type = Symbol.Types.BOOL;
-		att.atts.add(at);
-		
+		sf.add_to_atts(att,at);
+		sf.heredar_valores(att,at);
+
 		if(at.type!=Symbol.Types.BOOL)
 		{
 			throw new ErrorSemantico("Error de tipos. Se esperaban bool en primario: " + at.type);
 		}
-		
 		at = new Attributes();
 	}
 }
@@ -808,95 +828,36 @@ void primario(Attributes att) :
 {
 	<tAP> expresion(at) <tCP> 
 	{
-		if(att.type==Symbol.Types.UNDEFINED){att.type=at.type;}
-		att.atts.add(at);
-		//at = new Attributes();
+		sf.add_to_atts(att,at);
+		sf.heredar_valores(att,at);
 	}
 |   <tINT2CHAR> <tAP> expresion(at) <tCP> 
 	{
-		att.type = Symbol.Types.CHAR;
-		at.code = "int2char(" + at.code + ")";
-		att.atts.add(at);
-		//at = new Attributes();
-		/*for (Attributes a : at.atts)
-		{
-			if(a.type!=Symbol.Types.INT)
-			{
-				throw new ErrorSemantico("int2char solo acepta enteros");
-			}
-		}*/
-
 		if(at.type!=Symbol.Types.INT)
 		{
 			throw new ErrorSemantico("int2char solo acepta enteros");
 		}
+		sf.asignar_valores(att,at,"int2char(" + at.code + ")",Symbol.Types.CHAR, Symbol.ParameterClass.VAL, st.level);
+		sf.heredar_valores(att,at);
 	}
 |   <tCHAR2INT> <tAP> expresion(at) <tCP> 
 	{
-		att.type = Symbol.Types.INT;
-		at.code = "char2int(" + at.code + ")";
-		att.atts.add(at);
-		//at = new Attributes();
-		
 		if(at.type!=Symbol.Types.CHAR)
 		{
 			throw new ErrorSemantico("char2int solo acepta caracteres");
 		}
+		sf.asignar_valores(att,at,"char2int(" + at.code + ")",Symbol.Types.INT, Symbol.ParameterClass.VAL, st.level);
+		sf.heredar_valores(att,at);
 	}
-|   t=<tID> ((<tAP> (function_call(at)) <tCP> {
-
-	}))?  
+|   t=<tID> ((<tAP> (function_call(at)) <tCP> ))?  
 	{
 		try
 		{
 			S = st.getSymbol(t.image);
-			// System.err.println("Encontrado " + S);
-			// System.err.println("Token id " + t.image);
-			// System.err.println("Function call");
-			//at.type = S.type;
-			at.code = (t.image);
-			at.nivel = st.level;
-			att.atts.add(at);
-			String _code="";
-			int size = at.atts.size();
-
-			//Comprobar parametros (PENDIENTE)
-			for (int i = 0; i < size; i++) {
-				Attributes a = at.atts.get(i);
-				_code += a.code;
-				if (i < size - 1) { // if this is not the last element
-					_code += ",";
-				}
-			}
-			att.code = _code;
-
-			if(att.type==Symbol.Types.UNDEFINED)
-			{
-				att.type = S.type;
-
-				if(S.type==Symbol.Types.ARRAY)
-				{
-					att.type = ((SymbolArray)S).baseType;
-				}
-				
-				if(S.type==Symbol.Types.FUNCTION)
-				{
-					att.type = ((SymbolFunction)S).returnType;
-				}
-
-				//.println(att.type+" "+S.name);
-			}
-
-			at = new Attributes();
-
-			
-			// else if(att.type!=at.type)
-			// {
-			// 	throw new ErrorSemantico("Error de tipos");
-			// }
-			
-			// System.err.println("Añadido " + at);
-			
+			sf.cambiarTipos(at, S);
+			sf.asignar_valores(att,at,t.image,S.type, S.parClass, st.level);
+			sf.checkPrimarioIds(at);
+			at = new Attributes();			
 		}
 		catch(SymbolNotFoundException ex)
 		{
@@ -904,145 +865,49 @@ void primario(Attributes att) :
 		}
 
 	}
-|   t= <tCONST_INT> 
+|   ("-")? t= <tCONST_INT> 
     {
-		at.type = Symbol.Types.INT;
-		at.code = (t.image);
-		at.nivel = st.level;
-		att.atts.add(at);
-		//att.type = at.type;
-		
-		if(att.type==Symbol.Types.UNDEFINED)
-		{
-			att.type = at.type;
-		}
-
-		//at = new Attributes();
-		// else if(att.type!=at.type)
-		// {
-		// 	throw new ErrorSemantico("Error de tipos");
-		// }
-		// System.err.println("Añadido " + at);
-		
+		sf.asignar_valores(att,at,t.image,Symbol.Types.INT, Symbol.ParameterClass.VAL, st.level);
 	}
 |   t= <tCONST_CHAR> 
 	{
-		//CAMBIARLO INVOCACION A FUNCION
-		at.type = Symbol.Types.CHAR;
-		at.code = (t.image);
-		at.nivel = st.level;
-		att.atts.add(at);
-		//att.type = at.type;
-		//at = new Attributes();
-		if(att.type==Symbol.Types.UNDEFINED)
-		{
-			att.type = at.type;
-		}
-		// else if(att.type!=at.type)
-		// {
-		// 	throw new ErrorSemantico("Error de tipos");
-		// }
-		// System.err.println("Añadido " + at);
-		
+		sf.asignar_valores(att,at,t.image,Symbol.Types.CHAR, Symbol.ParameterClass.VAL, st.level);
 	}
 |   t= <tCONST_STRING> 
 	{
-		at.type = Symbol.Types.STRING;
-		at.code = (t.image);
-		at.nivel = st.level;
-		att.atts.add(at);
-		att.type = at.type;
-		//at = new Attributes();
-		/*if(atts.type==Symbol.Types.UNDEFINED)
-		{
-			atts.type = at.type;
-		}
-		else if(atts.type!=at.type)
-		{
-			throw new ErrorSemantico("Error de tipos");
-		}*/
-		// System.err.println("Añadido " + at);
-		
+		sf.asignar_valores(att,at,t.image,Symbol.Types.STRING, Symbol.ParameterClass.VAL, st.level);
 	}
 |   t= <tTRUE>	
 	{
-		at.type = Symbol.Types.BOOL;
-		at.code = "true";
-		at.nivel = st.level;
-		att.atts.add(at);
-		//att.type = at.type;
-		//at = new Attributes();
-		if(att.type==Symbol.Types.UNDEFINED)
-		{
-			att.type = at.type;
-		}
-		// else if(att.type!=at.type)
-		// {
-		// 	throw new ErrorSemantico("Error de tipos");
-		// }
-		// System.err.println("Añadido " + at);
-		
+		sf.asignar_valores(att,at,"true",Symbol.Types.BOOL, Symbol.ParameterClass.VAL, st.level);
 	}
 |   t= <tFALSE> 
 	{
-		at.type = Symbol.Types.BOOL;
-		at.code = "false";
-		at.nivel = st.level;
-		att.atts.add(at);
-		//att.type = at.type;
-		//at = new Attributes();
-		if(att.type==Symbol.Types.UNDEFINED)
-		{
-			att.type = at.type;
-		}
-		// else if(att.type!=at.type)
-		// {
-		// 	throw new ErrorSemantico("Error de tipos");
-		// }
-
-		// System.err.println("Añadido " + at);
-		
+		sf.asignar_valores(att,at,"false",Symbol.Types.BOOL, Symbol.ParameterClass.VAL, st.level);
 	}
-
 }
 
 
 void function_call(Attributes att) :
 { 
 	Attributes at = new Attributes();
-  	// Attributes att2 = new Attributes();
 }
 {
  ( expresion(at)
  {
-	//att.type = att2.type;
-	att.atts.add(at);
-	//att.type = at.type;
+	sf.add_to_atts(att,at);
+	sf.heredar_valores(att,at);
 	at = new Attributes();
- 	// System.err.println("Añadido " + att);
- 	// System.err.println("Añadido " + att);
  } 
  ((<tCOMA>) expresion(at)
  {
-	att.atts.add(at);
-	//att.type = at.type;
-	at = new Attributes();
-	// System.err.println("Añadido " + att);
-	// System.err.println("Añadido " + att);
+	sf.add_to_atts(att,at);
+	sf.heredar_valores(att,at);
 }
 )* 
  ) 
  {
-	String _code="";
-		int size = att.atts.size();
-		for (int i = 0; i < size; i++) {
-			Attributes a = att.atts.get(i);
-			_code += a.code;
-			if (i < size - 1) { // if this is not the last element
-				_code += ",";
-			}
-		}
-		att.code = _code;	
+	
  }
 }
 
@@ -1054,7 +919,7 @@ void tipo_variable(Attributes atTypes, Attributes atIsArray):
 {
 	< tARRAY >
 	<tAP>
-	i = < tCONST_INT >
+	("-")? i = < tCONST_INT >
 		{
 			atTypes.inicio = Integer.parseInt(i.image);
 			
@@ -1062,7 +927,7 @@ void tipo_variable(Attributes atTypes, Attributes atIsArray):
 			
 		}
 	("..")
-	i = < tCONST_INT >
+	("-")? i = < tCONST_INT >
 		{
 			atTypes.fin = Integer.parseInt(i.image);
 			// at.parList.add(new Symbol(i.image,Symbol.Types.INT));

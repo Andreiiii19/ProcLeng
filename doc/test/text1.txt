@@ -320,7 +320,7 @@ begin
 		end if;
 		
 		esTurnoIA := not esTurnoIA;
-			
+		cJugador := int2char(char2int(cJugador)+1);
 	end loop;
 	
 end;
