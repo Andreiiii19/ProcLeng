@@ -8,6 +8,7 @@ procedure tres_en_raya is
   iaMaximiza: boolean;
   cJugador: character;
 	tablero: array(0..8) of character;
+	estaBien: array(0..8) of boolean;
 
 --------------------------------------------------------------------
 procedure inicializarTablero (t: ref array(0..8) of character) is
@@ -322,5 +323,9 @@ begin
 		esTurnoIA := not esTurnoIA;
 		cJugador := int2char(char2int(cJugador)+1);
 	end loop;
+
+	if estaBien(0) or comprobarVictoria(tablero, 'X') and comprobarEmpate(tablero) then
+		put_line("El programa funciona correctamente.");
+	end if;
 	
 end;

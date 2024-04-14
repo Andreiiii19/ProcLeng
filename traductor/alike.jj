@@ -535,17 +535,59 @@ void inst_if(Attributes att):
 {
 	<tIF> expresion(at)
 	{
+		System.err.println("Expresion if tipo: " + at.type);
+		if(at.type==Symbol.Types.ARRAY)
+		{
+			Attributes aux = at.atts.get(0);
+			for(int i=0; i<6 && aux.atts.size()>0; i++)
+			{
+				aux = aux.atts.get(0);	
+				System.err.println(aux.type);
+			}
+			if(aux.type!=Symbol.Types.INT)
+			{
+				throw new ErrorSemantico("No puedes comparar un array entero con un booleano");
+			}
+			if(at.extraType!=Symbol.Types.BOOL)
+			{
+				throw new ErrorSemantico("El array tienen que devolver un booleano: "+at.type);
+			}
+		} 
+		else if(at.type== Symbol.Types.FUNCTION)
+		{
+			if(at.extraType!=Symbol.Types.BOOL)
+			{
+				throw new ErrorSemantico("La funcion tienen que devolver un booleano: "+at.type);
+			}
+		}
+		else if(at.type!=Symbol.Types.BOOL)
+		{
+			throw new ErrorSemantico("Solo se admiten expresiones booleanas: "+at.type);
+		}
 		sf.add_to_atts(att,at);
 		sf.heredar_valores(att,at);
 		at = new Attributes();
-
-		// if(at.type!=Symbol.Types.BOOL)
-		// {
-		// 	throw new ErrorSemantico("Solo se admiten expresiones booleanas: "+at.type);
-		// }
 	}
 	<tTHEN> instrucciones() ((<tELSIF> expresion(at)
 	{
+		if(at.type==Symbol.Types.ARRAY)
+		{
+			if(at.extraType!=Symbol.Types.BOOL)
+			{
+				throw new ErrorSemantico("El array tienen que devolver un booleano: "+at.type);
+			}
+		} 
+		else if(at.type== Symbol.Types.FUNCTION)
+		{
+			if(at.extraType!=Symbol.Types.BOOL)
+			{
+				throw new ErrorSemantico("La funcion tienen que devolver un booleano: "+at.type);
+			}
+		}
+		else if(at.type!=Symbol.Types.BOOL)
+		{
+			throw new ErrorSemantico("Solo se admiten expresiones booleanas: "+at.type);
+		}
 		sf.add_to_atts(att,at);
 		sf.heredar_valores(att,at);
 		at = new Attributes();
@@ -569,6 +611,17 @@ void inst_while(Attributes att):
 {
 	<tWHILE> expresion(at)
 	{
+		if(at.type==Symbol.Types.ARRAY || at.type==Symbol.Types.FUNCTION)
+		{
+			if(at.extraType!=Symbol.Types.BOOL)
+			{
+				throw new ErrorSemantico("Solo se admiten expresiones booleanas: "+at.type);
+			}
+		}
+		else if(at.type!=Symbol.Types.BOOL)
+		{
+			throw new ErrorSemantico("Solo se admiten expresiones booleanas: "+at.type);
+		}
 		sf.add_to_atts(att,at);
 		sf.heredar_valores(att,at);
 	}
@@ -613,7 +666,7 @@ void expresion(Attributes att):
 	{
 		sf.add_to_atts(att,at);
 		sf.heredar_valores(att,at);
-		
+		at = new Attributes();
 	}
 	)+ )?
 	{
@@ -627,10 +680,22 @@ void expresion(Attributes att):
 			 for(Attributes a : att.atts)
 			 {
 				System.err.println(a.type);
-				if(a.type == Symbol.Types.FUNCTION){
+				if(a.type == Symbol.Types.FUNCTION || a.type == Symbol.Types.ARRAY){
 					if(a.extraType!=Symbol.Types.BOOL)
 					{
 						throw new ErrorSemantico("Error de tipos");
+					}
+					if(a.type == Symbol.Types.ARRAY){
+						Attributes aux = a.atts.get(0);
+						for(int i=0; i<5 && aux.atts.size()>0; i++)
+						{
+							aux = aux.atts.get(0);	
+							System.err.println(aux.type);
+						}
+						if(aux.type!=Symbol.Types.INT)
+						{
+							throw new ErrorSemantico("No puedes comparar un array entero con un booleano");
+						}
 					}
 				} else{
 					if(a.type!=Symbol.Types.BOOL)
@@ -640,8 +705,6 @@ void expresion(Attributes att):
 				}
 			 }
 			 //System.out.println();
-		} else {
-			 att.type = att.atts.get(0).type;
 		}
 		
 	}

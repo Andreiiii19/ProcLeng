@@ -584,15 +584,38 @@ System.err.println("Expresion/es de inv o asignacion: " + att);
 void inst_if(Attributes att) throws ParseException {Attributes at = new Attributes();
     jj_consume_token(tIF);
     expresion(at);
-sf.add_to_atts(att,at);
+System.err.println("Expresion if tipo: " + at.type);
+                if(at.type==Symbol.Types.ARRAY)
+                {
+                        Attributes aux = at.atts.get(0);
+                        for(int i=0; i<6 && aux.atts.size()>0; i++)
+                        {
+                                aux = aux.atts.get(0);
+                                System.err.println(aux.type);
+                        }
+                        if(aux.type!=Symbol.Types.INT)
+                        {
+                                {if (true) throw new ErrorSemantico("No puedes comparar un array entero con un booleano");}
+                        }
+                        if(at.extraType!=Symbol.Types.BOOL)
+                        {
+                                {if (true) throw new ErrorSemantico("El array tienen que devolver un booleano: "+at.type);}
+                        }
+                }
+                else if(at.type== Symbol.Types.FUNCTION)
+                {
+                        if(at.extraType!=Symbol.Types.BOOL)
+                        {
+                                {if (true) throw new ErrorSemantico("La funcion tienen que devolver un booleano: "+at.type);}
+                        }
+                }
+                else if(at.type!=Symbol.Types.BOOL)
+                {
+                        {if (true) throw new ErrorSemantico("Solo se admiten expresiones booleanas: "+at.type);}
+                }
+                sf.add_to_atts(att,at);
                 sf.heredar_valores(att,at);
                 at = new Attributes();
-
-                // if(at.type!=Symbol.Types.BOOL)
-                // {
-                // 	throw new ErrorSemantico("Solo se admiten expresiones booleanas: "+at.type);
-                // }
-
     jj_consume_token(tTHEN);
     instrucciones();
     label_7:
@@ -608,7 +631,25 @@ sf.add_to_atts(att,at);
       }
       jj_consume_token(tELSIF);
       expresion(at);
-sf.add_to_atts(att,at);
+if(at.type==Symbol.Types.ARRAY)
+                {
+                        if(at.extraType!=Symbol.Types.BOOL)
+                        {
+                                {if (true) throw new ErrorSemantico("El array tienen que devolver un booleano: "+at.type);}
+                        }
+                }
+                else if(at.type== Symbol.Types.FUNCTION)
+                {
+                        if(at.extraType!=Symbol.Types.BOOL)
+                        {
+                                {if (true) throw new ErrorSemantico("La funcion tienen que devolver un booleano: "+at.type);}
+                        }
+                }
+                else if(at.type!=Symbol.Types.BOOL)
+                {
+                        {if (true) throw new ErrorSemantico("Solo se admiten expresiones booleanas: "+at.type);}
+                }
+                sf.add_to_atts(att,at);
                 sf.heredar_valores(att,at);
                 at = new Attributes();
 
@@ -637,7 +678,18 @@ System.err.println("Expresion/es de ifs condiciones: " + att);
   static final public void inst_while(Attributes att) throws ParseException {Attributes at = new Attributes();
     jj_consume_token(tWHILE);
     expresion(at);
-sf.add_to_atts(att,at);
+if(at.type==Symbol.Types.ARRAY || at.type==Symbol.Types.FUNCTION)
+                {
+                        if(at.extraType!=Symbol.Types.BOOL)
+                        {
+                                {if (true) throw new ErrorSemantico("Solo se admiten expresiones booleanas: "+at.type);}
+                        }
+                }
+                else if(at.type!=Symbol.Types.BOOL)
+                {
+                        {if (true) throw new ErrorSemantico("Solo se admiten expresiones booleanas: "+at.type);}
+                }
+                sf.add_to_atts(att,at);
                 sf.heredar_valores(att,at);
     jj_consume_token(tLOOP);
     instrucciones();
@@ -687,6 +739,7 @@ att.type = Symbol.Types.BOOL;
         relacion(at);
 sf.add_to_atts(att,at);
                 sf.heredar_valores(att,at);
+                at = new Attributes();
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
         case tAND:
         case tOR:{
@@ -714,10 +767,22 @@ sf.add_to_atts(att,at);
                          for(Attributes a : att.atts)
                          {
                                 System.err.println(a.type);
-                                if(a.type == Symbol.Types.FUNCTION){
+                                if(a.type == Symbol.Types.FUNCTION || a.type == Symbol.Types.ARRAY){
                                         if(a.extraType!=Symbol.Types.BOOL)
                                         {
                                                 {if (true) throw new ErrorSemantico("Error de tipos");}
+                                        }
+                                        if(a.type == Symbol.Types.ARRAY){
+                                                Attributes aux = a.atts.get(0);
+                                                for(int i=0; i<5 && aux.atts.size()>0; i++)
+                                                {
+                                                        aux = aux.atts.get(0);
+                                                        System.err.println(aux.type);
+                                                }
+                                                if(aux.type!=Symbol.Types.INT)
+                                                {
+                                                        {if (true) throw new ErrorSemantico("No puedes comparar un array entero con un booleano");}
+                                                }
                                         }
                                 } else{
                                         if(a.type!=Symbol.Types.BOOL)
@@ -727,8 +792,6 @@ sf.add_to_atts(att,at);
                                 }
                          }
                          //System.out.println();
-                } else {
-                         att.type = att.atts.get(0).type;
                 }
 }
 
