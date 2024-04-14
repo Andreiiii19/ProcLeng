@@ -324,8 +324,10 @@ begin
 		cJugador := int2char(char2int(cJugador)+1);
 	end loop;
 
-	if estaBien(0) or comprobarVictoria(tablero, 'X') and comprobarEmpate(tablero) then
+	if estaBien(0) or estaBien(1) and estaBien(0) then
 		put_line("El programa funciona correctamente.");
+	elsif tablero(0)='0' then
+		put_line("El tablero no se inicializa correctamente.");
 	end if;
 	
 end;

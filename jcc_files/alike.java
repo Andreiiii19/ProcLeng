@@ -1049,10 +1049,23 @@ sf.add_to_atts(att,at);
 att.type = Symbol.Types.BOOL;
                 sf.add_to_atts(att,at);
                 sf.heredar_valores(att,at);
-
-                if(at.type!=Symbol.Types.BOOL)
+                if(at.type == Symbol.Types.ARRAY)
                 {
-                        {if (true) throw new ErrorSemantico("Error de tipos. Se esperaban bool en primario: " + at.type);}
+                        if(at.extraType!=Symbol.Types.BOOL)
+                        {
+                                {if (true) throw new ErrorSemantico("El array tienen que devolver un booleano: "+at.type);}
+                        }
+                }
+                else if(at.type == Symbol.Types.FUNCTION)
+                {
+                        if(at.extraType!=Symbol.Types.BOOL)
+                        {
+                                {if (true) throw new ErrorSemantico("La funcion tienen que devolver un booleano: "+at.type);}
+                        }
+                }
+                else if(at.type!=Symbol.Types.BOOL)
+                {
+                        {if (true) throw new ErrorSemantico("Solo se admiten expresiones booleanas: "+at.type);}
                 }
                 at = new Attributes();
       break;
