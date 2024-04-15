@@ -11,6 +11,14 @@ procedure tres_en_raya is
 	estaBien: array(0..8) of boolean;
 
 --------------------------------------------------------------------
+procedure pruebaReferencia (t: ref integer) is
+--------------------------------------------------------------------
+	i: integer;
+begin
+	i:=t;
+end;
+
+--------------------------------------------------------------------
 procedure inicializarTablero (t: ref array(0..8) of character) is
 --------------------------------------------------------------------
 	i,j: integer;
@@ -284,6 +292,7 @@ end;
 
 -----------------------------------------------------------
 begin
+	--pruebaReferencia(30);
 	inicializarTablero(tablero);
 	
 	esTurnoIA:=playerElection;
@@ -330,4 +339,5 @@ begin
 		put_line("El tablero no se inicializa correctamente.");
 	end if;
 	
+	imprimirTablero(tablero);
 end;

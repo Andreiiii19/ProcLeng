@@ -15,6 +15,7 @@ public class Attributes implements Cloneable {
     public int inicio;
     public int fin;
     public ArrayList<Attributes> atts;
+    public boolean esConstante;
     
 
     public Attributes() {
@@ -24,6 +25,7 @@ public class Attributes implements Cloneable {
         this.parList = new ArrayList<Symbol>();
         this.nivel = -1;
         this.code = "";
+        this.esConstante = false;
         this.atts = new ArrayList<Attributes>();
     }
 
@@ -48,7 +50,7 @@ public class Attributes implements Cloneable {
         for (Attributes a : atts) {
             atris += "\n" + "\t".repeat(depth + 1) + a.toString(depth + 1);
         }
-        return "Type: " + type + " Type extra: " + extraType + " ParClass: " + parClass + " Parlist: " +parList+ " Nivel: " + nivel + " Code: " + code + "\n" + atris;
+        return "Type: " + type + " Type extra: " + extraType + " esConstante: " + esConstante + "ParClass: " + parClass + " Parlist: " +parList+ " Nivel: " + nivel + " Code: " + code + "\n" + atris;
     }
 
 

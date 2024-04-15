@@ -28,6 +28,7 @@ public class alike {
 
 	static SymbolTable st;
 	static SemanticFunctions sf = new SemanticFunctions();
+	static ArrayList<Token> tipoReturn = new ArrayList<Token>();
 
 	private static void initSymbolTable() {
 		boolean b;
@@ -57,7 +58,6 @@ public class alike {
 		   }
 		   //Programa es el símbolo inicial de la gramática
 		   parser.Programa();
-		   System.out.println(st.toString());
 		   //...
 		   System.out.println("***** Análisis terminado con éxito *****");
 	   }
@@ -176,6 +176,26 @@ void Programa():
 {
 	<tPROC>
 	name = <tID>
+	{
+		
+		try{
+			name.image = name.image.toLowerCase();
+			if(!st.isReservedWord(name.image))
+			{
+				st.insertReservedWord(name.image);
+
+				SymbolProcedure S = new SymbolProcedure(name.image, at.parList);
+				st.insertSymbol(S);
+			}
+			else
+			{
+				throw new ErrorSemantico("ID no valido. Es una palabra reservada");
+			}
+		} catch (AlreadyDefinedSymbolException ex)
+		{
+			throw new ErrorSemantico("Simbolo ya existente");
+		}
+	}
 	(<tAP> parametros_formales(at) <tCP>)?
 	<tIS>
 	( declaracion_variables() )?
@@ -183,7 +203,10 @@ void Programa():
 	<tBEGIN>
 	instrucciones()
 	<tEND>
-	<tPC>
+	<tPC> 
+	{
+		System.err.println("Bloque " + name.image + " terminado \n" + st.toString());
+	}
 }
 
 void declaracion_procedimiento():
@@ -200,7 +223,7 @@ void declaracion_procedimiento():
 	<tEND>
 	<tPC> 
 	{
-		//System.err.println("Bloque" + name.image + "terminado \n" + st.toString());
+		System.err.println("Bloque " + name.image + " terminado \n" + st.toString());
 		st.removeBlock();
 	}
 }
@@ -214,6 +237,9 @@ void declaracion_funcion():
 }
 {
 	name = cabecera_funcion(atType,atIsArray,atts)
+	{
+		tipoReturn.add(name);
+	}
 	( declaracion_variables() )?
 	( declaracion_procs_funcs() )?
 	<tBEGIN>
@@ -224,12 +250,14 @@ void declaracion_funcion():
 	<tEND>
 	<tPC>
 	{
-		//System.err.println("Bloque " + name.image + " terminado \n"+ st.toString());
+		System.err.println("Bloque " + name.image + " terminado \n"+ st.toString());
 		st.removeBlock();
 		if(atType.type == Symbol.Types.ARRAY)
 		{
 			throw new ErrorSemantico("No se permiten funciones con retorno de vectores");
 		}
+
+		tipoReturn.remove(tipoReturn.size()-1);
 	}
 }
 
@@ -303,6 +331,75 @@ ArrayList<Symbol> declaracion_var():
 		}
 }
 
+Attributes lista_componentes():
+{
+	Token t;
+	Attributes att = new Attributes();
+	Attributes at = new Attributes();
+	Symbol S = null;
+}
+{
+	(
+		t=<tID>
+			(<tAP>expresion(at)<tCP>)?
+			{
+				t.image = t.image.toLowerCase();
+				if(!st.isReservedWord(t.image))
+				{
+					try
+					{
+						t.image = t.image.toLowerCase();
+						S = st.getSymbol(t.image);
+						sf.cambiarTipos(at, S);
+						sf.asignar_valores(att,at,t.image,S.type, S.parClass, st.level,false);
+						//sf.checkPrimarioIds(at);
+						at = new Attributes();	
+					}
+					catch(SymbolNotFoundException ex)
+					{
+						throw new ErrorSemantico(t.image + " no existe.");
+					}
+				}
+				else
+				{
+					throw new ErrorSemantico("ID no valido. Es una palabra reservada");
+				}
+			}
+	)
+	(
+		<tCOMA>
+		t=<tID>
+			(<tAP>expresion(at)<tCP>)?
+			{
+				t.image = t.image.toLowerCase();
+				if(!st.isReservedWord(t.image))
+				{
+					try
+					{
+						t.image = t.image.toLowerCase();
+						S = st.getSymbol(t.image);
+						sf.cambiarTipos(at, S);
+						sf.asignar_valores(att,at,t.image,S.type, S.parClass, st.level,false);
+						//sf.checkPrimarioIds(at);
+						at = new Attributes();	
+					}
+					catch(SymbolNotFoundException ex)
+					{
+						throw new ErrorSemantico(t.image + " no existe.");
+					}
+				}
+				else
+				{
+					throw new ErrorSemantico("ID no valido. Es una palabra reservada");
+				}
+			}
+	)*
+		{
+			//System.err.println("Lista de ids ");
+			return att;
+		}
+}
+
 ArrayList<Token> lista_ids():
 {
 	ArrayList<Token> tokens = new ArrayList<Token>();
@@ -312,6 +409,7 @@ ArrayList<Token> lista_ids():
 	(
 		t=<tID>
 			{
+				t.image = t.image.toLowerCase();
 				if(!st.isReservedWord(t.image))
 				{
 					tokens.add(t);
@@ -327,6 +425,7 @@ ArrayList<Token> lista_ids():
 		<tCOMA>
 		t=<tID>
 			{
+				t.image = t.image.toLowerCase();
 				if(!st.isReservedWord(t.image)) tokens.add(t);
 				else throw new ErrorSemantico("ID no valido. Es una palabra reservada");
 			}
@@ -368,6 +467,7 @@ Token cabecera_procedimiento(Attributes att):
 	name = <tID>
 	{
 		try {
+			name.image = name.image.toLowerCase();
 			Symbol S = new SymbolProcedure(name.image,att.parList);
 			st.insertSymbol(S);
 			st.insertBlock();
@@ -395,6 +495,7 @@ Token cabecera_funcion(Attributes atType,Attributes atIsArray,Attributes atts):
 	name = <tID>
 	{
 		try{ 
+			name.image = name.image.toLowerCase();
 			S = new SymbolFunction(name.image,atts.parList,atType.type);
 			st.insertSymbol(S);
 			st.insertBlock();
@@ -406,7 +507,7 @@ Token cabecera_funcion(Attributes atType,Attributes atIsArray,Attributes atts):
 	}
 	(<tAP> parametros_formales(atts) <tCP>)?
 	<tRETURN>
-	tipo_variable(atType,atIsArray)
+	tipo_variable_simple(atType)
 	<tIS>
 	{
 		S.returnType = atType.type;
@@ -462,16 +563,40 @@ void instruccion() :
 }
 
 void inst_leer(Attributes att):
-{}{<tGET> <tAP> lista_ids() <tCP>{System.err.println("Expresion: " + att);}}
+{
+
+}
+{
+	<tGET> 
+	<tAP> att = lista_componentes() <tCP>
+	{
+		sf.check_inst_leer(st,att);
+		System.err.println("Expresion: " + att);
+	}
+}
 
 void inst_saltar_linea(Attributes att):
-{}{<tSKIP>{System.err.println("Expresion: " + att);}}
+{}{<tSKIP>}
 
 void inst_escribir(Attributes att):
-{}{<tPUT> <tAP> lista_ids_o_string_o_inv(att)  <tCP>{System.err.println("Expresion: " + att);}}
+{}
+{
+	<tPUT> <tAP> lista_ids_o_string_o_inv(att)  <tCP>
+	{
+		sf.check_inst_escribir(st,att);
+		System.err.println("Expresion: " + att);
+	}
+}
 
 void inst_escribir_linea(Attributes att):
-{}{<tPLINE> ((<tAP> lista_ids_o_string_o_inv(att) <tCP>))?{System.err.println("Expresion: " + att);}}
+{}
+{
+	<tPLINE> ((<tAP> lista_ids_o_string_o_inv(att) <tCP>))?
+	{
+		if(att.atts.size()>0) 
+		System.err.println("Expresion: " + att);
+	}
+}
 
 void inst_invocacion_o_asignacion(Attributes att):
 {
@@ -481,25 +606,27 @@ void inst_invocacion_o_asignacion(Attributes att):
 }
 {
 	t = <tID>
+	(<tAP> ((function_call(at2)))
+	<tCP>)? 
 	{
 		try {
+			t.image = t.image.toLowerCase();
 			Symbol S = st.getSymbol(t.image);
+			System.err.println("Tipo de la funcion: " + at2);	
 			sf.cambiarTipos(at2, S);
-			sf.asignar_valores(att,at2,t.image,S.type, S.parClass, st.level);
+			System.err.println("Tipo de la funcion: " + at2);	
+			sf.asignar_valores(att,at2,t.image,S.type, S.parClass, st.level,false);
+			sf.checkTypeFunctionCall(at2);
 		} catch (SymbolNotFoundException ex)
 		{
 			throw new ErrorSemantico(t.image + " no existe.");
 		}
-	} 
-	(<tAP> (function_call(at2)) 
-	{
-		sf.checkTypeFunctionCall(at2);
-	} 
-	<tCP>)? 	
+	} 	
 	(<tASIG> expresion(at) 
 	{
 		sf.add_to_atts(att,at);
 		sf.heredar_valores(att,at);
+		System.err.println("Expresion en inst: " + att);
 		sf.checkTypesAsignacion(at,at2);
 		at = new Attributes();
 		at2 = new Attributes();
@@ -637,8 +764,30 @@ void inst_return(Attributes att):{
 {
 	<tRETURN> expresion(at)
 	{
-		att.atts.add(at.clone());
-		at = new Attributes();
+		try{
+			Symbol S = st.getSymbol(tipoReturn.get(tipoReturn.size()-1).image);
+			sf.add_to_atts(att,at);
+			
+			if(S.type != Symbol.Types.FUNCTION){
+				throw new ErrorSemantico("Solo se puede hacer return en funciones");
+			} 
+			if(at.type == Symbol.Types.FUNCTION)
+			{
+				if(at.extraType!=((SymbolFunction)S).returnType)
+				{
+					throw new ErrorSemantico("Error de tipos en return");
+				}
+			} 
+			else if(at.type != ((SymbolFunction)S).returnType)
+			{
+
+				throw new ErrorSemantico("Error de tipos en return");
+			}
+			
+			at = new Attributes();
+		} catch(SymbolNotFoundException ex) {
+			throw new ErrorSemantico("Error semantico. Funcion no encontrada");
+		}
 	}
 }
 
@@ -737,12 +886,18 @@ void relacion(Attributes att):
 			att.type = Symbol.Types.BOOL;
 			if(tieneOpInts)
 			{
+				System.err.println("Operador relacional: " + att);
 				for(Attributes a : att.atts)
 			 	{
-			 		if(a.type!=Symbol.Types.INT)
+					if (a.type==Symbol.Types.ARRAY || a.type==Symbol.Types.FUNCTION)
+					{
+						if(a.extraType!=Symbol.Types.INT)
+						{
+							throw new ErrorSemantico("Error de tipos. Se esperaban integers en relacion: "+a.type);
+						}
+					} else if(a.type!=Symbol.Types.INT)
 			 		{
-			 			throw new ErrorSemantico("Error de tipos. Se esperaban integers en relacion: "+
-						att);
+			 			throw new ErrorSemantico("Error de tipos. Se esperaban integers en relacion: "+a.type);
 			 		}
 			 	}
 			} else {
@@ -808,9 +963,16 @@ void expresion_simple(Attributes att):
 		sf.heredar_valores(att,at);
 		at = new Attributes();
 		att.type = Symbol.Types.INT;
+		System.err.println("Expresion simple: " + att);
 		for(Attributes a : att.atts)
 		{
-			if(a.type!=Symbol.Types.INT)
+			if(a.type == Symbol.Types.FUNCTION || a.type == Symbol.Types.ARRAY)
+			{
+				if(a.extraType!=Symbol.Types.INT)
+				{
+					throw new ErrorSemantico("Error de tipos. Se esperaban integers en expresion simple: " + a.type);
+				}
+			} else if(a.type!=Symbol.Types.INT)
 			{
 				throw new ErrorSemantico("Error de tipos. Se esperaban integers en expresion simple: " + a.type);
 			}
@@ -838,7 +1000,13 @@ void termino(Attributes att):
 		
 		for(Attributes a : att.atts)
 		{
-			if(a.type!=Symbol.Types.INT)
+			if(a.type == Symbol.Types.FUNCTION || a.type == Symbol.Types.ARRAY)
+			{
+				if(a.extraType!=Symbol.Types.INT)
+				{
+					throw new ErrorSemantico("Error de tipos. Se esperaban integers en termino: " + att.atts.get(0).type);
+				}
+			} else if(a.type!=Symbol.Types.INT)
 			{
 				throw new ErrorSemantico("Error de tipos. Se esperaban integers en termino: " + att.atts.get(0).type);
 			}
@@ -913,7 +1081,10 @@ void primario(Attributes att) :
 		{
 			throw new ErrorSemantico("int2char solo acepta enteros");
 		}
-		sf.asignar_valores(att,at,"int2char(" + at.code + ")",Symbol.Types.CHAR, Symbol.ParameterClass.VAL, st.level);
+		if(at.atts.size()!=1){
+			throw new ErrorSemantico("int2char solo acepta un entero");
+		}
+		sf.asignar_valores(att,at,"int2char(" + at.code + ")",Symbol.Types.CHAR, Symbol.ParameterClass.VAL, st.level, true);
 		sf.heredar_valores(att,at);
 	}
 |   <tCHAR2INT> <tAP> expresion(at) <tCP> 
@@ -922,16 +1093,20 @@ void primario(Attributes att) :
 		{
 			throw new ErrorSemantico("char2int solo acepta caracteres");
 		}
-		sf.asignar_valores(att,at,"char2int(" + at.code + ")",Symbol.Types.INT, Symbol.ParameterClass.VAL, st.level);
+		if(at.atts.size()!=1){
+			throw new ErrorSemantico("char2int solo acepta un caracter");
+		}
+		sf.asignar_valores(att,at,"char2int(" + at.code + ")",Symbol.Types.INT, Symbol.ParameterClass.VAL, st.level,true);
 		sf.heredar_valores(att,at);
 	}
-|   t=<tID> ((<tAP> (function_call(at)) <tCP> ))?  
+|   t=<tID> (<tAP> (function_call(at)) <tCP> )?  
 	{
 		try
 		{
+			t.image = t.image.toLowerCase();
 			S = st.getSymbol(t.image);
 			sf.cambiarTipos(at, S);
-			sf.asignar_valores(att,at,t.image,S.type, S.parClass, st.level);
+			sf.asignar_valores(att,at,t.image,S.type, S.parClass, st.level,false);
 			sf.checkPrimarioIds(at);
 			at = new Attributes();			
 		}
@@ -943,23 +1118,23 @@ void primario(Attributes att) :
 	}
 |   ("-")? t= <tCONST_INT> 
     {
-		sf.asignar_valores(att,at,t.image,Symbol.Types.INT, Symbol.ParameterClass.VAL, st.level);
+		sf.asignar_valores(att,at,t.image,Symbol.Types.INT, Symbol.ParameterClass.VAL, st.level,true);
 	}
 |   t= <tCONST_CHAR> 
 	{
-		sf.asignar_valores(att,at,t.image,Symbol.Types.CHAR, Symbol.ParameterClass.VAL, st.level);
+		sf.asignar_valores(att,at,t.image,Symbol.Types.CHAR, Symbol.ParameterClass.VAL, st.level,true);
 	}
 |   t= <tCONST_STRING> 
 	{
-		sf.asignar_valores(att,at,t.image,Symbol.Types.STRING, Symbol.ParameterClass.VAL, st.level);
+		sf.asignar_valores(att,at,t.image,Symbol.Types.STRING, Symbol.ParameterClass.VAL, st.level,true);
 	}
 |   t= <tTRUE>	
 	{
-		sf.asignar_valores(att,at,"true",Symbol.Types.BOOL, Symbol.ParameterClass.VAL, st.level);
+		sf.asignar_valores(att,at,"true",Symbol.Types.BOOL, Symbol.ParameterClass.VAL, st.level,true);
 	}
 |   t= <tFALSE> 
 	{
-		sf.asignar_valores(att,at,"false",Symbol.Types.BOOL, Symbol.ParameterClass.VAL, st.level);
+		sf.asignar_valores(att,at,"false",Symbol.Types.BOOL, Symbol.ParameterClass.VAL, st.level,true);
 	}
 }
 
@@ -979,6 +1154,7 @@ void function_call(Attributes att) :
  {
 	sf.add_to_atts(att,at);
 	sf.heredar_valores(att,at);
+	at = new Attributes();
 }
 )* 
  ) 

@@ -82,7 +82,7 @@ public class SymbolTable {
     //para usar en "getSymbol" y "containsSymbol"
     private Symbol findSymbol (String name) {
     	for (int i=st.size()-1; i>=0; i--) {
-            if (st.get(i).containsKey(name)) {
+            if (st.get(i).containsKey(name) && !isReservedWord(name)) {
                 return st.get(i).get(name);
             }
         }
@@ -92,6 +92,13 @@ public class SymbolTable {
     //inserta las palabras reservadas, sustituyendo el anterior contenido
     public void insertReservedWords(String[] pals) {
         reservedWords = new HashSet<String>(Arrays.asList(pals));
+    }
+
+    public void insertReservedWord(String pals) {
+        if(reservedWords!=null)
+        {
+            reservedWords.add(pals);
+        }
     }
     
     public boolean isReservedWord (String word)  
