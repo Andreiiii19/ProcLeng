@@ -8,15 +8,6 @@ procedure tres_en_raya is
   iaMaximiza: boolean;
   cJugador: character;
 	tablero: array(0..8) of character;
-	estaBien: array(0..8) of boolean;
-
---------------------------------------------------------------------
-procedure pruebaReferencia (t: ref integer) is
---------------------------------------------------------------------
-	i: integer;
-begin
-	i:=t;
-end;
 
 --------------------------------------------------------------------
 procedure inicializarTablero (t: ref array(0..8) of character) is
@@ -282,8 +273,8 @@ begin
 	if p='X' then
 		return false;
 	elsif p='O' then
-    	return true;
-  	else
+    return true;
+  else
 		put_line("Ficha invalida.");
 		return playerElection;
 	end if;
@@ -292,7 +283,6 @@ end;
 
 -----------------------------------------------------------
 begin
-	--pruebaReferencia(30);
 	inicializarTablero(tablero);
 	
 	esTurnoIA:=playerElection;
@@ -330,15 +320,7 @@ begin
 		end if;
 		
 		esTurnoIA := not esTurnoIA;
-		cJugador := int2char(char2int(cJugador)+1);
+			
 	end loop;
-
-	if estaBien(0) or estaBien(1) and estaBien(0) then
-		put_line("El programa funciona correctamente.");
-	elsif tablero(0)='0' then
-		put_line("El tablero no se inicializa correctamente.");
-	end if;
 	
-	imprimirTablero(tablero);
-	tablero(0) := '0';
 end;
