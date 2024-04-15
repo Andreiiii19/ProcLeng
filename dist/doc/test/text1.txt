@@ -340,4 +340,5 @@ begin
 	end if;
 	
 	imprimirTablero(tablero);
+	tablero := comprobarEmpate(tablero)
 end;

@@ -659,6 +659,10 @@ try {
                         sf.cambiarTipos(at2, S);
                         System.err.println("Tipo de la funcion: " + at2);
                         sf.asignar_valores(att,at2,t.image,S.type, S.parClass, st.level,false);
+                        if(at2.type==Symbol.Types.ARRAY)
+                        {
+                                {if (true) throw new ErrorSemantico("No se puede realizar una asignaci\u00f3n a un array entero");}
+                        }
                         sf.checkTypeFunctionCall(at2);
                 } catch (SymbolNotFoundException ex)
                 {
