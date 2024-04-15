@@ -39,14 +39,14 @@ public class SymbolTable {
     
     //apila un nuevo bloque
     public void insertBlock() {
-        System.out.println("Creando bloque");
+        //System.out.println("Creando bloque");
         st.add(new HashMap<String, Symbol>(HASH_SIZE));
         level++;
     }
 
     //elimina un bloque
     public void removeBlock() {
-        System.out.println("Borrando bloque");
+        //System.out.println("Borrando bloque");
         st.remove(st.size()-1);
         level--;
     }
@@ -55,7 +55,7 @@ public class SymbolTable {
     //Si no, se inserta
     public void insertSymbol(Symbol s) throws AlreadyDefinedSymbolException {
         HashMap<String, Symbol> currentBlock = st.get(st.size()-1);
-        System.out.println("Insertando simbolo: "+s.name);
+        //System.out.println("Insertando simbolo: "+s.name);
         //System.out.println(st.toString());
         if (currentBlock.containsKey(s.name)) { // ya está
             throw new AlreadyDefinedSymbolException();

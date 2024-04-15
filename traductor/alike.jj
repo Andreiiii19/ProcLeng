@@ -7,7 +7,7 @@
 
 options {
 	IGNORE_CASE = true;
-	COMMON_TOKEN_ACTION = true;
+	COMMON_TOKEN_ACTION = false;
 }
 
 PARSER_BEGIN(alike)
@@ -205,7 +205,7 @@ void Programa():
 	<tEND>
 	<tPC> 
 	{
-		System.err.println("Bloque " + name.image + " terminado \n" + st.toString());
+		//System.err.println("Bloque " + name.image + " terminado \n" + st.toString());
 	}
 }
 
@@ -223,7 +223,7 @@ void declaracion_procedimiento():
 	<tEND>
 	<tPC> 
 	{
-		System.err.println("Bloque " + name.image + " terminado \n" + st.toString());
+		//System.err.println("Bloque " + name.image + " terminado \n" + st.toString());
 		st.removeBlock();
 	}
 }
@@ -250,7 +250,7 @@ void declaracion_funcion():
 	<tEND>
 	<tPC>
 	{
-		System.err.println("Bloque " + name.image + " terminado \n"+ st.toString());
+		//System.err.println("Bloque " + name.image + " terminado \n"+ st.toString());
 		st.removeBlock();
 		if(atType.type == Symbol.Types.ARRAY)
 		{
@@ -323,7 +323,7 @@ ArrayList<Symbol> declaracion_var():
 					st.insertSymbol(S);
 				} catch (AlreadyDefinedSymbolException e)
 				{
-					System.err.println("Error semantico. Simbolo ya existente");
+					throw new ErrorSemantico("Error semantico. Simbolo ya existente");
 				}
 			}
 
@@ -431,7 +431,7 @@ ArrayList<Token> lista_ids():
 			}
 	)*
 		{
-			System.err.println("Lista de ids ");
+			//System.err.println("Lista de ids ");
 			return tokens;
 		}
 }
@@ -473,7 +473,7 @@ Token cabecera_procedimiento(Attributes att):
 			st.insertBlock();
 		}catch (AlreadyDefinedSymbolException ex)
 		{
-			System.err.println("Error semantico. Simbolo ya existente");
+			throw new ErrorSemantico("Error semantico. Simbolo ya existente");
 		}
 	}
 	(<tAP> 
@@ -501,7 +501,7 @@ Token cabecera_funcion(Attributes atType,Attributes atIsArray,Attributes atts):
 			st.insertBlock();
 		} catch (AlreadyDefinedSymbolException ex)
 		{
-			System.err.println("Error semantico. Simbolo ya existente");
+			throw new ErrorSemantico("Error semantico. Simbolo ya existente");
 		}
 		
 	}
@@ -571,7 +571,7 @@ void inst_leer(Attributes att):
 	<tAP> att = lista_componentes() <tCP>
 	{
 		sf.check_inst_leer(st,att);
-		System.err.println("Expresion: " + att);
+		//System.err.println("Expresion: " + att);
 	}
 }
 
@@ -584,7 +584,7 @@ void inst_escribir(Attributes att):
 	<tPUT> <tAP> lista_ids_o_string_o_inv(att)  <tCP>
 	{
 		sf.check_inst_escribir(st,att);
-		System.err.println("Expresion: " + att);
+		//System.err.println("Expresion: " + att);
 	}
 }
 
@@ -593,8 +593,10 @@ void inst_escribir_linea(Attributes att):
 {
 	<tPLINE> ((<tAP> lista_ids_o_string_o_inv(att) <tCP>))?
 	{
-		if(att.atts.size()>0) 
-		System.err.println("Expresion: " + att);
+		if(att.atts.size()>0)
+		{
+			sf.check_inst_escribir(st,att);
+		}
 	}
 }
 
@@ -612,9 +614,9 @@ void inst_invocacion_o_asignacion(Attributes att):
 		try {
 			t.image = t.image.toLowerCase();
 			Symbol S = st.getSymbol(t.image);
-			System.err.println("Tipo de la funcion: " + at2);	
+			//System.err.println("Tipo de la funcion: " + at2);	
 			sf.cambiarTipos(at2, S);
-			System.err.println("Tipo de la funcion: " + at2);	
+			//System.err.println("Tipo de la funcion: " + at2);	
 			sf.asignar_valores(att,at2,t.image,S.type, S.parClass, st.level,false);
 			if(at2.type==Symbol.Types.ARRAY)
 			{
@@ -630,14 +632,14 @@ void inst_invocacion_o_asignacion(Attributes att):
 	{
 		sf.add_to_atts(att,at);
 		sf.heredar_valores(att,at);
-		System.err.println("Expresion en inst: " + att);
+		//System.err.println("Expresion en inst: " + att);
 		sf.checkTypesAsignacion(at,at2);
 		at = new Attributes();
 		at2 = new Attributes();
 	}
 	)?
 	{
-		System.err.println("Expresion/es de inv o asignacion: " + att);
+		//System.err.println("Expresion/es de inv o asignacion: " + att);
 	}
 }
 
@@ -666,14 +668,14 @@ void inst_if(Attributes att):
 {
 	<tIF> expresion(at)
 	{
-		System.err.println("Expresion if tipo: " + at.type);
+		//System.err.println("Expresion if tipo: " + at.type);
 		if(at.type==Symbol.Types.ARRAY)
 		{
 			Attributes aux = at.atts.get(0);
 			for(int i=0; i<6 && aux.atts.size()>0; i++)
 			{
 				aux = aux.atts.get(0);	
-				System.err.println(aux.type);
+				//System.err.println(aux.type);
 			}
 			if(aux.type!=Symbol.Types.INT)
 			{
@@ -731,7 +733,7 @@ void inst_if(Attributes att):
 	<tTHEN> instrucciones())* (<tELSE> instrucciones())?) <tENDIF>
 	{
 		
-		System.err.println("Expresion/es de ifs condiciones: " + att);
+		//System.err.println("Expresion/es de ifs condiciones: " + att);
 	}
 } 
 
@@ -758,7 +760,7 @@ void inst_while(Attributes att):
 	}
 	<tLOOP> instrucciones() <tENDLOOP>
 	{
-		System.err.println("Expresion while condicion: " + att);
+		//System.err.println("Expresion while condicion: " + att);
 	}
 }
 
@@ -795,7 +797,7 @@ void inst_return(Attributes att):{
 	}
 }
 
-void inst_null(Attributes att):{}{<tNULL>{System.err.println("Expresion null");}	}
+void inst_null(Attributes att):{}{<tNULL>	}
 
 
 void expresion(Attributes att):
@@ -832,7 +834,7 @@ void expresion(Attributes att):
 		{
 			 for(Attributes a : att.atts)
 			 {
-				System.err.println(a.type);
+				//System.err.println(a.type);
 				if(a.type == Symbol.Types.FUNCTION || a.type == Symbol.Types.ARRAY){
 					if(a.extraType!=Symbol.Types.BOOL)
 					{
@@ -843,7 +845,7 @@ void expresion(Attributes att):
 						for(int i=0; i<5 && aux.atts.size()>0; i++)
 						{
 							aux = aux.atts.get(0);	
-							System.err.println(aux.type);
+							//System.err.println(aux.type);
 						}
 						if(aux.type!=Symbol.Types.INT)
 						{
@@ -890,7 +892,7 @@ void relacion(Attributes att):
 			att.type = Symbol.Types.BOOL;
 			if(tieneOpInts)
 			{
-				System.err.println("Operador relacional: " + att);
+				//System.err.println("Operador relacional: " + att);
 				for(Attributes a : att.atts)
 			 	{
 					if (a.type==Symbol.Types.ARRAY || a.type==Symbol.Types.FUNCTION)
@@ -967,7 +969,7 @@ void expresion_simple(Attributes att):
 		sf.heredar_valores(att,at);
 		at = new Attributes();
 		att.type = Symbol.Types.INT;
-		System.err.println("Expresion simple: " + att);
+		//System.err.println("Expresion simple: " + att);
 		for(Attributes a : att.atts)
 		{
 			if(a.type == Symbol.Types.FUNCTION || a.type == Symbol.Types.ARRAY)

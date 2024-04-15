@@ -135,7 +135,7 @@ try{
     instrucciones();
     jj_consume_token(tEND);
     jj_consume_token(tPC);
-System.err.println("Bloque " + name.image + " terminado \n" + st.toString());
+
 }
 
   static final public void declaracion_procedimiento() throws ParseException {Token name;
@@ -164,7 +164,7 @@ System.err.println("Bloque " + name.image + " terminado \n" + st.toString());
     instrucciones();
     jj_consume_token(tEND);
     jj_consume_token(tPC);
-System.err.println("Bloque " + name.image + " terminado \n" + st.toString());
+//System.err.println("Bloque " + name.image + " terminado \n" + st.toString());
                 st.removeBlock();
 }
 
@@ -198,7 +198,7 @@ tipoReturn.add(name);
     instrucciones();
     jj_consume_token(tEND);
     jj_consume_token(tPC);
-System.err.println("Bloque " + name.image + " terminado \n"+ st.toString());
+//System.err.println("Bloque " + name.image + " terminado \n"+ st.toString());
                 st.removeBlock();
                 if(atType.type == Symbol.Types.ARRAY)
                 {
@@ -306,7 +306,7 @@ if(atType.parClass==Symbol.ParameterClass.NONE)atType.parClass=Symbol.ParameterC
                                         st.insertSymbol(S);
                                 } catch (AlreadyDefinedSymbolException e)
                                 {
-                                        System.err.println("Error semantico. Simbolo ya existente");
+                                        {if (true) throw new ErrorSemantico("Error semantico. Simbolo ya existente");}
                                 }
                         }
 
@@ -431,7 +431,7 @@ t.image = t.image.toLowerCase();
                                 if(!st.isReservedWord(t.image)) tokens.add(t);
                                 else {if (true) throw new ErrorSemantico("ID no valido. Es una palabra reservada");}
     }
-System.err.println("Lista de ids ");
+//System.err.println("Lista de ids ");
                         {if ("" != null) return tokens;}
     throw new Error("Missing return statement in function");
 }
@@ -469,7 +469,7 @@ try {
                         st.insertBlock();
                 }catch (AlreadyDefinedSymbolException ex)
                 {
-                        System.err.println("Error semantico. Simbolo ya existente");
+                        {if (true) throw new ErrorSemantico("Error semantico. Simbolo ya existente");}
                 }
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tAP:{
@@ -498,7 +498,7 @@ try{
                         st.insertBlock();
                 } catch (AlreadyDefinedSymbolException ex)
                 {
-                        System.err.println("Error semantico. Simbolo ya existente");
+                        {if (true) throw new ErrorSemantico("Error semantico. Simbolo ya existente");}
                 }
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tAP:{
@@ -604,7 +604,8 @@ for(Symbol S : symbols)
     att = lista_componentes();
     jj_consume_token(tCP);
 sf.check_inst_leer(st,att);
-                System.err.println("Expresion: " + att);
+                //System.err.println("Expresion: " + att);
+
 }
 
   static final public void inst_saltar_linea(Attributes att) throws ParseException {
@@ -617,7 +618,8 @@ sf.check_inst_leer(st,att);
     lista_ids_o_string_o_inv(att);
     jj_consume_token(tCP);
 sf.check_inst_escribir(st,att);
-                System.err.println("Expresion: " + att);
+                //System.err.println("Expresion: " + att);
+
 }
 
   static final public void inst_escribir_linea(Attributes att) throws ParseException {
@@ -634,7 +636,9 @@ sf.check_inst_escribir(st,att);
       ;
     }
 if(att.atts.size()>0)
-                System.err.println("Expresion: " + att);
+                {
+                        sf.check_inst_escribir(st,att);
+                }
 }
 
   static final public void inst_invocacion_o_asignacion(Attributes att) throws ParseException {Attributes at = new Attributes();
@@ -655,9 +659,9 @@ if(att.atts.size()>0)
 try {
                         t.image = t.image.toLowerCase();
                         Symbol S = st.getSymbol(t.image);
-                        System.err.println("Tipo de la funcion: " + at2);
+                        //System.err.println("Tipo de la funcion: " + at2);	
                         sf.cambiarTipos(at2, S);
-                        System.err.println("Tipo de la funcion: " + at2);
+                        //System.err.println("Tipo de la funcion: " + at2);	
                         sf.asignar_valores(att,at2,t.image,S.type, S.parClass, st.level,false);
                         if(at2.type==Symbol.Types.ARRAY)
                         {
@@ -674,7 +678,7 @@ try {
       expresion(at);
 sf.add_to_atts(att,at);
                 sf.heredar_valores(att,at);
-                System.err.println("Expresion en inst: " + att);
+                //System.err.println("Expresion en inst: " + att);
                 sf.checkTypesAsignacion(at,at2);
                 at = new Attributes();
                 at2 = new Attributes();
@@ -684,7 +688,7 @@ sf.add_to_atts(att,at);
       jj_la1[23] = jj_gen;
       ;
     }
-System.err.println("Expresion/es de inv o asignacion: " + att);
+
 }
 
 // void inv_funcion(Attributes att):
@@ -707,14 +711,14 @@ System.err.println("Expresion/es de inv o asignacion: " + att);
 void inst_if(Attributes att) throws ParseException {Attributes at = new Attributes();
     jj_consume_token(tIF);
     expresion(at);
-System.err.println("Expresion if tipo: " + at.type);
+//System.err.println("Expresion if tipo: " + at.type);
                 if(at.type==Symbol.Types.ARRAY)
                 {
                         Attributes aux = at.atts.get(0);
                         for(int i=0; i<6 && aux.atts.size()>0; i++)
                         {
                                 aux = aux.atts.get(0);
-                                System.err.println(aux.type);
+                                //System.err.println(aux.type);
                         }
                         if(aux.type!=Symbol.Types.INT)
                         {
@@ -795,7 +799,7 @@ if(at.type==Symbol.Types.ARRAY)
       ;
     }
     jj_consume_token(tENDIF);
-System.err.println("Expresion/es de ifs condiciones: " + att);
+
 }
 
   static final public void inst_while(Attributes att) throws ParseException {Attributes at = new Attributes();
@@ -817,7 +821,7 @@ if(at.type==Symbol.Types.ARRAY || at.type==Symbol.Types.FUNCTION)
     jj_consume_token(tLOOP);
     instrucciones();
     jj_consume_token(tENDLOOP);
-System.err.println("Expresion while condicion: " + att);
+
 }
 
   static final public void inst_return(Attributes att) throws ParseException {Attributes at = new Attributes();
@@ -851,7 +855,6 @@ try{
 
   static final public void inst_null(Attributes att) throws ParseException {
     jj_consume_token(tNULL);
-System.err.println("Expresion null");
 }
 
   static final public void expresion(Attributes att) throws ParseException {Boolean esBool = false;
@@ -911,7 +914,7 @@ sf.add_to_atts(att,at);
                 {
                          for(Attributes a : att.atts)
                          {
-                                System.err.println(a.type);
+                                //System.err.println(a.type);
                                 if(a.type == Symbol.Types.FUNCTION || a.type == Symbol.Types.ARRAY){
                                         if(a.extraType!=Symbol.Types.BOOL)
                                         {
@@ -922,7 +925,7 @@ sf.add_to_atts(att,at);
                                                 for(int i=0; i<5 && aux.atts.size()>0; i++)
                                                 {
                                                         aux = aux.atts.get(0);
-                                                        System.err.println(aux.type);
+                                                        //System.err.println(aux.type);
                                                 }
                                                 if(aux.type!=Symbol.Types.INT)
                                                 {
@@ -969,7 +972,7 @@ if(tieneOpInts!=null)
                         att.type = Symbol.Types.BOOL;
                         if(tieneOpInts)
                         {
-                                System.err.println("Operador relacional: " + att);
+                                //System.err.println("Operador relacional: " + att);
                                 for(Attributes a : att.atts)
                                 {
                                         if (a.type==Symbol.Types.ARRAY || a.type==Symbol.Types.FUNCTION)
@@ -1110,7 +1113,7 @@ sf.add_to_atts(att,at);
                 sf.heredar_valores(att,at);
                 at = new Attributes();
                 att.type = Symbol.Types.INT;
-                System.err.println("Expresion simple: " + att);
+                //System.err.println("Expresion simple: " + att);
                 for(Attributes a : att.atts)
                 {
                         if(a.type == Symbol.Types.FUNCTION || a.type == Symbol.Types.ARRAY)

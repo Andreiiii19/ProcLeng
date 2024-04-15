@@ -106,7 +106,7 @@ public class SemanticFunctions {
 	public void checkTypeFunctionCall(Attributes at2) {
 		if(at2.type == Symbol.Types.ARRAY)
 		{
-			System.out.println("Expresion a comprobar: " + at2);
+			//System.out.println("Expresion a comprobar: " + at2);
 			if(at2.atts.size()>1)
 			{
 				throw new ErrorSemantico("Demasiados parametros en invocacion a array");
@@ -143,8 +143,8 @@ public class SemanticFunctions {
 			}
 		} else if(at2.type == Symbol.Types.PROCEDURE)
 		{
-			System.out.println("Lista de atts: " + at2);
-			System.out.println("Lista de parList: " + at2.parList);
+			//System.out.println("Lista de atts: " + at2);
+			//System.out.println("Lista de parList: " + at2.parList);
 			if(at2.atts.size()!=at2.parList.size())
 			{
 				throw new ErrorSemantico("Número de parametros en invocacion a procedimiento");
@@ -239,10 +239,10 @@ public class SemanticFunctions {
 				for(int i = 0; i < at.atts.size(); i++)
 				{
 					Attributes a = at.atts.get(i);
-					System.out.println("Comparando: " + a.type + " con " + at.parList.get(i).type);
+					//System.out.println("Comparando: " + a.type + " con " + at.parList.get(i).type);
 					if(a.type!= at.parList.get(i).type)
 					{
-						System.out.println("Error en invocacion a funcion: " + at);
+						//System.out.println("Error en invocacion a funcion: " + at);
 						throw new ErrorSemantico("Error de tipos en invocacion a funcion: " + a.type);
 					}
 				}
