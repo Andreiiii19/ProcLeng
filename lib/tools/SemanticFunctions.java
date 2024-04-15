@@ -165,12 +165,9 @@ public class SemanticFunctions {
 	}
 
 	public void checkTypesAsignacion(Attributes at, Attributes at2) {
-		if(at2.type == Symbol.Types.ARRAY)
+		if(at.type==Symbol.Types.ARRAY)
 		{
-			if(at2.extraType!=at.type)
-			{
-				throw new ErrorSemantico("Intento de asignar a un array un tipo distinto al de sus elementos");
-			}
+			throw new ErrorSemantico("Intento de asignación de un array completo");
 		}
 		else if(at.type == Symbol.Types.FUNCTION){
 			if(at.extraType!=at2.type)

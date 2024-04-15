@@ -340,5 +340,5 @@ begin
 	end if;
 	
 	imprimirTablero(tablero);
-	tablero := comprobarEmpate(tablero)
+	tablero(0) := '0';
 end;

@@ -340,5 +340,5 @@ begin
 	end if;
 	
 	imprimirTablero(tablero);
-	tablero(0) := '0';
+	tablero(0) := tablero(1);
 end;
