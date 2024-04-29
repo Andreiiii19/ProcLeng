@@ -22,6 +22,7 @@ import lib.symbolTable.exceptions.*;
 import java.util.ArrayList;
 import lib.errores.*;
 import lib.tools.SemanticFunctions;
+import lib.tools.codeGeneration.*;
 
 public class alike { 
 
@@ -42,8 +43,6 @@ public class alike {
 
 		st.insertReservedWords(palsRes);
 	}
-
-
 
    public static void main(String[] args) {
 	   alike parser = null;
@@ -172,8 +171,13 @@ void Programa():
 {
 	Token name;
 	Attributes at = new Attributes();
+
+	CodeBlock cprog,cprocfun,cbloque;
 } 
 {
+	{
+		cprog = new CodeBlock();
+	}
 	<tPROC>
 	name = <tID>
 	{
@@ -199,41 +203,64 @@ void Programa():
 	(<tAP> parametros_formales(at) <tCP>)?
 	<tIS>
 	( declaracion_variables() )?
-	( (declaracion_procs_funcs())+ )?
+	( (declaracion_procs_funcs(cprocfun))+ )?
 	<tBEGIN>
-	instrucciones()
+	instrucciones(cbloque)
 	<tEND>
 	<tPC> 
 	{
 		//System.err.println("Bloque " + name.image + " terminado \n" + st.toString());
+		String etiq = CGUtils.newLabel();
+		cprog.addInst(PCodeInstruction.OpCode.ENP, etiq);
+		cprog.addBlock(cprocfun);
+		cprog.addComment("Comienzo main");
+		cprog.addLabel(etiq);
+		cprog.addBlock(cbloque);
+		cprog.addComment("Fin main");
+		cprog.addInst(PCodeInstruction.OpCode.LVP);
 	}
 }
 
-void declaracion_procedimiento():
+void declaracion_procedimiento(CodeBlock cBlock):
 {
 	Token name;
 	Attributes att = new Attributes();
+
+	CodeBlock cprog,cprocfun,cbloque;
 }
 {
 	name = cabecera_procedimiento(att)
 	( declaracion_variables() )?
-	( declaracion_procs_funcs() )?
+	( declaracion_procs_funcs(cprocfun) )?
 	<tBEGIN>
-	instrucciones()
+	instrucciones(cbloque)
 	<tEND>
 	<tPC> 
 	{
 		//System.err.println("Bloque " + name.image + " terminado \n" + st.toString());
 		st.removeBlock();
+
+		String etiq = CGUtils.newLabel();
+
+		cprog.addBlock(cprocfun);
+		cprog.addComment("Comienzo "+name.image);
+		cprog.addLabel(etiq);
+		cprog.addBlock(cbloque);
+		cprog.addComment("Fin "+name.image);
+		//cprog.addInst(LVP);
+
+		cBlock.addBlock(cprog);
 	}
 }
 
-void declaracion_funcion():
+void declaracion_funcion(CodeBlock cBlock):
 {
 	Attributes atType = new Attributes();
 	Attributes atIsArray = new Attributes();
 	Attributes atts = new Attributes();
 	Token name;
+
+	CodeBlock cprog,cprocfun,cbloque;
 }
 {
 	name = cabecera_funcion(atType,atIsArray,atts)
@@ -258,17 +285,28 @@ void declaracion_funcion():
 		}
 
 		tipoReturn.remove(tipoReturn.size()-1);
+
+		String etiq = CGUtils.newLabel();
+		//cprog.addInst(ENP, etiq);
+		cprog.addBlock(cprocfun);
+		cprog.addComment("Comienzo "+name.image);
+		cprog.addLabel(etiq);
+		cprog.addBlock(cbloque);
+		cprog.addComment("Fin "+name.image);
+		//cprog.addInst(LVP);
+
+		cBlock.addBlock(cprog);
 	}
 }
 
-void declaracion_procs_funcs():
+void declaracion_procs_funcs(CodeBlock cBlock):
 {}
 {
-	declaracion_procedimiento()
-	| declaracion_funcion()
+	declaracion_procedimiento(cBlock)
+	| declaracion_funcion(cBlock)
 }
 
-void instrucciones():
+void instrucciones(CodeBlock cBlock):
 {}
 {
 	(instruccion()(";"))+
@@ -812,7 +850,20 @@ void expresion(Attributes att):
 		sf.heredar_valores(att,at);
 		at = new Attributes();
 	}
-	( ((<tAND> | <tOR>) 
+	( ((<tAND>) 
+	{
+		att.type = Symbol.Types.BOOL;
+		esBool = true;
+	}
+	relacion(at) 
+	{
+		sf.add_to_atts(att,at);
+		sf.heredar_valores(att,at);
+		at = new Attributes();
+	}
+	)+
+	|
+	((<tOR>) 
 	{
 		att.type = Symbol.Types.BOOL;
 		esBool = true;
