@@ -42,6 +42,11 @@ public class SemanticFunctions {
 				throw new ErrorSemantico("La instruccion get no admite arrays");
 			}
 
+			if(at.type==Symbol.Types.PROCEDURE||at.type==Symbol.Types.FUNCTION)
+			{
+				throw new ErrorSemantico("La instruccion get no admite ni procedimientos ni funciones");
+			}
+
 			if(at.esConstante)
 			{
 				throw new ErrorSemantico("La instruccion get no admite constantes");

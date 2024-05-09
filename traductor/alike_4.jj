@@ -7,7 +7,7 @@
 
 options {
 	IGNORE_CASE = true;
-	COMMON_TOKEN_ACTION = false;
+	COMMON_TOKEN_ACTION = true;
 }
 
 PARSER_BEGIN(alike)
@@ -172,7 +172,7 @@ void Programa():
 	Token name;
 	Attributes at = new Attributes();
 
-	CodeBlock cprog,cprocfun,cbloque;
+	CodeBlock cprog=new CodeBlock(),cprocfun=new CodeBlock(),cbloque=new CodeBlock();
 } 
 {
 	{
@@ -226,7 +226,7 @@ void declaracion_procedimiento(CodeBlock cBlock):
 	Token name;
 	Attributes att = new Attributes();
 
-	CodeBlock cprog,cprocfun,cbloque;
+	CodeBlock cprog=new CodeBlock(),cprocfun=new CodeBlock(),cbloque=new CodeBlock();
 }
 {
 	name = cabecera_procedimiento(att)
@@ -260,7 +260,7 @@ void declaracion_funcion(CodeBlock cBlock):
 	Attributes atts = new Attributes();
 	Token name;
 
-	CodeBlock cprog,cprocfun,cbloque;
+	CodeBlock cprog=new CodeBlock(),cprocfun=new CodeBlock(),cbloque=new CodeBlock();
 }
 {
 	name = cabecera_funcion(atType,atIsArray,atts)
@@ -268,12 +268,12 @@ void declaracion_funcion(CodeBlock cBlock):
 		tipoReturn.add(name);
 	}
 	( declaracion_variables() )?
-	( declaracion_procs_funcs() )?
+	( declaracion_procs_funcs(cprocfun) )?
 	<tBEGIN>
 	{
 		
 	}
-	instrucciones()
+	instrucciones(cbloque)
 	<tEND>
 	<tPC>
 	{
@@ -307,9 +307,16 @@ void declaracion_procs_funcs(CodeBlock cBlock):
 }
 
 void instrucciones(CodeBlock cBlock):
-{}
 {
-	(instruccion()(";"))+
+	CodeBlock cInst = new CodeBlock();
+}
+{
+	(instruccion(cInst)
+	{
+		cBlock.addBlock(cInst);
+		cInst = new CodeBlock();
+	}
+	(";"))+
 }
 
 
@@ -351,7 +358,11 @@ ArrayList<Symbol> declaracion_var():
 				if(atType.type == Symbol.Types.INT) S = new SymbolInt(t.image, atType.parClass);
 				if(atType.type == Symbol.Types.ARRAY) 
 				{
-					
+					if(atType.inicio>atType.fin)
+					{
+						throw new ErrorSemantico("Indices en declaración de array incoherentes");
+					}
+
 					S = new SymbolArray(t.image, atType.inicio,atType.fin,atIsArray.type,atType.parClass);
 				}
 
@@ -584,23 +595,28 @@ void parametros_formales(Attributes att):
 }
 
 
-void instruccion() :
+void instruccion(CodeBlock cBlock) :
 {
 	Attributes att = new Attributes();	
+	CodeBlock cInst = new CodeBlock();
 }
 {
-		inst_leer(att)
-	|   inst_saltar_linea(att)
-	|	inst_escribir(att)
-	|   inst_escribir_linea(att)
-	|   inst_invocacion_o_asignacion(att)
-	|   inst_if(att)
-	|   inst_while(att)
-	|   inst_return(att)
-	|   inst_null(att)
+	(	inst_leer(att,cInst)
+	|   inst_saltar_linea(att,cInst)
+	|	inst_escribir(att,cInst)
+	|   inst_escribir_linea(att,cInst)
+	|   inst_invocacion_o_asignacion(att,cInst)
+	|   inst_if(att,cInst)
+	|   inst_while(att,cInst)
+	|   inst_return(att,cInst)
+	|   inst_null(att,cInst)
+	)
+	{
+		cBlock.addBlock(cInst);
+	}
 }
 
-void inst_leer(Attributes att):
+void inst_leer(Attributes att,CodeBlock cBlock):
 {
 
 }
@@ -613,10 +629,10 @@ void inst_leer(Attributes att):
 	}
 }
 
-void inst_saltar_linea(Attributes att):
+void inst_saltar_linea(Attributes att,CodeBlock cBlock):
 {}{<tSKIP>}
 
-void inst_escribir(Attributes att):
+void inst_escribir(Attributes att,CodeBlock cBlock):
 {}
 {
 	<tPUT> <tAP> lista_ids_o_string_o_inv(att)  <tCP>
@@ -626,7 +642,7 @@ void inst_escribir(Attributes att):
 	}
 }
 
-void inst_escribir_linea(Attributes att):
+void inst_escribir_linea(Attributes att,CodeBlock cBlock):
 {}
 {
 	<tPLINE> ((<tAP> lista_ids_o_string_o_inv(att) <tCP>))?
@@ -638,7 +654,7 @@ void inst_escribir_linea(Attributes att):
 	}
 }
 
-void inst_invocacion_o_asignacion(Attributes att):
+void inst_invocacion_o_asignacion(Attributes att,CodeBlock cBlock):
 {
 	Attributes at = new Attributes();
 	Attributes at2 = new Attributes();
@@ -699,9 +715,10 @@ void inst_invocacion_o_asignacion(Attributes att):
 // 	{System.err.println("Expresion/es de inv a funcion: " + att);}
 // }
 
-void inst_if(Attributes att):
+void inst_if(Attributes att,CodeBlock cBlock):
 {
 	Attributes at = new Attributes();
+	CodeBlock cbloque=new CodeBlock();
 }
 {
 	<tIF> expresion(at)
@@ -739,7 +756,7 @@ void inst_if(Attributes att):
 		sf.heredar_valores(att,at);
 		at = new Attributes();
 	}
-	<tTHEN> instrucciones() ((<tELSIF> expresion(at)
+	<tTHEN> instrucciones(cbloque) ((<tELSIF> expresion(at)
 	{
 		if(at.type==Symbol.Types.ARRAY)
 		{
@@ -768,16 +785,18 @@ void inst_if(Attributes att):
 		// 	throw new ErrorSemantico("Solo se admiten expresiones booleanas: "+at.type);
 		// }
 	}
-	<tTHEN> instrucciones())* (<tELSE> instrucciones())?) <tENDIF>
+	<tTHEN> instrucciones(cbloque))* (<tELSE> instrucciones(cbloque))?) <tENDIF>
 	{
 		
 		//System.err.println("Expresion/es de ifs condiciones: " + att);
 	}
 } 
 
-void inst_while(Attributes att):
+void inst_while(Attributes att,CodeBlock cBlock):
 {
 	Attributes at = new Attributes();
+
+	CodeBlock cbloque=new CodeBlock();
 }
 {
 	<tWHILE> expresion(at)
@@ -796,13 +815,13 @@ void inst_while(Attributes att):
 		sf.add_to_atts(att,at);
 		sf.heredar_valores(att,at);
 	}
-	<tLOOP> instrucciones() <tENDLOOP>
+	<tLOOP> instrucciones(cbloque) <tENDLOOP>
 	{
 		//System.err.println("Expresion while condicion: " + att);
 	}
 }
 
-void inst_return(Attributes att):{
+void inst_return(Attributes att,CodeBlock cBlock):{
 	Attributes at = new Attributes();
 }
 {
@@ -835,7 +854,7 @@ void inst_return(Attributes att):{
 	}
 }
 
-void inst_null(Attributes att):{}{<tNULL>	}
+void inst_null(Attributes att,CodeBlock cBlock):{}{<tNULL>	}
 
 
 void expresion(Attributes att):

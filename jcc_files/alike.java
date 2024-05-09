@@ -68,7 +68,7 @@ public class alike implements alikeConstants {
   static final public void Programa() throws ParseException {Token name;
         Attributes at = new Attributes();
 
-        CodeBlock cprog,cprocfun,cbloque;
+        CodeBlock cprog=new CodeBlock(),cprocfun=new CodeBlock(),cbloque=new CodeBlock();
 cprog = new CodeBlock();
     jj_consume_token(tPROC);
     name = jj_consume_token(tID);
@@ -151,7 +151,7 @@ try{
   static final public void declaracion_procedimiento(CodeBlock cBlock) throws ParseException {Token name;
         Attributes att = new Attributes();
 
-        CodeBlock cprog,cprocfun,cbloque;
+        CodeBlock cprog=new CodeBlock(),cprocfun=new CodeBlock(),cbloque=new CodeBlock();
     name = cabecera_procedimiento(att);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tID:{
@@ -196,7 +196,7 @@ try{
         Attributes atts = new Attributes();
         Token name;
 
-        CodeBlock cprog,cprocfun,cbloque;
+        CodeBlock cprog=new CodeBlock(),cprocfun=new CodeBlock(),cbloque=new CodeBlock();
     name = cabecera_funcion(atType,atIsArray,atts);
 tipoReturn.add(name);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -211,7 +211,7 @@ tipoReturn.add(name);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tPROC:
     case tFUNC:{
-      declaracion_procs_funcs();
+      declaracion_procs_funcs(cprocfun);
       break;
       }
     default:
@@ -220,7 +220,7 @@ tipoReturn.add(name);
     }
     jj_consume_token(tBEGIN);
 
-    instrucciones();
+    instrucciones(cbloque);
     jj_consume_token(tEND);
     jj_consume_token(tPC);
 //System.err.println("Bloque " + name.image + " terminado \n"+ st.toString());
@@ -261,10 +261,12 @@ tipoReturn.add(name);
     }
 }
 
-  static final public void instrucciones(CodeBlock cBlock) throws ParseException {
+  static final public void instrucciones(CodeBlock cBlock) throws ParseException {CodeBlock cInst = new CodeBlock();
     label_2:
     while (true) {
-      instruccion();
+      instruccion(cInst);
+cBlock.addBlock(cInst);
+                cInst = new CodeBlock();
       jj_consume_token(tPC);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case tIF:
@@ -332,6 +334,10 @@ if(atType.parClass==Symbol.ParameterClass.NONE)atType.parClass=Symbol.ParameterC
                                 if(atType.type == Symbol.Types.INT) S = new SymbolInt(t.image, atType.parClass);
                                 if(atType.type == Symbol.Types.ARRAY)
                                 {
+                                        if(atType.inicio>atType.fin)
+                                        {
+                                                {if (true) throw new ErrorSemantico("Indices en declaraci\u00f3n de array incoherentes");}
+                                        }
 
                                         S = new SymbolArray(t.image, atType.inicio,atType.fin,atIsArray.type,atType.parClass);
                                 }
@@ -589,42 +595,43 @@ for(Symbol S : symbols)
     }
 }
 
-  static final public void instruccion() throws ParseException {Attributes att = new Attributes();
+  static final public void instruccion(CodeBlock cBlock) throws ParseException {Attributes att = new Attributes();
+        CodeBlock cInst = new CodeBlock();
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tGET:{
-      inst_leer(att);
+      inst_leer(att,cInst);
       break;
       }
     case tSKIP:{
-      inst_saltar_linea(att);
+      inst_saltar_linea(att,cInst);
       break;
       }
     case tPUT:{
-      inst_escribir(att);
+      inst_escribir(att,cInst);
       break;
       }
     case tPLINE:{
-      inst_escribir_linea(att);
+      inst_escribir_linea(att,cInst);
       break;
       }
     case tID:{
-      inst_invocacion_o_asignacion(att);
+      inst_invocacion_o_asignacion(att,cInst);
       break;
       }
     case tIF:{
-      inst_if(att);
+      inst_if(att,cInst);
       break;
       }
     case tWHILE:{
-      inst_while(att);
+      inst_while(att,cInst);
       break;
       }
     case tRETURN:{
-      inst_return(att);
+      inst_return(att,cInst);
       break;
       }
     case tNULL:{
-      inst_null(att);
+      inst_null(att,cInst);
       break;
       }
     default:
@@ -632,9 +639,10 @@ for(Symbol S : symbols)
       jj_consume_token(-1);
       throw new ParseException();
     }
+cBlock.addBlock(cInst);
 }
 
-  static final public void inst_leer(Attributes att) throws ParseException {
+  static final public void inst_leer(Attributes att,CodeBlock cBlock) throws ParseException {
     jj_consume_token(tGET);
     jj_consume_token(tAP);
     att = lista_componentes();
@@ -644,11 +652,11 @@ sf.check_inst_leer(st,att);
 
 }
 
-  static final public void inst_saltar_linea(Attributes att) throws ParseException {
+  static final public void inst_saltar_linea(Attributes att,CodeBlock cBlock) throws ParseException {
     jj_consume_token(tSKIP);
 }
 
-  static final public void inst_escribir(Attributes att) throws ParseException {
+  static final public void inst_escribir(Attributes att,CodeBlock cBlock) throws ParseException {
     jj_consume_token(tPUT);
     jj_consume_token(tAP);
     lista_ids_o_string_o_inv(att);
@@ -658,7 +666,7 @@ sf.check_inst_escribir(st,att);
 
 }
 
-  static final public void inst_escribir_linea(Attributes att) throws ParseException {
+  static final public void inst_escribir_linea(Attributes att,CodeBlock cBlock) throws ParseException {
     jj_consume_token(tPLINE);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tAP:{
@@ -677,7 +685,7 @@ if(att.atts.size()>0)
                 }
 }
 
-  static final public void inst_invocacion_o_asignacion(Attributes att) throws ParseException {Attributes at = new Attributes();
+  static final public void inst_invocacion_o_asignacion(Attributes att,CodeBlock cBlock) throws ParseException {Attributes at = new Attributes();
         Attributes at2 = new Attributes();
         Token t;
     t = jj_consume_token(tID);
@@ -744,7 +752,8 @@ sf.add_to_atts(att,at);
 // 	{System.err.println("Expresion/es de inv a funcion: " + att);}
 // }
   static final public 
-void inst_if(Attributes att) throws ParseException {Attributes at = new Attributes();
+void inst_if(Attributes att,CodeBlock cBlock) throws ParseException {Attributes at = new Attributes();
+        CodeBlock cbloque=new CodeBlock();
     jj_consume_token(tIF);
     expresion(at);
 //System.err.println("Expresion if tipo: " + at.type);
@@ -780,7 +789,7 @@ void inst_if(Attributes att) throws ParseException {Attributes at = new Attribut
                 sf.heredar_valores(att,at);
                 at = new Attributes();
     jj_consume_token(tTHEN);
-    instrucciones();
+    instrucciones(cbloque);
     label_8:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -822,12 +831,12 @@ if(at.type==Symbol.Types.ARRAY)
                 // }
 
       jj_consume_token(tTHEN);
-      instrucciones();
+      instrucciones(cbloque);
     }
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tELSE:{
       jj_consume_token(tELSE);
-      instrucciones();
+      instrucciones(cbloque);
       break;
       }
     default:
@@ -838,7 +847,9 @@ if(at.type==Symbol.Types.ARRAY)
 
 }
 
-  static final public void inst_while(Attributes att) throws ParseException {Attributes at = new Attributes();
+  static final public void inst_while(Attributes att,CodeBlock cBlock) throws ParseException {Attributes at = new Attributes();
+
+        CodeBlock cbloque=new CodeBlock();
     jj_consume_token(tWHILE);
     expresion(at);
 if(at.type==Symbol.Types.ARRAY || at.type==Symbol.Types.FUNCTION)
@@ -855,12 +866,12 @@ if(at.type==Symbol.Types.ARRAY || at.type==Symbol.Types.FUNCTION)
                 sf.add_to_atts(att,at);
                 sf.heredar_valores(att,at);
     jj_consume_token(tLOOP);
-    instrucciones();
+    instrucciones(cbloque);
     jj_consume_token(tENDLOOP);
 
 }
 
-  static final public void inst_return(Attributes att) throws ParseException {Attributes at = new Attributes();
+  static final public void inst_return(Attributes att,CodeBlock cBlock) throws ParseException {Attributes at = new Attributes();
     jj_consume_token(tRETURN);
     expresion(at);
 try{
@@ -889,7 +900,7 @@ try{
                 }
 }
 
-  static final public void inst_null(Attributes att) throws ParseException {
+  static final public void inst_null(Attributes att,CodeBlock cBlock) throws ParseException {
     jj_consume_token(tNULL);
 }
 
