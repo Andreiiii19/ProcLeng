@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import lib.errores.*;
 import lib.tools.SemanticFunctions;
 import lib.tools.codeGeneration.*;
+import static lib.symbolTable.Symbol.Types.*;
 
 public class alike { 
 
@@ -30,6 +31,8 @@ public class alike {
 	static SymbolTable st;
 	static SemanticFunctions sf = new SemanticFunctions();
 	static ArrayList<Token> tipoReturn = new ArrayList<Token>();
+
+	static int linea = 0;
 
 	private static void initSymbolTable() {
 		boolean b;
@@ -80,8 +83,9 @@ PARSER_END(alike)
 
 TOKEN_MGR_DECLS : {
 	static void CommonTokenAction(Token token) {
-		System.err.println("(" + token.beginLine + ", "
-					+ token.beginColumn + "): "+ alikeConstants.tokenImage[token.kind] + " " + token.image);
+		alike.linea = token.beginLine;
+		// System.err.println("(" + token.beginLine + ", "
+		// 			+ token.beginColumn + "): "+ alikeConstants.tokenImage[token.kind] + " " + token.image);
 	}
 
 }
@@ -172,11 +176,13 @@ void Programa():
 	Token name;
 	Attributes at = new Attributes();
 
-	CodeBlock cprog=new CodeBlock(),cprocfun=new CodeBlock(),cbloque=new CodeBlock();
+	CodeBlock cprog=new CodeBlock(), cprocvar=new CodeBlock(),cprocfun=new CodeBlock(),cbloque=new CodeBlock();
 } 
 {
 	{
 		cprog = new CodeBlock();
+		String etiq = CGUtils.newLabel();
+		CGUtils.setLevel();
 	}
 	<tPROC>
 	name = <tID>
@@ -200,9 +206,9 @@ void Programa():
 			throw new ErrorSemantico("Simbolo ya existente");
 		}
 	}
-	(<tAP> parametros_formales(at) <tCP>)?
+	(<tAP> parametros_formales(at, cprog) <tCP>)?
 	<tIS>
-	( declaracion_variables() )?
+	( declaracion_variables(cprocvar, false) )?
 	( (declaracion_procs_funcs(cprocfun))+ )?
 	<tBEGIN>
 	instrucciones(cbloque)
@@ -210,14 +216,15 @@ void Programa():
 	<tPC> 
 	{
 		//System.err.println("Bloque " + name.image + " terminado \n" + st.toString());
-		String etiq = CGUtils.newLabel();
 		cprog.addInst(PCodeInstruction.OpCode.ENP, etiq);
+		cprog.addBlock(cprocvar);
 		cprog.addBlock(cprocfun);
 		cprog.addComment("Comienzo main");
 		cprog.addLabel(etiq);
 		cprog.addBlock(cbloque);
 		cprog.addComment("Fin main");
 		cprog.addInst(PCodeInstruction.OpCode.LVP);
+		System.out.println(cprog.toString());
 	}
 }
 
@@ -226,11 +233,13 @@ void declaracion_procedimiento(CodeBlock cBlock):
 	Token name;
 	Attributes att = new Attributes();
 
-	CodeBlock cprog=new CodeBlock(),cprocfun=new CodeBlock(),cbloque=new CodeBlock();
+	CodeBlock cprog=new CodeBlock(),cparam = new CodeBlock(),cprocfun=new CodeBlock(),cprocvar=new CodeBlock(),cbloque=new CodeBlock();
+	CGUtils.setLevel();
+	String etiq = CGUtils.newLabel();
 }
 {
-	name = cabecera_procedimiento(att)
-	( declaracion_variables() )?
+	name = cabecera_procedimiento(att, cparam)
+	( declaracion_variables(cprocvar, false) )?
 	( declaracion_procs_funcs(cprocfun) )?
 	<tBEGIN>
 	instrucciones(cbloque)
@@ -239,16 +248,14 @@ void declaracion_procedimiento(CodeBlock cBlock):
 	{
 		//System.err.println("Bloque " + name.image + " terminado \n" + st.toString());
 		st.removeBlock();
-
-		String etiq = CGUtils.newLabel();
-
+		cprog.addComment("Comienzo procedure "+name.image);
+		cprog.addBlock(cparam);
+		cprog.addBlock(cprocvar);
 		cprog.addBlock(cprocfun);
-		cprog.addComment("Comienzo "+name.image);
 		cprog.addLabel(etiq);
 		cprog.addBlock(cbloque);
-		cprog.addComment("Fin "+name.image);
-		//cprog.addInst(LVP);
-
+		cprog.addComment("Fin procedure "+name.image);
+		cprog.addInst(PCodeInstruction.OpCode.CSF);
 		cBlock.addBlock(cprog);
 	}
 }
@@ -259,15 +266,16 @@ void declaracion_funcion(CodeBlock cBlock):
 	Attributes atIsArray = new Attributes();
 	Attributes atts = new Attributes();
 	Token name;
-
-	CodeBlock cprog=new CodeBlock(),cprocfun=new CodeBlock(),cbloque=new CodeBlock();
+	String etiq = CGUtils.newLabel();
+	CodeBlock cprog=new CodeBlock(),cparam = new CodeBlock(), cprocvar=new CodeBlock(),cprocfun=new CodeBlock(),cbloque=new CodeBlock();
+	CGUtils.setLevel();
 }
 {
-	name = cabecera_funcion(atType,atIsArray,atts)
+	name = cabecera_funcion(atType,atIsArray,atts, cparam)
 	{
 		tipoReturn.add(name);
 	}
-	( declaracion_variables() )?
+	( declaracion_variables(cprocvar, false) )?
 	( declaracion_procs_funcs(cprocfun) )?
 	<tBEGIN>
 	{
@@ -286,15 +294,14 @@ void declaracion_funcion(CodeBlock cBlock):
 
 		tipoReturn.remove(tipoReturn.size()-1);
 
-		String etiq = CGUtils.newLabel();
-		//cprog.addInst(ENP, etiq);
+		cprog.addComment("Comienzo function "+name.image);
+		cprog.addBlock(cparam);
+		cprog.addBlock(cprocvar);
 		cprog.addBlock(cprocfun);
-		cprog.addComment("Comienzo "+name.image);
 		cprog.addLabel(etiq);
 		cprog.addBlock(cbloque);
-		cprog.addComment("Fin "+name.image);
-		//cprog.addInst(LVP);
-
+		cprog.addComment("Fin function "+name.image);
+		cprog.addInst(PCodeInstruction.OpCode.CSF);
 		cBlock.addBlock(cprog);
 	}
 }
@@ -320,15 +327,15 @@ void instrucciones(CodeBlock cBlock):
 }
 
 
-void declaracion_variables():
+void declaracion_variables(CodeBlock cprocvar, Boolean esParametro):
 {
 
 }
 {
-	( declaracion_var() ";")+
+	( declaracion_var(cprocvar, esParametro) ";")+
 }
 
-ArrayList<Symbol> declaracion_var():
+ArrayList<Symbol> declaracion_var(CodeBlock cprocvar, Boolean esParametro):
 {
 	Attributes atType = new Attributes();
 	Attributes atIsArray = new Attributes();
@@ -365,10 +372,37 @@ ArrayList<Symbol> declaracion_var():
 
 					S = new SymbolArray(t.image, atType.inicio,atType.fin,atIsArray.type,atType.parClass);
 				}
-
 				symbols.add(S);
+
 				
 				try {
+					
+					String name = "";
+					Symbol.Types type = Symbol.Types.UNDEFINED;
+					long inicio=0, fin = 0;
+					if(S.type == Symbol.Types.ARRAY) {
+						inicio = CGUtils.getLevel();
+						S.dir = inicio;
+						if(S.parClass != Symbol.ParameterClass.REF){
+							for (int i = atType.inicio+1; i < atType.fin; i++) {
+								fin = CGUtils.getLevel();
+							}
+							fin = CGUtils.getLevel();
+						}
+						name = "Array";
+						SymbolArray symbolArrayInstance = (SymbolArray) S;
+						type = symbolArrayInstance.baseType;
+						if(!esParametro) cprocvar.addComment("- " + name + " variable \"" + t.image + "\", type " + type + ", size " + ( symbolArrayInstance.maxInd-symbolArrayInstance.minInd+1) +", level " + st.level + ", address [" + inicio + ":" + fin + "]!");
+						else {
+							if(S.parClass == Symbol.ParameterClass.REF) cprocvar.addComment("- " + name +" parameter \"" + t.image + "\", type " + type + ", size " + ( symbolArrayInstance.maxInd-symbolArrayInstance.minInd+1) + ", class " + S.parClass + ", level " + st.level + ", address ["+S.dir+"]!");
+							else
+							cprocvar.addComment("- " + name +" parameter \"" + t.image + "\", type " + type + ", size " + ( symbolArrayInstance.maxInd-symbolArrayInstance.minInd+1) + ", class " + S.parClass + ", level " + st.level + ", address [" + inicio + ":" + fin + "]!");
+						}
+					} else {
+					S.dir = CGUtils.getLevel();
+					if(!esParametro && S.type != Symbol.Types.ARRAY) cprocvar.addComment("- Simple variable \"" + t.image + "\", type " + type + ", level " + st.level + ", address [" + S.dir + "]!");
+					else cprocvar.addComment("- Simple parameter \"" + t.image + "\", type " + type + ", class " + S.parClass + ", level " + st.level + ", address [" + S.dir + "]!");
+					}
 					st.insertSymbol(S);
 				} catch (AlreadyDefinedSymbolException e)
 				{
@@ -386,11 +420,12 @@ Attributes lista_componentes():
 	Attributes att = new Attributes();
 	Attributes at = new Attributes();
 	Symbol S = null;
+	CodeBlock cBlock = new CodeBlock();
 }
 {
 	(
 		t=<tID>
-			(<tAP>expresion(at)<tCP>)?
+			(<tAP>expresion(at, cBlock)<tCP>)?
 			{
 				t.image = t.image.toLowerCase();
 				if(!st.isReservedWord(t.image))
@@ -418,7 +453,7 @@ Attributes lista_componentes():
 	(
 		<tCOMA>
 		t=<tID>
-			(<tAP>expresion(at)<tCP>)?
+			(<tAP>expresion(at, cBlock)<tCP>)?
 			{
 				t.image = t.image.toLowerCase();
 				if(!st.isReservedWord(t.image))
@@ -485,20 +520,69 @@ ArrayList<Token> lista_ids():
 		}
 }
 
-void lista_ids_o_string_o_inv(Attributes att):
+void lista_ids_o_string_o_inv(Attributes att, CodeBlock cBlock):
 {
 	Attributes at = new Attributes();
 }
 {
-	expresion(at)
+	expresion(at, cBlock)
 	{
 		att.atts.add(at.clone());
+		switch (at.type){
+			case STRING:
+				String code = at.code;
+				if (code.startsWith("\"") && code.endsWith("\"")) {
+					code = code.substring(1, code.length() - 1);
+				}
+				if (code.contains("\"\"")) {
+					code = code.replace("\"\"", "\"");
+				}
+				cBlock.addComment("- Write STRING \"" + code + "\".");
+				for(char c: code.toCharArray()) {
+					cBlock.addComment("- Write CHAR \"" + c + "\".");
+					cBlock.addInst(PCodeInstruction.OpCode.STC, (int)c);
+					cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+				}
+				break;
+			
+		}
+
 		at = new Attributes();
 	}
-	(<tCOMA> expresion(at) 
+	(<tCOMA> expresion(at, cBlock) 
 	{
 		att.atts.add(at.clone());
+		switch (at.type){
+			case STRING:
+				String code = at.code;
+				if (code.startsWith("\"") && code.endsWith("\"")) {
+					code = code.substring(1, code.length() - 1);
+				}
+				if (code.contains("\"\"")) {
+					code = code.replace("\"\"", "\"");
+				}
+				cBlock.addComment("- Write STRING \"" + code + "\".");
+				for(char c: code.toCharArray()) {
+					cBlock.addComment("- Write CHAR \"" + c + "\".");
+					cBlock.addInst(PCodeInstruction.OpCode.STC, (int)c);
+					cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+				}
+				break;
+			case CHAR:
+				if(!at.code.contains("int2char"))
+				{
+					cBlock.addComment("- Write CHAR \"" + at.code + "\".");
+					cBlock.addInst(PCodeInstruction.OpCode.STC, (int)at.code.charAt(0));
+					cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+				} else {
+					cBlock.addComment("- Write CHAR \"" + at.code + "\".");
+				}
+				break;
+				
+		}
+
 		at = new Attributes();
+
 	})*
 	{
 		att.type = att.atts.get(0).type;
@@ -507,7 +591,7 @@ void lista_ids_o_string_o_inv(Attributes att):
 }
 
 
-Token cabecera_procedimiento(Attributes att):
+Token cabecera_procedimiento(Attributes att, CodeBlock cprog):
 {
 	Token name;
 }
@@ -526,7 +610,7 @@ Token cabecera_procedimiento(Attributes att):
 		}
 	}
 	(<tAP> 
-	parametros_formales(att)
+	parametros_formales(att, cprog)
 	<tCP>)?
 	<tIS>
 	{
@@ -534,7 +618,7 @@ Token cabecera_procedimiento(Attributes att):
 	}
 }
 
-Token cabecera_funcion(Attributes atType,Attributes atIsArray,Attributes atts):
+Token cabecera_funcion(Attributes atType,Attributes atIsArray,Attributes atts, CodeBlock cprog):
 {
 	Token name;
 	SymbolFunction S = null;
@@ -554,7 +638,7 @@ Token cabecera_funcion(Attributes atType,Attributes atIsArray,Attributes atts):
 		}
 		
 	}
-	(<tAP> parametros_formales(atts) <tCP>)?
+	(<tAP> parametros_formales(atts, cprog) <tCP>)?
 	<tRETURN>
 	tipo_variable_simple(atType)
 	<tIS>
@@ -564,12 +648,13 @@ Token cabecera_funcion(Attributes atType,Attributes atIsArray,Attributes atts):
 	}
 }
 
-void parametros_formales(Attributes att): 
+void parametros_formales(Attributes att, CodeBlock cprog): 
 {
 	ArrayList<Symbol> symbols;
+	CodeBlock cprocvar = new CodeBlock();
 }
 {
-	symbols = declaracion_var()
+	symbols = declaracion_var(cprocvar, true)
 	{
 		// try {
 			for(Symbol S : symbols)
@@ -577,19 +662,22 @@ void parametros_formales(Attributes att):
 				att.parList.add(S);
 		// 		st.insertSymbol(S);
 			}
+			cprog.addBlock(cprocvar);
+			cprocvar = new CodeBlock();
 		// } catch (AlreadyDefinedSymbolException ex)
 		// {
 		// 	System.err.println("Error semantico. Simbolo ya existente");
 		// }
 	}
 	(<tPC> 
-	symbols = declaracion_var()
+	symbols = declaracion_var(cprocvar, true)
 	{
 		for(Symbol S : symbols)
 		{
 			att.parList.add(S);
 			// st.insertSymbol(S);
 		}
+		cprog.addBlock(cprocvar);
 	}
 	)*
 }
@@ -625,19 +713,50 @@ void inst_leer(Attributes att,CodeBlock cBlock):
 	<tAP> att = lista_componentes() <tCP>
 	{
 		sf.check_inst_leer(st,att);
-		//System.err.println("Expresion: " + att);
+	}
+	{	
+		for (Attributes a : att.atts)
+		{	
+			try{
+				Symbol S = st.getSymbol(a.code);
+				cBlock.addComment("- Get simple variable/parameter \"" + a.code + "\".");
+				cBlock.addInst(PCodeInstruction.OpCode.SRF, (st.level - S.nivel), (int)S.dir);
+				cBlock.addInst(PCodeInstruction.OpCode.RD, a.type== Symbol.Types.INT?1:0);
+			} catch (SymbolNotFoundException ex)
+			{
+				throw new ErrorSemantico(a.code + " no existe.");
+			}
+		}
 	}
 }
 
 void inst_saltar_linea(Attributes att,CodeBlock cBlock):
-{}{<tSKIP>}
+{}{<tSKIP>
+	{
+		String et = CGUtils.newLabel();
+		cBlock.addLabel(et);
+		long dir = CGUtils.getLevel();
+		cBlock.addInst(PCodeInstruction.OpCode.SRF, 0, (int)dir);
+		cBlock.addInst(PCodeInstruction.OpCode.RD, 0);
+		cBlock.addInst(PCodeInstruction.OpCode.SRF, 0, (int)dir);
+		cBlock.addInst(PCodeInstruction.OpCode.DRF);
+		cBlock.addInst(PCodeInstruction.OpCode.STC, 10);
+		cBlock.addInst(PCodeInstruction.OpCode.EQ);
+		cBlock.addInst(PCodeInstruction.OpCode.JMF, et);
+	}
+}
 
 void inst_escribir(Attributes att,CodeBlock cBlock):
 {}
 {
-	<tPUT> <tAP> lista_ids_o_string_o_inv(att)  <tCP>
+	<tPUT> <tAP> lista_ids_o_string_o_inv(att, cBlock)  <tCP>
 	{
 		sf.check_inst_escribir(st,att);
+		cBlock.addComment("- Write CR/LF");
+		cBlock.addInst(PCodeInstruction.OpCode.STC, 13);
+		cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+		cBlock.addInst(PCodeInstruction.OpCode.STC, 10);
+		cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
 		//System.err.println("Expresion: " + att);
 	}
 }
@@ -645,12 +764,17 @@ void inst_escribir(Attributes att,CodeBlock cBlock):
 void inst_escribir_linea(Attributes att,CodeBlock cBlock):
 {}
 {
-	<tPLINE> ((<tAP> lista_ids_o_string_o_inv(att) <tCP>))?
+	<tPLINE> ((<tAP> lista_ids_o_string_o_inv(att, cBlock) <tCP>))?
 	{
 		if(att.atts.size()>0)
 		{
 			sf.check_inst_escribir(st,att);
 		}
+		cBlock.addComment("- Write CR/LF");
+		cBlock.addInst(PCodeInstruction.OpCode.STC, 13);
+		cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+		cBlock.addInst(PCodeInstruction.OpCode.STC, 10);
+		cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
 	}
 }
 
@@ -682,38 +806,18 @@ void inst_invocacion_o_asignacion(Attributes att,CodeBlock cBlock):
 			throw new ErrorSemantico(t.image + " no existe.");
 		}
 	} 	
-	(<tASIG> expresion(at) 
+	(<tASIG> expresion(at, cBlock) 
 	{
 		sf.add_to_atts(att,at);
 		sf.heredar_valores(att,at);
-		//System.err.println("Expresion en inst: " + att);
 		sf.checkTypesAsignacion(at,at2);
 		at = new Attributes();
 		at2 = new Attributes();
 	}
 	)?
 	{
-		//System.err.println("Expresion/es de inv o asignacion: " + att);
 	}
 }
-
-
-// void inv_funcion(Attributes att):
-// {
-// 	Attributes at = new Attributes();
-// }
-// {
-// 	(expresion(at) 
-// 	{
-// 		att.atts.add(at.clone());
-// 	}
-// 	(<tCOMA> expresion(at)
-// 	{
-// 		att.atts.add(at.clone());
-// 	}
-// 	)*)
-// 	{System.err.println("Expresion/es de inv a funcion: " + att);}
-// }
 
 void inst_if(Attributes att,CodeBlock cBlock):
 {
@@ -721,16 +825,14 @@ void inst_if(Attributes att,CodeBlock cBlock):
 	CodeBlock cbloque=new CodeBlock();
 }
 {
-	<tIF> expresion(at)
+	<tIF> expresion(at, cBlock)
 	{
-		//System.err.println("Expresion if tipo: " + at.type);
 		if(at.type==Symbol.Types.ARRAY)
 		{
 			Attributes aux = at.atts.get(0);
 			for(int i=0; i<6 && aux.atts.size()>0; i++)
 			{
 				aux = aux.atts.get(0);	
-				//System.err.println(aux.type);
 			}
 			if(aux.type!=Symbol.Types.INT)
 			{
@@ -756,7 +858,7 @@ void inst_if(Attributes att,CodeBlock cBlock):
 		sf.heredar_valores(att,at);
 		at = new Attributes();
 	}
-	<tTHEN> instrucciones(cbloque) ((<tELSIF> expresion(at)
+	<tTHEN> instrucciones(cbloque) ((<tELSIF> expresion(at, cBlock)
 	{
 		if(at.type==Symbol.Types.ARRAY)
 		{
@@ -780,16 +882,8 @@ void inst_if(Attributes att,CodeBlock cBlock):
 		sf.heredar_valores(att,at);
 		at = new Attributes();
 
-		// if(at.type!=Symbol.Types.BOOL)
-		// {
-		// 	throw new ErrorSemantico("Solo se admiten expresiones booleanas: "+at.type);
-		// }
 	}
 	<tTHEN> instrucciones(cbloque))* (<tELSE> instrucciones(cbloque))?) <tENDIF>
-	{
-		
-		//System.err.println("Expresion/es de ifs condiciones: " + att);
-	}
 } 
 
 void inst_while(Attributes att,CodeBlock cBlock):
@@ -799,7 +893,7 @@ void inst_while(Attributes att,CodeBlock cBlock):
 	CodeBlock cbloque=new CodeBlock();
 }
 {
-	<tWHILE> expresion(at)
+	<tWHILE> expresion(at, cBlock)
 	{
 		if(at.type==Symbol.Types.ARRAY || at.type==Symbol.Types.FUNCTION)
 		{
@@ -825,7 +919,7 @@ void inst_return(Attributes att,CodeBlock cBlock):{
 	Attributes at = new Attributes();
 }
 {
-	<tRETURN> expresion(at)
+	<tRETURN> expresion(at, cBlock)
 	{
 		try{
 			Symbol S = st.getSymbol(tipoReturn.get(tipoReturn.size()-1).image);
@@ -857,13 +951,13 @@ void inst_return(Attributes att,CodeBlock cBlock):{
 void inst_null(Attributes att,CodeBlock cBlock):{}{<tNULL>	}
 
 
-void expresion(Attributes att):
+void expresion(Attributes att, CodeBlock cBlock):
 {
 	Boolean esBool = false; 
 	Attributes at = new Attributes();
 }
 {
-    relacion(at)
+    relacion(at, cBlock)
 	{
 		sf.add_to_atts(att,at);
 		sf.heredar_valores(att,at);
@@ -874,7 +968,7 @@ void expresion(Attributes att):
 		att.type = Symbol.Types.BOOL;
 		esBool = true;
 	}
-	relacion(at) 
+	relacion(at, cBlock) 
 	{
 		sf.add_to_atts(att,at);
 		sf.heredar_valores(att,at);
@@ -887,7 +981,7 @@ void expresion(Attributes att):
 		att.type = Symbol.Types.BOOL;
 		esBool = true;
 	}
-	relacion(at) 
+	relacion(at, cBlock) 
 	{
 		sf.add_to_atts(att,at);
 		sf.heredar_valores(att,at);
@@ -935,21 +1029,21 @@ void expresion(Attributes att):
 	}
 }
 
-void relacion(Attributes att):
+void relacion(Attributes att, CodeBlock cBlock):
 {
 	//Attributes atTypes = new Attributes();
 	Boolean tieneOpInts = null;
 	Attributes at = new Attributes();
 }
 {
-    expresion_simple(at)
+    expresion_simple(at, cBlock)
 	{
 		sf.add_to_atts(att,at);
 		sf.heredar_valores(att,at);
 		at = new Attributes();
 	}
  	( tieneOpInts = operador_relacional()
-	expresion_simple(at)
+	expresion_simple(at, cBlock)
 	{
 		sf.add_to_atts(att,at);
 		sf.heredar_valores(att,at);
@@ -1016,7 +1110,7 @@ Boolean operador_relacional():
 	| <tNEQ> {return false;}// Char,bool,int
 }
 
-void expresion_simple(Attributes att):
+void expresion_simple(Attributes att, CodeBlock cBlock):
 {
 	boolean esInt=false;
 	Attributes at = new Attributes();
@@ -1026,14 +1120,14 @@ void expresion_simple(Attributes att):
 	{
 		esInt=true;att.type=Symbol.Types.INT;
 	})? 
-    termino(at)
+    termino(at, cBlock)
 	{
 		sf.add_to_atts(att,at);
 		sf.heredar_valores(att,at); 
 		at = new Attributes();
 	}
 	( ( <tADD> | <tSUB> ) 
-	termino(at) 
+	termino(at, cBlock) 
 	{	
 		sf.add_to_atts(att,at);
 		sf.heredar_valores(att,at);
@@ -1056,18 +1150,18 @@ void expresion_simple(Attributes att):
 	})*
 }
 
-void termino(Attributes att):
+void termino(Attributes att, CodeBlock cBlock):
 {
 	Attributes at = new Attributes();
 }
 {
-    factor(at) 
+    factor(at, cBlock) 
 	{
 		sf.add_to_atts(att,at);
 		sf.heredar_valores(att,at);
 		at = new Attributes();
 	}
-	( operador_multiplicativo() factor(at)
+	( operador_multiplicativo() factor(at, cBlock)
 	{
 		sf.add_to_atts(att,at);
 		sf.heredar_valores(att,at);
@@ -1098,12 +1192,12 @@ void operador_multiplicativo():
     <tMUL> | <tMOD> | <tDIV>
 }
 
-void factor(Attributes att):
+void factor(Attributes att, CodeBlock cBlock):
 {
 	Attributes at = new Attributes();
 }
 {
-    primario(at) 
+    primario(at, cBlock) 
 	{
 		sf.add_to_atts(att,at);
 		sf.heredar_valores(att,at);
@@ -1111,7 +1205,7 @@ void factor(Attributes att):
 		
 	}
 
-|   <tNOT>  primario(at)
+|   <tNOT>  primario(at, cBlock)
 	{
 		att.type = Symbol.Types.BOOL;
 		sf.add_to_atts(att,at);
@@ -1138,7 +1232,7 @@ void factor(Attributes att):
 	}
 }
 
-void primario(Attributes att) :
+void primario(Attributes att, CodeBlock cBlock) :
 { 
 	Attributes at = new Attributes();
 
@@ -1146,12 +1240,12 @@ void primario(Attributes att) :
 	Symbol S;
 }
 {
-	<tAP> expresion(at) <tCP> 
+	<tAP> expresion(at, cBlock) <tCP> 
 	{
 		sf.add_to_atts(att,at);
 		sf.heredar_valores(att,at);
 	}
-|   <tINT2CHAR> <tAP> expresion(at) <tCP> 
+|   <tINT2CHAR> <tAP> expresion(at, cBlock) <tCP> 
 	{
 		if(at.type!=Symbol.Types.INT)
 		{
@@ -1160,10 +1254,41 @@ void primario(Attributes att) :
 		if(at.atts.size()!=1){
 			throw new ErrorSemantico("int2char solo acepta un entero");
 		}
-		sf.asignar_valores(att,at,"int2char(" + at.code + ")",Symbol.Types.CHAR, Symbol.ParameterClass.VAL, st.level, true);
+		if(at.esConstante) {
+			cBlock.addInst(PCodeInstruction.OpCode.STC, Integer.parseInt(at.code));
+		}
+		String etiq1 = CGUtils.newLabel();
+		String etiq2 = CGUtils.newLabel();
+		cBlock.addComment("- check 0 <= int <= 255");
+		cBlock.addInst(PCodeInstruction.OpCode.DUP);
+		cBlock.addInst(PCodeInstruction.OpCode.STC, 0);
+		cBlock.addInst(PCodeInstruction.OpCode.GTE);
+		cBlock.addInst(PCodeInstruction.OpCode.JMF, etiq1);
+		cBlock.addInst(PCodeInstruction.OpCode.STC, 255);
+		cBlock.addInst(PCodeInstruction.OpCode.LTE);
+		cBlock.addInst(PCodeInstruction.OpCode.JMF, etiq1);
+		cBlock.addInst(PCodeInstruction.OpCode.JMP, etiq2);
+		cBlock.addLabel(etiq1);
+		String code = "Value invalid for int2char in line ("+ linea + ").";
+				if (code.startsWith("\"") && code.endsWith("\"")) {
+					code = code.substring(1, code.length() - 1);
+				}
+				if (code.contains("\"\"")) {
+					code = code.replace("\"\"", "\"");
+				}
+				cBlock.addComment("- Write STRING \"" + code + "\".");
+				for(char c: code.toCharArray()) {
+					cBlock.addComment("- Write CHAR \"" + c + "\".");
+					cBlock.addInst(PCodeInstruction.OpCode.STC, (int)c);
+					cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+				}
+		cBlock.addInst(PCodeInstruction.OpCode.LVP);
+		cBlock.addLabel(etiq2);
+		cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+		sf.asignar_valores(att,at,at.code,Symbol.Types.CHAR, Symbol.ParameterClass.VAL, st.level, true);
 		sf.heredar_valores(att,at);
 	}
-|   <tCHAR2INT> <tAP> expresion(at) <tCP> 
+|   <tCHAR2INT> <tAP> expresion(at, cBlock) <tCP> 
 	{
 		if(at.type!=Symbol.Types.CHAR)
 		{
@@ -1194,22 +1319,30 @@ void primario(Attributes att) :
 	}
 |   ("-")? t= <tCONST_INT> 
     {
+		cBlock.addInst(PCodeInstruction.OpCode.STC, Integer.parseInt(t.image));
 		sf.asignar_valores(att,at,t.image,Symbol.Types.INT, Symbol.ParameterClass.VAL, st.level,true);
 	}
 |   t= <tCONST_CHAR> 
 	{
+		String charWithoutQuotes = t.image.substring(1, t.image.length() - 1);
+		System.out.println("Char: " + charWithoutQuotes);
+		char charValue = charWithoutQuotes.charAt(0);
+		cBlock.addInst(PCodeInstruction.OpCode.STC, (int) charValue);
 		sf.asignar_valores(att,at,t.image,Symbol.Types.CHAR, Symbol.ParameterClass.VAL, st.level,true);
 	}
 |   t= <tCONST_STRING> 
 	{
+		// cBlock.addInst(PCodeInstruction.OpCode.STC, Integer.parseInt(t.image));
 		sf.asignar_valores(att,at,t.image,Symbol.Types.STRING, Symbol.ParameterClass.VAL, st.level,true);
 	}
 |   t= <tTRUE>	
 	{
+		cBlock.addInst(PCodeInstruction.OpCode.STC, 1);
 		sf.asignar_valores(att,at,"true",Symbol.Types.BOOL, Symbol.ParameterClass.VAL, st.level,true);
 	}
 |   t= <tFALSE> 
 	{
+		cBlock.addInst(PCodeInstruction.OpCode.STC, 0);
 		sf.asignar_valores(att,at,"false",Symbol.Types.BOOL, Symbol.ParameterClass.VAL, st.level,true);
 	}
 }
@@ -1218,15 +1351,16 @@ void primario(Attributes att) :
 void function_call(Attributes att) :
 { 
 	Attributes at = new Attributes();
+	CodeBlock cBlock = new CodeBlock();
 }
 {
- ( expresion(at)
+ ( expresion(at, cBlock)
  {
 	sf.add_to_atts(att,at);
 	sf.heredar_valores(att,at);
 	at = new Attributes();
  } 
- ((<tCOMA>) expresion(at)
+ ((<tCOMA>) expresion(at, cBlock)
  {
 	sf.add_to_atts(att,at);
 	sf.heredar_valores(att,at);
@@ -1243,23 +1377,28 @@ void function_call(Attributes att) :
 void tipo_variable(Attributes atTypes, Attributes atIsArray):
 { 
 	Token i;
+	Boolean esNegativo = false;
 }
 {
 	< tARRAY >
 	<tAP>
-	("-")? i = < tCONST_INT >
+	("-" {esNegativo=true;})? i = < tCONST_INT >
 		{
-			atTypes.inicio = Integer.parseInt(i.image);
+			if(esNegativo)	atTypes.inicio = -Integer.parseInt(i.image);
+			else atTypes.inicio = Integer.parseInt(i.image);
+			esNegativo = false;
 			
 			//at.parList.add(new Symbol(i.image,Symbol.Types.INT));
 			
 		}
 	("..")
-	("-")? i = < tCONST_INT >
+	("-"{esNegativo=true;})? i = < tCONST_INT >
 		{
-			atTypes.fin = Integer.parseInt(i.image);
+			if(esNegativo)	atTypes.fin = -Integer.parseInt(i.image);
+			else atTypes.fin = Integer.parseInt(i.image);
 			// at.parList.add(new Symbol(i.image,Symbol.Types.INT));
 			atTypes.type = Symbol.Types.ARRAY;
+			esNegativo = false;
 		}
 	<tCP>
 	 <tOF> tipo_variable_simple(atIsArray)

@@ -10,13 +10,15 @@ import java.util.ArrayList;
 import lib.errores.*;
 import lib.tools.SemanticFunctions;
 import lib.tools.codeGeneration.*;
+import static lib.symbolTable.Symbol.Types.*;
 
 /** Token Manager. */
 @SuppressWarnings ("unused")
 public class alikeTokenManager implements alikeConstants {
         static void CommonTokenAction(Token token) {
-                System.err.println("(" + token.beginLine + ", "
-                                        + token.beginColumn + "): "+ alikeConstants.tokenImage[token.kind] + " " + token.image);
+                alike.linea = token.beginLine;
+                // System.err.println("(" + token.beginLine + ", "
+                // 			+ token.beginColumn + "): "+ alikeConstants.tokenImage[token.kind] + " " + token.image);
         }
 
   /** Debug output. */

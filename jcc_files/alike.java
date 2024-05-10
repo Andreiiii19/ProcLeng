@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import lib.errores.*;
 import lib.tools.SemanticFunctions;
 import lib.tools.codeGeneration.*;
+import static lib.symbolTable.Symbol.Types.*;
 
 public class alike implements alikeConstants {
 
@@ -18,6 +19,8 @@ public class alike implements alikeConstants {
         static SymbolTable st;
         static SemanticFunctions sf = new SemanticFunctions();
         static ArrayList<Token> tipoReturn = new ArrayList<Token>();
+
+        static int linea = 0;
 
         private static void initSymbolTable() {
                 boolean b;
@@ -68,8 +71,10 @@ public class alike implements alikeConstants {
   static final public void Programa() throws ParseException {Token name;
         Attributes at = new Attributes();
 
-        CodeBlock cprog=new CodeBlock(),cprocfun=new CodeBlock(),cbloque=new CodeBlock();
+        CodeBlock cprog=new CodeBlock(), cprocvar=new CodeBlock(),cprocfun=new CodeBlock(),cbloque=new CodeBlock();
 cprog = new CodeBlock();
+                String etiq = CGUtils.newLabel();
+                CGUtils.setLevel();
     jj_consume_token(tPROC);
     name = jj_consume_token(tID);
 try{
@@ -92,7 +97,7 @@ try{
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tAP:{
       jj_consume_token(tAP);
-      parametros_formales(at);
+      parametros_formales(at, cprog);
       jj_consume_token(tCP);
       break;
       }
@@ -103,7 +108,7 @@ try{
     jj_consume_token(tIS);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tID:{
-      declaracion_variables();
+      declaracion_variables(cprocvar, false);
       break;
       }
     default:
@@ -138,24 +143,27 @@ try{
     jj_consume_token(tEND);
     jj_consume_token(tPC);
 //System.err.println("Bloque " + name.image + " terminado \n" + st.toString());
-                String etiq = CGUtils.newLabel();
                 cprog.addInst(PCodeInstruction.OpCode.ENP, etiq);
+                cprog.addBlock(cprocvar);
                 cprog.addBlock(cprocfun);
                 cprog.addComment("Comienzo main");
                 cprog.addLabel(etiq);
                 cprog.addBlock(cbloque);
                 cprog.addComment("Fin main");
                 cprog.addInst(PCodeInstruction.OpCode.LVP);
+                System.out.println(cprog.toString());
 }
 
   static final public void declaracion_procedimiento(CodeBlock cBlock) throws ParseException {Token name;
         Attributes att = new Attributes();
 
-        CodeBlock cprog=new CodeBlock(),cprocfun=new CodeBlock(),cbloque=new CodeBlock();
-    name = cabecera_procedimiento(att);
+        CodeBlock cprog=new CodeBlock(),cparam = new CodeBlock(),cprocfun=new CodeBlock(),cprocvar=new CodeBlock(),cbloque=new CodeBlock();
+        CGUtils.setLevel();
+        String etiq = CGUtils.newLabel();
+    name = cabecera_procedimiento(att, cparam);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tID:{
-      declaracion_variables();
+      declaracion_variables(cprocvar, false);
       break;
       }
     default:
@@ -178,16 +186,14 @@ try{
     jj_consume_token(tPC);
 //System.err.println("Bloque " + name.image + " terminado \n" + st.toString());
                 st.removeBlock();
-
-                String etiq = CGUtils.newLabel();
-
+                cprog.addComment("Comienzo procedure "+name.image);
+                cprog.addBlock(cparam);
+                cprog.addBlock(cprocvar);
                 cprog.addBlock(cprocfun);
-                cprog.addComment("Comienzo "+name.image);
                 cprog.addLabel(etiq);
                 cprog.addBlock(cbloque);
-                cprog.addComment("Fin "+name.image);
-                //cprog.addInst(LVP);
-
+                cprog.addComment("Fin procedure "+name.image);
+                cprog.addInst(PCodeInstruction.OpCode.CSF);
                 cBlock.addBlock(cprog);
 }
 
@@ -195,13 +201,14 @@ try{
         Attributes atIsArray = new Attributes();
         Attributes atts = new Attributes();
         Token name;
-
-        CodeBlock cprog=new CodeBlock(),cprocfun=new CodeBlock(),cbloque=new CodeBlock();
-    name = cabecera_funcion(atType,atIsArray,atts);
+        String etiq = CGUtils.newLabel();
+        CodeBlock cprog=new CodeBlock(),cparam = new CodeBlock(), cprocvar=new CodeBlock(),cprocfun=new CodeBlock(),cbloque=new CodeBlock();
+        CGUtils.setLevel();
+    name = cabecera_funcion(atType,atIsArray,atts, cparam);
 tipoReturn.add(name);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tID:{
-      declaracion_variables();
+      declaracion_variables(cprocvar, false);
       break;
       }
     default:
@@ -232,15 +239,14 @@ tipoReturn.add(name);
 
                 tipoReturn.remove(tipoReturn.size()-1);
 
-                String etiq = CGUtils.newLabel();
-                //cprog.addInst(ENP, etiq);
+                cprog.addComment("Comienzo function "+name.image);
+                cprog.addBlock(cparam);
+                cprog.addBlock(cprocvar);
                 cprog.addBlock(cprocfun);
-                cprog.addComment("Comienzo "+name.image);
                 cprog.addLabel(etiq);
                 cprog.addBlock(cbloque);
-                cprog.addComment("Fin "+name.image);
-                //cprog.addInst(LVP);
-
+                cprog.addComment("Fin function "+name.image);
+                cprog.addInst(PCodeInstruction.OpCode.CSF);
                 cBlock.addBlock(cprog);
 }
 
@@ -288,10 +294,10 @@ cBlock.addBlock(cInst);
     }
 }
 
-  static final public void declaracion_variables() throws ParseException {
+  static final public void declaracion_variables(CodeBlock cprocvar, Boolean esParametro) throws ParseException {
     label_3:
     while (true) {
-      declaracion_var();
+      declaracion_var(cprocvar, esParametro);
       jj_consume_token(tPC);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case tID:{
@@ -305,7 +311,7 @@ cBlock.addBlock(cInst);
     }
 }
 
-  static final public ArrayList<Symbol> declaracion_var() throws ParseException {Attributes atType = new Attributes();
+  static final public ArrayList<Symbol> declaracion_var(CodeBlock cprocvar, Boolean esParametro) throws ParseException {Attributes atType = new Attributes();
         Attributes atIsArray = new Attributes();
         ArrayList<Token> tokens;
         ArrayList<Symbol> symbols = new ArrayList<Symbol>();
@@ -341,10 +347,37 @@ if(atType.parClass==Symbol.ParameterClass.NONE)atType.parClass=Symbol.ParameterC
 
                                         S = new SymbolArray(t.image, atType.inicio,atType.fin,atIsArray.type,atType.parClass);
                                 }
-
                                 symbols.add(S);
 
+
                                 try {
+
+                                        String name = "";
+                                        Symbol.Types type = Symbol.Types.UNDEFINED;
+                                        long inicio=0, fin = 0;
+                                        if(S.type == Symbol.Types.ARRAY) {
+                                                inicio = CGUtils.getLevel();
+                                                S.dir = inicio;
+                                                if(S.parClass != Symbol.ParameterClass.REF){
+                                                        for (int i = atType.inicio+1; i < atType.fin; i++) {
+                                                                fin = CGUtils.getLevel();
+                                                        }
+                                                        fin = CGUtils.getLevel();
+                                                }
+                                                name = "Array";
+                                                SymbolArray symbolArrayInstance = (SymbolArray) S;
+                                                type = symbolArrayInstance.baseType;
+                                                if(!esParametro) cprocvar.addComment("- " + name + " variable \"" + t.image + "\", type " + type + ", size " + ( symbolArrayInstance.maxInd-symbolArrayInstance.minInd+1) +", level " + st.level + ", address [" + inicio + ":" + fin + "]!");
+                                                else {
+                                                        if(S.parClass == Symbol.ParameterClass.REF) cprocvar.addComment("- " + name +" parameter \"" + t.image + "\", type " + type + ", size " + ( symbolArrayInstance.maxInd-symbolArrayInstance.minInd+1) + ", class " + S.parClass + ", level " + st.level + ", address ["+S.dir+"]!");
+                                                        else
+                                                        cprocvar.addComment("- " + name +" parameter \"" + t.image + "\", type " + type + ", size " + ( symbolArrayInstance.maxInd-symbolArrayInstance.minInd+1) + ", class " + S.parClass + ", level " + st.level + ", address [" + inicio + ":" + fin + "]!");
+                                                }
+                                        } else {
+                                        S.dir = CGUtils.getLevel();
+                                        if(!esParametro && S.type != Symbol.Types.ARRAY) cprocvar.addComment("- Simple variable \"" + t.image + "\", type " + type + ", level " + st.level + ", address [" + S.dir + "]!");
+                                        else cprocvar.addComment("- Simple parameter \"" + t.image + "\", type " + type + ", class " + S.parClass + ", level " + st.level + ", address [" + S.dir + "]!");
+                                        }
                                         st.insertSymbol(S);
                                 } catch (AlreadyDefinedSymbolException e)
                                 {
@@ -360,11 +393,12 @@ if(atType.parClass==Symbol.ParameterClass.NONE)atType.parClass=Symbol.ParameterC
         Attributes att = new Attributes();
         Attributes at = new Attributes();
         Symbol S = null;
+        CodeBlock cBlock = new CodeBlock();
     t = jj_consume_token(tID);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tAP:{
       jj_consume_token(tAP);
-      expresion(at);
+      expresion(at, cBlock);
       jj_consume_token(tCP);
       break;
       }
@@ -409,7 +443,7 @@ t.image = t.image.toLowerCase();
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case tAP:{
         jj_consume_token(tAP);
-        expresion(at);
+        expresion(at, cBlock);
         jj_consume_token(tCP);
         break;
         }
@@ -478,9 +512,28 @@ t.image = t.image.toLowerCase();
     throw new Error("Missing return statement in function");
 }
 
-  static final public void lista_ids_o_string_o_inv(Attributes att) throws ParseException {Attributes at = new Attributes();
-    expresion(at);
+  static final public void lista_ids_o_string_o_inv(Attributes att, CodeBlock cBlock) throws ParseException {Attributes at = new Attributes();
+    expresion(at, cBlock);
 att.atts.add(at.clone());
+                switch (at.type){
+                        case STRING:
+                                String code = at.code;
+                                if (code.startsWith("\"") && code.endsWith("\"")) {
+                                        code = code.substring(1, code.length() - 1);
+                                }
+                                if (code.contains("\"\"")) {
+                                        code = code.replace("\"\"", "\"");
+                                }
+                                cBlock.addComment("- Write STRING \"" + code + "\".");
+                                for(char c: code.toCharArray()) {
+                                        cBlock.addComment("- Write CHAR \"" + c + "\".");
+                                        cBlock.addInst(PCodeInstruction.OpCode.STC, (int)c);
+                                        cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+                                }
+                                break;
+
+                }
+
                 at = new Attributes();
     label_6:
     while (true) {
@@ -494,14 +547,43 @@ att.atts.add(at.clone());
         break label_6;
       }
       jj_consume_token(tCOMA);
-      expresion(at);
+      expresion(at, cBlock);
 att.atts.add(at.clone());
+                switch (at.type){
+                        case STRING:
+                                String code = at.code;
+                                if (code.startsWith("\"") && code.endsWith("\"")) {
+                                        code = code.substring(1, code.length() - 1);
+                                }
+                                if (code.contains("\"\"")) {
+                                        code = code.replace("\"\"", "\"");
+                                }
+                                cBlock.addComment("- Write STRING \"" + code + "\".");
+                                for(char c: code.toCharArray()) {
+                                        cBlock.addComment("- Write CHAR \"" + c + "\".");
+                                        cBlock.addInst(PCodeInstruction.OpCode.STC, (int)c);
+                                        cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+                                }
+                                break;
+                        case CHAR:
+                                if(!at.code.contains("int2char"))
+                                {
+                                        cBlock.addComment("- Write CHAR \"" + at.code + "\".");
+                                        cBlock.addInst(PCodeInstruction.OpCode.STC, (int)at.code.charAt(0));
+                                        cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+                                } else {
+                                        cBlock.addComment("- Write CHAR \"" + at.code + "\".");
+                                }
+                                break;
+
+                }
+
                 at = new Attributes();
     }
 att.type = att.atts.get(0).type;
 }
 
-  static final public Token cabecera_procedimiento(Attributes att) throws ParseException {Token name;
+  static final public Token cabecera_procedimiento(Attributes att, CodeBlock cprog) throws ParseException {Token name;
     jj_consume_token(tPROC);
     name = jj_consume_token(tID);
 try {
@@ -516,7 +598,7 @@ try {
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tAP:{
       jj_consume_token(tAP);
-      parametros_formales(att);
+      parametros_formales(att, cprog);
       jj_consume_token(tCP);
       break;
       }
@@ -529,7 +611,7 @@ try {
     throw new Error("Missing return statement in function");
 }
 
-  static final public Token cabecera_funcion(Attributes atType,Attributes atIsArray,Attributes atts) throws ParseException {Token name;
+  static final public Token cabecera_funcion(Attributes atType,Attributes atIsArray,Attributes atts, CodeBlock cprog) throws ParseException {Token name;
         SymbolFunction S = null;
     jj_consume_token(tFUNC);
     name = jj_consume_token(tID);
@@ -545,7 +627,7 @@ try{
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tAP:{
       jj_consume_token(tAP);
-      parametros_formales(atts);
+      parametros_formales(atts, cprog);
       jj_consume_token(tCP);
       break;
       }
@@ -561,14 +643,17 @@ S.returnType = atType.type;
     throw new Error("Missing return statement in function");
 }
 
-  static final public void parametros_formales(Attributes att) throws ParseException {ArrayList<Symbol> symbols;
-    symbols = declaracion_var();
+  static final public void parametros_formales(Attributes att, CodeBlock cprog) throws ParseException {ArrayList<Symbol> symbols;
+        CodeBlock cprocvar = new CodeBlock();
+    symbols = declaracion_var(cprocvar, true);
 // try {
                         for(Symbol S : symbols)
                         {
                                 att.parList.add(S);
                 // 		st.insertSymbol(S);
                         }
+                        cprog.addBlock(cprocvar);
+                        cprocvar = new CodeBlock();
                 // } catch (AlreadyDefinedSymbolException ex)
                 // {
                 // 	System.err.println("Error semantico. Simbolo ya existente");
@@ -586,12 +671,13 @@ S.returnType = atType.type;
         break label_7;
       }
       jj_consume_token(tPC);
-      symbols = declaracion_var();
+      symbols = declaracion_var(cprocvar, true);
 for(Symbol S : symbols)
                 {
                         att.parList.add(S);
                         // st.insertSymbol(S);
                 }
+                cprog.addBlock(cprocvar);
     }
 }
 
@@ -648,20 +734,45 @@ cBlock.addBlock(cInst);
     att = lista_componentes();
     jj_consume_token(tCP);
 sf.check_inst_leer(st,att);
-                //System.err.println("Expresion: " + att);
-
+for (Attributes a : att.atts)
+                {
+                        try{
+                                Symbol S = st.getSymbol(a.code);
+                                cBlock.addComment("- Get simple variable/parameter \"" + a.code + "\".");
+                                cBlock.addInst(PCodeInstruction.OpCode.SRF, (st.level - S.nivel), (int)S.dir);
+                                cBlock.addInst(PCodeInstruction.OpCode.RD, a.type== Symbol.Types.INT?1:0);
+                        } catch (SymbolNotFoundException ex)
+                        {
+                                {if (true) throw new ErrorSemantico(a.code + " no existe.");}
+                        }
+                }
 }
 
   static final public void inst_saltar_linea(Attributes att,CodeBlock cBlock) throws ParseException {
     jj_consume_token(tSKIP);
+String et = CGUtils.newLabel();
+                cBlock.addLabel(et);
+                long dir = CGUtils.getLevel();
+                cBlock.addInst(PCodeInstruction.OpCode.SRF, 0, (int)dir);
+                cBlock.addInst(PCodeInstruction.OpCode.RD, 0);
+                cBlock.addInst(PCodeInstruction.OpCode.SRF, 0, (int)dir);
+                cBlock.addInst(PCodeInstruction.OpCode.DRF);
+                cBlock.addInst(PCodeInstruction.OpCode.STC, 10);
+                cBlock.addInst(PCodeInstruction.OpCode.EQ);
+                cBlock.addInst(PCodeInstruction.OpCode.JMF, et);
 }
 
   static final public void inst_escribir(Attributes att,CodeBlock cBlock) throws ParseException {
     jj_consume_token(tPUT);
     jj_consume_token(tAP);
-    lista_ids_o_string_o_inv(att);
+    lista_ids_o_string_o_inv(att, cBlock);
     jj_consume_token(tCP);
 sf.check_inst_escribir(st,att);
+                cBlock.addComment("- Write CR/LF");
+                cBlock.addInst(PCodeInstruction.OpCode.STC, 13);
+                cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+                cBlock.addInst(PCodeInstruction.OpCode.STC, 10);
+                cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
                 //System.err.println("Expresion: " + att);
 
 }
@@ -671,7 +782,7 @@ sf.check_inst_escribir(st,att);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tAP:{
       jj_consume_token(tAP);
-      lista_ids_o_string_o_inv(att);
+      lista_ids_o_string_o_inv(att, cBlock);
       jj_consume_token(tCP);
       break;
       }
@@ -683,6 +794,11 @@ if(att.atts.size()>0)
                 {
                         sf.check_inst_escribir(st,att);
                 }
+                cBlock.addComment("- Write CR/LF");
+                cBlock.addInst(PCodeInstruction.OpCode.STC, 13);
+                cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+                cBlock.addInst(PCodeInstruction.OpCode.STC, 10);
+                cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
 }
 
   static final public void inst_invocacion_o_asignacion(Attributes att,CodeBlock cBlock) throws ParseException {Attributes at = new Attributes();
@@ -719,10 +835,9 @@ try {
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tASIG:{
       jj_consume_token(tASIG);
-      expresion(at);
+      expresion(at, cBlock);
 sf.add_to_atts(att,at);
                 sf.heredar_valores(att,at);
-                //System.err.println("Expresion en inst: " + att);
                 sf.checkTypesAsignacion(at,at2);
                 at = new Attributes();
                 at2 = new Attributes();
@@ -735,35 +850,16 @@ sf.add_to_atts(att,at);
 
 }
 
-// void inv_funcion(Attributes att):
-// {
-// 	Attributes at = new Attributes();
-// }
-// {
-// 	(expresion(at) 
-// 	{
-// 		att.atts.add(at.clone());
-// 	}
-// 	(<tCOMA> expresion(at)
-// 	{
-// 		att.atts.add(at.clone());
-// 	}
-// 	)*)
-// 	{System.err.println("Expresion/es de inv a funcion: " + att);}
-// }
-  static final public 
-void inst_if(Attributes att,CodeBlock cBlock) throws ParseException {Attributes at = new Attributes();
+  static final public void inst_if(Attributes att,CodeBlock cBlock) throws ParseException {Attributes at = new Attributes();
         CodeBlock cbloque=new CodeBlock();
     jj_consume_token(tIF);
-    expresion(at);
-//System.err.println("Expresion if tipo: " + at.type);
-                if(at.type==Symbol.Types.ARRAY)
+    expresion(at, cBlock);
+if(at.type==Symbol.Types.ARRAY)
                 {
                         Attributes aux = at.atts.get(0);
                         for(int i=0; i<6 && aux.atts.size()>0; i++)
                         {
                                 aux = aux.atts.get(0);
-                                //System.err.println(aux.type);
                         }
                         if(aux.type!=Symbol.Types.INT)
                         {
@@ -802,7 +898,7 @@ void inst_if(Attributes att,CodeBlock cBlock) throws ParseException {Attributes 
         break label_8;
       }
       jj_consume_token(tELSIF);
-      expresion(at);
+      expresion(at, cBlock);
 if(at.type==Symbol.Types.ARRAY)
                 {
                         if(at.extraType!=Symbol.Types.BOOL)
@@ -824,12 +920,6 @@ if(at.type==Symbol.Types.ARRAY)
                 sf.add_to_atts(att,at);
                 sf.heredar_valores(att,at);
                 at = new Attributes();
-
-                // if(at.type!=Symbol.Types.BOOL)
-                // {
-                // 	throw new ErrorSemantico("Solo se admiten expresiones booleanas: "+at.type);
-                // }
-
       jj_consume_token(tTHEN);
       instrucciones(cbloque);
     }
@@ -844,14 +934,13 @@ if(at.type==Symbol.Types.ARRAY)
       ;
     }
     jj_consume_token(tENDIF);
-
 }
 
   static final public void inst_while(Attributes att,CodeBlock cBlock) throws ParseException {Attributes at = new Attributes();
 
         CodeBlock cbloque=new CodeBlock();
     jj_consume_token(tWHILE);
-    expresion(at);
+    expresion(at, cBlock);
 if(at.type==Symbol.Types.ARRAY || at.type==Symbol.Types.FUNCTION)
                 {
                         if(at.extraType!=Symbol.Types.BOOL)
@@ -873,7 +962,7 @@ if(at.type==Symbol.Types.ARRAY || at.type==Symbol.Types.FUNCTION)
 
   static final public void inst_return(Attributes att,CodeBlock cBlock) throws ParseException {Attributes at = new Attributes();
     jj_consume_token(tRETURN);
-    expresion(at);
+    expresion(at, cBlock);
 try{
                         Symbol S = st.getSymbol(tipoReturn.get(tipoReturn.size()-1).image);
                         sf.add_to_atts(att,at);
@@ -904,9 +993,9 @@ try{
     jj_consume_token(tNULL);
 }
 
-  static final public void expresion(Attributes att) throws ParseException {Boolean esBool = false;
+  static final public void expresion(Attributes att, CodeBlock cBlock) throws ParseException {Boolean esBool = false;
         Attributes at = new Attributes();
-    relacion(at);
+    relacion(at, cBlock);
 sf.add_to_atts(att,at);
                 sf.heredar_valores(att,at);
                 at = new Attributes();
@@ -920,7 +1009,7 @@ sf.add_to_atts(att,at);
           jj_consume_token(tAND);
 att.type = Symbol.Types.BOOL;
                 esBool = true;
-          relacion(at);
+          relacion(at, cBlock);
 sf.add_to_atts(att,at);
                 sf.heredar_valores(att,at);
                 at = new Attributes();
@@ -942,7 +1031,7 @@ sf.add_to_atts(att,at);
           jj_consume_token(tOR);
 att.type = Symbol.Types.BOOL;
                 esBool = true;
-          relacion(at);
+          relacion(at, cBlock);
 sf.add_to_atts(att,at);
                 sf.heredar_valores(att,at);
                 at = new Attributes();
@@ -1007,10 +1096,10 @@ sf.add_to_atts(att,at);
                 }
 }
 
-  static final public void relacion(Attributes att) throws ParseException {//Attributes atTypes = new Attributes();
+  static final public void relacion(Attributes att, CodeBlock cBlock) throws ParseException {//Attributes atTypes = new Attributes();
         Boolean tieneOpInts = null;
         Attributes at = new Attributes();
-    expresion_simple(at);
+    expresion_simple(at, cBlock);
 sf.add_to_atts(att,at);
                 sf.heredar_valores(att,at);
                 at = new Attributes();
@@ -1022,7 +1111,7 @@ sf.add_to_atts(att,at);
     case tGT:
     case tLS:{
       tieneOpInts = operador_relacional();
-      expresion_simple(at);
+      expresion_simple(at, cBlock);
 sf.add_to_atts(att,at);
                 sf.heredar_valores(att,at);
       break;
@@ -1116,7 +1205,7 @@ if(tieneOpInts!=null)
     throw new Error("Missing return statement in function");
 }
 
-  static final public void expresion_simple(Attributes att) throws ParseException {boolean esInt=false;
+  static final public void expresion_simple(Attributes att, CodeBlock cBlock) throws ParseException {boolean esInt=false;
         Attributes at = new Attributes();
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tADD:
@@ -1142,7 +1231,7 @@ esInt=true;att.type=Symbol.Types.INT;
       jj_la1[33] = jj_gen;
       ;
     }
-    termino(at);
+    termino(at, cBlock);
 sf.add_to_atts(att,at);
                 sf.heredar_valores(att,at);
                 at = new Attributes();
@@ -1172,7 +1261,7 @@ sf.add_to_atts(att,at);
         jj_consume_token(-1);
         throw new ParseException();
       }
-      termino(at);
+      termino(at, cBlock);
 sf.add_to_atts(att,at);
                 sf.heredar_valores(att,at);
                 at = new Attributes();
@@ -1194,8 +1283,8 @@ sf.add_to_atts(att,at);
     }
 }
 
-  static final public void termino(Attributes att) throws ParseException {Attributes at = new Attributes();
-    factor(at);
+  static final public void termino(Attributes att, CodeBlock cBlock) throws ParseException {Attributes at = new Attributes();
+    factor(at, cBlock);
 sf.add_to_atts(att,at);
                 sf.heredar_valores(att,at);
                 at = new Attributes();
@@ -1213,7 +1302,7 @@ sf.add_to_atts(att,at);
         break label_12;
       }
       operador_multiplicativo();
-      factor(at);
+      factor(at, cBlock);
 sf.add_to_atts(att,at);
                 sf.heredar_valores(att,at);
                 att.type = Symbol.Types.INT;
@@ -1256,7 +1345,7 @@ sf.add_to_atts(att,at);
     }
 }
 
-  static final public void factor(Attributes att) throws ParseException {Attributes at = new Attributes();
+  static final public void factor(Attributes att, CodeBlock cBlock) throws ParseException {Attributes at = new Attributes();
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tAP:
     case tSUB:
@@ -1268,7 +1357,7 @@ sf.add_to_atts(att,at);
     case tCONST_INT:
     case tCONST_STRING:
     case tID:{
-      primario(at);
+      primario(at, cBlock);
 sf.add_to_atts(att,at);
                 sf.heredar_valores(att,at);
                 at = new Attributes();
@@ -1276,7 +1365,7 @@ sf.add_to_atts(att,at);
       }
     case tNOT:{
       jj_consume_token(tNOT);
-      primario(at);
+      primario(at, cBlock);
 att.type = Symbol.Types.BOOL;
                 sf.add_to_atts(att,at);
                 sf.heredar_valores(att,at);
@@ -1308,14 +1397,14 @@ att.type = Symbol.Types.BOOL;
     }
 }
 
-  static final public void primario(Attributes att) throws ParseException {Attributes at = new Attributes();
+  static final public void primario(Attributes att, CodeBlock cBlock) throws ParseException {Attributes at = new Attributes();
 
         Token t;
         Symbol S;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tAP:{
       jj_consume_token(tAP);
-      expresion(at);
+      expresion(at, cBlock);
       jj_consume_token(tCP);
 sf.add_to_atts(att,at);
                 sf.heredar_valores(att,at);
@@ -1324,7 +1413,7 @@ sf.add_to_atts(att,at);
     case tINT2CHAR:{
       jj_consume_token(tINT2CHAR);
       jj_consume_token(tAP);
-      expresion(at);
+      expresion(at, cBlock);
       jj_consume_token(tCP);
 if(at.type!=Symbol.Types.INT)
                 {
@@ -1333,14 +1422,45 @@ if(at.type!=Symbol.Types.INT)
                 if(at.atts.size()!=1){
                         {if (true) throw new ErrorSemantico("int2char solo acepta un entero");}
                 }
-                sf.asignar_valores(att,at,"int2char(" + at.code + ")",Symbol.Types.CHAR, Symbol.ParameterClass.VAL, st.level, true);
+                if(at.esConstante) {
+                        cBlock.addInst(PCodeInstruction.OpCode.STC, Integer.parseInt(at.code));
+                }
+                String etiq1 = CGUtils.newLabel();
+                String etiq2 = CGUtils.newLabel();
+                cBlock.addComment("- check 0 <= int <= 255");
+                cBlock.addInst(PCodeInstruction.OpCode.DUP);
+                cBlock.addInst(PCodeInstruction.OpCode.STC, 0);
+                cBlock.addInst(PCodeInstruction.OpCode.GTE);
+                cBlock.addInst(PCodeInstruction.OpCode.JMF, etiq1);
+                cBlock.addInst(PCodeInstruction.OpCode.STC, 255);
+                cBlock.addInst(PCodeInstruction.OpCode.LTE);
+                cBlock.addInst(PCodeInstruction.OpCode.JMF, etiq1);
+                cBlock.addInst(PCodeInstruction.OpCode.JMP, etiq2);
+                cBlock.addLabel(etiq1);
+                String code = "Value invalid for int2char in line ("+ linea + ").";
+                                if (code.startsWith("\"") && code.endsWith("\"")) {
+                                        code = code.substring(1, code.length() - 1);
+                                }
+                                if (code.contains("\"\"")) {
+                                        code = code.replace("\"\"", "\"");
+                                }
+                                cBlock.addComment("- Write STRING \"" + code + "\".");
+                                for(char c: code.toCharArray()) {
+                                        cBlock.addComment("- Write CHAR \"" + c + "\".");
+                                        cBlock.addInst(PCodeInstruction.OpCode.STC, (int)c);
+                                        cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+                                }
+                cBlock.addInst(PCodeInstruction.OpCode.LVP);
+                cBlock.addLabel(etiq2);
+                cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+                sf.asignar_valores(att,at,at.code,Symbol.Types.CHAR, Symbol.ParameterClass.VAL, st.level, true);
                 sf.heredar_valores(att,at);
       break;
       }
     case tCHAR2INT:{
       jj_consume_token(tCHAR2INT);
       jj_consume_token(tAP);
-      expresion(at);
+      expresion(at, cBlock);
       jj_consume_token(tCP);
 if(at.type!=Symbol.Types.CHAR)
                 {
@@ -1393,27 +1513,35 @@ try
         ;
       }
       t = jj_consume_token(tCONST_INT);
-sf.asignar_valores(att,at,t.image,Symbol.Types.INT, Symbol.ParameterClass.VAL, st.level,true);
+cBlock.addInst(PCodeInstruction.OpCode.STC, Integer.parseInt(t.image));
+                sf.asignar_valores(att,at,t.image,Symbol.Types.INT, Symbol.ParameterClass.VAL, st.level,true);
       break;
       }
     case tCONST_CHAR:{
       t = jj_consume_token(tCONST_CHAR);
-sf.asignar_valores(att,at,t.image,Symbol.Types.CHAR, Symbol.ParameterClass.VAL, st.level,true);
+String charWithoutQuotes = t.image.substring(1, t.image.length() - 1);
+                System.out.println("Char: " + charWithoutQuotes);
+                char charValue = charWithoutQuotes.charAt(0);
+                cBlock.addInst(PCodeInstruction.OpCode.STC, (int) charValue);
+                sf.asignar_valores(att,at,t.image,Symbol.Types.CHAR, Symbol.ParameterClass.VAL, st.level,true);
       break;
       }
     case tCONST_STRING:{
       t = jj_consume_token(tCONST_STRING);
-sf.asignar_valores(att,at,t.image,Symbol.Types.STRING, Symbol.ParameterClass.VAL, st.level,true);
+// cBlock.addInst(PCodeInstruction.OpCode.STC, Integer.parseInt(t.image));
+                sf.asignar_valores(att,at,t.image,Symbol.Types.STRING, Symbol.ParameterClass.VAL, st.level,true);
       break;
       }
     case tTRUE:{
       t = jj_consume_token(tTRUE);
-sf.asignar_valores(att,at,"true",Symbol.Types.BOOL, Symbol.ParameterClass.VAL, st.level,true);
+cBlock.addInst(PCodeInstruction.OpCode.STC, 1);
+                sf.asignar_valores(att,at,"true",Symbol.Types.BOOL, Symbol.ParameterClass.VAL, st.level,true);
       break;
       }
     case tFALSE:{
       t = jj_consume_token(tFALSE);
-sf.asignar_valores(att,at,"false",Symbol.Types.BOOL, Symbol.ParameterClass.VAL, st.level,true);
+cBlock.addInst(PCodeInstruction.OpCode.STC, 0);
+                sf.asignar_valores(att,at,"false",Symbol.Types.BOOL, Symbol.ParameterClass.VAL, st.level,true);
       break;
       }
     default:
@@ -1424,7 +1552,8 @@ sf.asignar_valores(att,at,"false",Symbol.Types.BOOL, Symbol.ParameterClass.VAL, 
 }
 
   static final public void function_call(Attributes att) throws ParseException {Attributes at = new Attributes();
-    expresion(at);
+        CodeBlock cBlock = new CodeBlock();
+    expresion(at, cBlock);
 sf.add_to_atts(att,at);
         sf.heredar_valores(att,at);
         at = new Attributes();
@@ -1440,7 +1569,7 @@ sf.add_to_atts(att,at);
         break label_13;
       }
       jj_consume_token(tCOMA);
-      expresion(at);
+      expresion(at, cBlock);
 sf.add_to_atts(att,at);
         sf.heredar_valores(att,at);
         at = new Attributes();
@@ -1449,6 +1578,7 @@ sf.add_to_atts(att,at);
 }
 
   static final public void tipo_variable(Attributes atTypes, Attributes atIsArray) throws ParseException {Token i;
+        Boolean esNegativo = false;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tARRAY:{
       jj_consume_token(tARRAY);
@@ -1456,6 +1586,7 @@ sf.add_to_atts(att,at);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case tSUB:{
         jj_consume_token(tSUB);
+esNegativo=true;
         break;
         }
       default:
@@ -1463,7 +1594,9 @@ sf.add_to_atts(att,at);
         ;
       }
       i = jj_consume_token(tCONST_INT);
-atTypes.inicio = Integer.parseInt(i.image);
+if(esNegativo)  atTypes.inicio = -Integer.parseInt(i.image);
+                        else atTypes.inicio = Integer.parseInt(i.image);
+                        esNegativo = false;
 
                         //at.parList.add(new Symbol(i.image,Symbol.Types.INT));
 
@@ -1471,6 +1604,7 @@ atTypes.inicio = Integer.parseInt(i.image);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case tSUB:{
         jj_consume_token(tSUB);
+esNegativo=true;
         break;
         }
       default:
@@ -1478,9 +1612,11 @@ atTypes.inicio = Integer.parseInt(i.image);
         ;
       }
       i = jj_consume_token(tCONST_INT);
-atTypes.fin = Integer.parseInt(i.image);
+if(esNegativo)  atTypes.fin = -Integer.parseInt(i.image);
+                        else atTypes.fin = Integer.parseInt(i.image);
                         // at.parList.add(new Symbol(i.image,Symbol.Types.INT));
                         atTypes.type = Symbol.Types.ARRAY;
+                        esNegativo = false;
       jj_consume_token(tCP);
       jj_consume_token(tOF);
       tipo_variable_simple(atIsArray);

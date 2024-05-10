@@ -13,10 +13,20 @@ import lib.tools.codeGeneration.PCodeInstruction.OpCode;
 
 public class CGUtils {
 	
-	private static int l=0; 
+	private static int l=0;
+	
+	private static long level = 3;
 	
 	public static String newLabel () {
 		return "L"+(l++); 
+	}
+
+	public static long getLevel() {
+		return level++;
+	}
+
+	public static long setLevel() {
+		return level = 3;
 	}
 	
 	// campo requeridos para la generación de código

@@ -1,0 +1,530 @@
+Char: p
+  ENP L0
+; --- Simple variable "i", type UNDEFINED, level 0, address [3]!
+; --- Simple variable "j", type UNDEFINED, level 0, address [4]!
+; --- Simple variable "c", type UNDEFINED, level 0, address [5]!
+; --- Simple variable "bool", type UNDEFINED, level 0, address [6]!
+; --- Array variable "tablero", type INT, size 9, level 0, address [7:15]!
+; --Comienzo procedure inicializartablero
+; --- Array parameter "t", type INT, size 9, class REF, level 1, address [3]!
+; --- Simple variable "i", type UNDEFINED, level 1, address [4]!
+; --- Simple variable "j", type UNDEFINED, level 1, address [5]!
+L1:
+; --Fin procedure inicializartablero
+  CSF
+; --Comienzo procedure inicializartablero2
+; --- Simple variable "i", type UNDEFINED, level 1, address [3]!
+; --- Simple variable "j", type UNDEFINED, level 1, address [4]!
+; --- Simple variable "p", type UNDEFINED, level 1, address [5]!
+L2:
+  STC 112
+; --- Get simple variable/parameter "bool".
+  SRF  1  6
+  RD  1
+; --- Get simple variable/parameter "i".
+  SRF  0  3
+  RD  1
+L3:
+  SRF  0  6
+  RD  0
+  SRF  0  6
+  DRF
+  STC 10
+  EQ
+  JMF L3
+; --Fin procedure inicializartablero2
+  CSF
+; --Comienzo main
+L0:
+; --- check 0 <= int <= 255
+  DUP
+  STC  0
+  GTE
+  JMF L4
+  STC 255
+  LTE
+  JMF L4
+  JMP L5
+L4:
+; --- Write STRING "Value invalid for int2char in line (33).".
+; --- Write CHAR "V".
+  STC 86
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "u".
+  STC 117
+  WRT  0
+; --- Write CHAR "e".
+  STC 101
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "v".
+  STC 118
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "d".
+  STC 100
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "f".
+  STC 102
+  WRT  0
+; --- Write CHAR "o".
+  STC 111
+  WRT  0
+; --- Write CHAR "r".
+  STC 114
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "t".
+  STC 116
+  WRT  0
+; --- Write CHAR "2".
+  STC 50
+  WRT  0
+; --- Write CHAR "c".
+  STC 99
+  WRT  0
+; --- Write CHAR "h".
+  STC 104
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR "r".
+  STC 114
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "e".
+  STC 101
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "(".
+  STC 40
+  WRT  0
+; --- Write CHAR "3".
+  STC 51
+  WRT  0
+; --- Write CHAR "3".
+  STC 51
+  WRT  0
+; --- Write CHAR ")".
+  STC 41
+  WRT  0
+; --- Write CHAR ".".
+  STC 46
+  WRT  0
+  LVP
+L5:
+  WRT  0
+; --- check 0 <= int <= 255
+  DUP
+  STC  0
+  GTE
+  JMF L6
+  STC 255
+  LTE
+  JMF L6
+  JMP L7
+L6:
+; --- Write STRING "Value invalid for int2char in line (34).".
+; --- Write CHAR "V".
+  STC 86
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "u".
+  STC 117
+  WRT  0
+; --- Write CHAR "e".
+  STC 101
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "v".
+  STC 118
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "d".
+  STC 100
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "f".
+  STC 102
+  WRT  0
+; --- Write CHAR "o".
+  STC 111
+  WRT  0
+; --- Write CHAR "r".
+  STC 114
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "t".
+  STC 116
+  WRT  0
+; --- Write CHAR "2".
+  STC 50
+  WRT  0
+; --- Write CHAR "c".
+  STC 99
+  WRT  0
+; --- Write CHAR "h".
+  STC 104
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR "r".
+  STC 114
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "e".
+  STC 101
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "(".
+  STC 40
+  WRT  0
+; --- Write CHAR "3".
+  STC 51
+  WRT  0
+; --- Write CHAR "4".
+  STC 52
+  WRT  0
+; --- Write CHAR ")".
+  STC 41
+  WRT  0
+; --- Write CHAR ".".
+  STC 46
+  WRT  0
+  LVP
+L7:
+  WRT  0
+; --- Get simple variable/parameter "i".
+  SRF  0  3
+  RD  1
+; --- Get simple variable/parameter "c".
+  SRF  0  5
+  RD  0
+; --- Write STRING "Hola me llamo " Andrei ".
+; --- Write CHAR "H".
+  STC 72
+  WRT  0
+; --- Write CHAR "o".
+  STC 111
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "m".
+  STC 109
+  WRT  0
+; --- Write CHAR "e".
+  STC 101
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR "m".
+  STC 109
+  WRT  0
+; --- Write CHAR "o".
+  STC 111
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR """.
+  STC 34
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "A".
+  STC 65
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "d".
+  STC 100
+  WRT  0
+; --- Write CHAR "r".
+  STC 114
+  WRT  0
+; --- Write CHAR "e".
+  STC 101
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+  STC 237
+  STC 237
+; --- check 0 <= int <= 255
+  DUP
+  STC  0
+  GTE
+  JMF L8
+  STC 255
+  LTE
+  JMF L8
+  JMP L9
+L8:
+; --- Write STRING "Value invalid for int2char in line (36).".
+; --- Write CHAR "V".
+  STC 86
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "u".
+  STC 117
+  WRT  0
+; --- Write CHAR "e".
+  STC 101
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "v".
+  STC 118
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "d".
+  STC 100
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "f".
+  STC 102
+  WRT  0
+; --- Write CHAR "o".
+  STC 111
+  WRT  0
+; --- Write CHAR "r".
+  STC 114
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "t".
+  STC 116
+  WRT  0
+; --- Write CHAR "2".
+  STC 50
+  WRT  0
+; --- Write CHAR "c".
+  STC 99
+  WRT  0
+; --- Write CHAR "h".
+  STC 104
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR "r".
+  STC 114
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "e".
+  STC 101
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "(".
+  STC 40
+  WRT  0
+; --- Write CHAR "3".
+  STC 51
+  WRT  0
+; --- Write CHAR "6".
+  STC 54
+  WRT  0
+; --- Write CHAR ")".
+  STC 41
+  WRT  0
+; --- Write CHAR ".".
+  STC 46
+  WRT  0
+  LVP
+L9:
+  WRT  0
+; --- Write CHAR "237".
+  STC 50
+  WRT  0
+; --- Write CR/LF
+  STC 13
+  WRT  0
+  STC 10
+  WRT  0
+; --Fin main
+  LVP
+
+***** Análisis terminado con éxito *****

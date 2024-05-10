@@ -1,0 +1,821 @@
+; --- Program "tres_en_raya"
+; --- p-code instruction 0
+  ENP L0
+; --- Simple variable "i", type INT, level 0,  address [3]!
+; --- Simple variable "j", type INT, level 0,  address [4]!
+; --- Simple variable "c", type CHAR, level 0,  address [5]!
+; --- Simple variable "bool", type INT, level 0,  address [6]!
+; --- Array variable "tablero", type INT, size 9, level 0, address [7:15]!
+L1:
+; --- Ref array parameter "t", type INT, class REF, size 9, level 1, address [3]!
+; --- Recover array ref variable parameter "t" (number 1).
+; --- p-code instruction 1
+  SRF  0  3
+; --- p-code instruction 2
+  ASGI 
+; --- p-code instruction 3
+  JMP L2
+; --- Simple variable "i", type INT, level 1,  address [4]!
+; --- Simple variable "j", type INT, level 1,  address [5]!
+L2:
+; --- p-code instruction 4
+  CSF 
+L3:
+; --- p-code instruction 5
+  JMP L4
+; --- Simple variable "i", type INT, level 1,  address [3]!
+; --- Simple variable "j", type INT, level 1,  address [4]!
+; --- Simple variable "p", type INT, level 1,  address [5]!
+L4:
+; --- Address of variable / parameter "c"
+; --- p-code instruction 6
+  SRF  1  5
+; --- p-code instruction 7
+  STC 112
+; --- p-code instruction 8
+  ASG 
+; --- Get simple variable/parameter "bool".
+; --- p-code instruction 9
+  SRF  1  6
+; --- p-code instruction 10
+  RD  1
+; --- Get simple variable/parameter "i".
+; --- p-code instruction 11
+  SRF  0  3
+; --- p-code instruction 12
+  RD  1
+L5:
+; --- Temporary hidden compiler variable used for reading until LF
+; --- p-code instruction 13
+  SRF  0  6
+; --- p-code instruction 14
+  RD  0
+; --- p-code instruction 15
+  SRF  0  6
+; --- p-code instruction 16
+  DRF 
+; --- p-code instruction 17
+  STC 10
+; --- p-code instruction 18
+  EQ 
+; --- p-code instruction 19
+  JMF L5
+; --- p-code instruction 20
+  CSF 
+L0:
+; --- Address of variable / parameter "i"
+; --- p-code instruction 21
+  SRF  0  3
+; --- p-code instruction 22
+  STC  2
+; --- p-code instruction 23
+  NGI 
+; --- p-code instruction 24
+  STC  4
+; --- p-code instruction 25
+  NGI 
+; --- p-code instruction 26
+  SBT 
+; --- Initial address of array "tablero"
+; --- p-code instruction 27
+  SRF  0  7
+; --- p-code instruction 28
+  PLUS 
+; --- p-code instruction 29
+  DRF 
+; --- p-code instruction 30
+  ASG 
+; --- Address of variable / parameter "c"
+; --- p-code instruction 31
+  SRF  0  5
+; --- Constant / variable / parameter "i"
+; --- p-code instruction 32
+  SRF  0  3
+; --- p-code instruction 33
+  DRF 
+; --- check 0 <= int <= 255
+; --- p-code instruction 34
+  DUP 
+; --- p-code instruction 35
+  STC  0
+; --- p-code instruction 36
+  GTE 
+; --- p-code instruction 37
+  JMF L6
+; --- p-code instruction 38
+  DUP 
+; --- p-code instruction 39
+  STC 255
+; --- p-code instruction 40
+  LTE 
+; --- p-code instruction 41
+  JMF L6
+; --- p-code instruction 42
+  JMP L7
+L6:
+; --- Write STRING "Value "
+; --- Standard string writing
+; --- p-code instruction 43
+  STC 86
+; --- p-code instruction 44
+  WRT  0
+; --- p-code instruction 45
+  STC 97
+; --- p-code instruction 46
+  WRT  0
+; --- p-code instruction 47
+  STC 108
+; --- p-code instruction 48
+  WRT  0
+; --- p-code instruction 49
+  STC 117
+; --- p-code instruction 50
+  WRT  0
+; --- p-code instruction 51
+  STC 101
+; --- p-code instruction 52
+  WRT  0
+; --- p-code instruction 53
+  STC 32
+; --- p-code instruction 54
+  WRT  0
+; --- p-code instruction 55
+  WRT  1
+; --- Write STRING " invalid for int2char in line 31."
+; --- Standard string writing
+; --- p-code instruction 56
+  STC 32
+; --- p-code instruction 57
+  WRT  0
+; --- p-code instruction 58
+  STC 105
+; --- p-code instruction 59
+  WRT  0
+; --- p-code instruction 60
+  STC 110
+; --- p-code instruction 61
+  WRT  0
+; --- p-code instruction 62
+  STC 118
+; --- p-code instruction 63
+  WRT  0
+; --- p-code instruction 64
+  STC 97
+; --- p-code instruction 65
+  WRT  0
+; --- p-code instruction 66
+  STC 108
+; --- p-code instruction 67
+  WRT  0
+; --- p-code instruction 68
+  STC 105
+; --- p-code instruction 69
+  WRT  0
+; --- p-code instruction 70
+  STC 100
+; --- p-code instruction 71
+  WRT  0
+; --- p-code instruction 72
+  STC 32
+; --- p-code instruction 73
+  WRT  0
+; --- p-code instruction 74
+  STC 102
+; --- p-code instruction 75
+  WRT  0
+; --- p-code instruction 76
+  STC 111
+; --- p-code instruction 77
+  WRT  0
+; --- p-code instruction 78
+  STC 114
+; --- p-code instruction 79
+  WRT  0
+; --- p-code instruction 80
+  STC 32
+; --- p-code instruction 81
+  WRT  0
+; --- p-code instruction 82
+  STC 105
+; --- p-code instruction 83
+  WRT  0
+; --- p-code instruction 84
+  STC 110
+; --- p-code instruction 85
+  WRT  0
+; --- p-code instruction 86
+  STC 116
+; --- p-code instruction 87
+  WRT  0
+; --- p-code instruction 88
+  STC 50
+; --- p-code instruction 89
+  WRT  0
+; --- p-code instruction 90
+  STC 99
+; --- p-code instruction 91
+  WRT  0
+; --- p-code instruction 92
+  STC 104
+; --- p-code instruction 93
+  WRT  0
+; --- p-code instruction 94
+  STC 97
+; --- p-code instruction 95
+  WRT  0
+; --- p-code instruction 96
+  STC 114
+; --- p-code instruction 97
+  WRT  0
+; --- p-code instruction 98
+  STC 32
+; --- p-code instruction 99
+  WRT  0
+; --- p-code instruction 100
+  STC 105
+; --- p-code instruction 101
+  WRT  0
+; --- p-code instruction 102
+  STC 110
+; --- p-code instruction 103
+  WRT  0
+; --- p-code instruction 104
+  STC 32
+; --- p-code instruction 105
+  WRT  0
+; --- p-code instruction 106
+  STC 108
+; --- p-code instruction 107
+  WRT  0
+; --- p-code instruction 108
+  STC 105
+; --- p-code instruction 109
+  WRT  0
+; --- p-code instruction 110
+  STC 110
+; --- p-code instruction 111
+  WRT  0
+; --- p-code instruction 112
+  STC 101
+; --- p-code instruction 113
+  WRT  0
+; --- p-code instruction 114
+  STC 32
+; --- p-code instruction 115
+  WRT  0
+; --- p-code instruction 116
+  STC 51
+; --- p-code instruction 117
+  WRT  0
+; --- p-code instruction 118
+  STC 49
+; --- p-code instruction 119
+  WRT  0
+; --- p-code instruction 120
+  STC 46
+; --- p-code instruction 121
+  WRT  0
+; --- CR/LF
+; --- p-code instruction 122
+  STC 13
+; --- p-code instruction 123
+  WRT  0
+; --- p-code instruction 124
+  STC 10
+; --- p-code instruction 125
+  WRT  0
+; --- p-code instruction 126
+  LVP 
+L7:
+; --- p-code instruction 127
+  ASG 
+; --- Address of variable / parameter "c"
+; --- p-code instruction 128
+  SRF  0  5
+; --- p-code instruction 129
+  STC  1
+; --- p-code instruction 130
+  NGI 
+; --- p-code instruction 131
+  STC  4
+; --- p-code instruction 132
+  NGI 
+; --- p-code instruction 133
+  SBT 
+; --- Initial address of array "tablero"
+; --- p-code instruction 134
+  SRF  0  7
+; --- p-code instruction 135
+  PLUS 
+; --- p-code instruction 136
+  DRF 
+; --- check 0 <= int <= 255
+; --- p-code instruction 137
+  DUP 
+; --- p-code instruction 138
+  STC  0
+; --- p-code instruction 139
+  GTE 
+; --- p-code instruction 140
+  JMF L8
+; --- p-code instruction 141
+  DUP 
+; --- p-code instruction 142
+  STC 255
+; --- p-code instruction 143
+  LTE 
+; --- p-code instruction 144
+  JMF L8
+; --- p-code instruction 145
+  JMP L9
+L8:
+; --- Write STRING "Value "
+; --- Standard string writing
+; --- p-code instruction 146
+  STC 86
+; --- p-code instruction 147
+  WRT  0
+; --- p-code instruction 148
+  STC 97
+; --- p-code instruction 149
+  WRT  0
+; --- p-code instruction 150
+  STC 108
+; --- p-code instruction 151
+  WRT  0
+; --- p-code instruction 152
+  STC 117
+; --- p-code instruction 153
+  WRT  0
+; --- p-code instruction 154
+  STC 101
+; --- p-code instruction 155
+  WRT  0
+; --- p-code instruction 156
+  STC 32
+; --- p-code instruction 157
+  WRT  0
+; --- p-code instruction 158
+  WRT  1
+; --- Write STRING " invalid for int2char in line 32."
+; --- Standard string writing
+; --- p-code instruction 159
+  STC 32
+; --- p-code instruction 160
+  WRT  0
+; --- p-code instruction 161
+  STC 105
+; --- p-code instruction 162
+  WRT  0
+; --- p-code instruction 163
+  STC 110
+; --- p-code instruction 164
+  WRT  0
+; --- p-code instruction 165
+  STC 118
+; --- p-code instruction 166
+  WRT  0
+; --- p-code instruction 167
+  STC 97
+; --- p-code instruction 168
+  WRT  0
+; --- p-code instruction 169
+  STC 108
+; --- p-code instruction 170
+  WRT  0
+; --- p-code instruction 171
+  STC 105
+; --- p-code instruction 172
+  WRT  0
+; --- p-code instruction 173
+  STC 100
+; --- p-code instruction 174
+  WRT  0
+; --- p-code instruction 175
+  STC 32
+; --- p-code instruction 176
+  WRT  0
+; --- p-code instruction 177
+  STC 102
+; --- p-code instruction 178
+  WRT  0
+; --- p-code instruction 179
+  STC 111
+; --- p-code instruction 180
+  WRT  0
+; --- p-code instruction 181
+  STC 114
+; --- p-code instruction 182
+  WRT  0
+; --- p-code instruction 183
+  STC 32
+; --- p-code instruction 184
+  WRT  0
+; --- p-code instruction 185
+  STC 105
+; --- p-code instruction 186
+  WRT  0
+; --- p-code instruction 187
+  STC 110
+; --- p-code instruction 188
+  WRT  0
+; --- p-code instruction 189
+  STC 116
+; --- p-code instruction 190
+  WRT  0
+; --- p-code instruction 191
+  STC 50
+; --- p-code instruction 192
+  WRT  0
+; --- p-code instruction 193
+  STC 99
+; --- p-code instruction 194
+  WRT  0
+; --- p-code instruction 195
+  STC 104
+; --- p-code instruction 196
+  WRT  0
+; --- p-code instruction 197
+  STC 97
+; --- p-code instruction 198
+  WRT  0
+; --- p-code instruction 199
+  STC 114
+; --- p-code instruction 200
+  WRT  0
+; --- p-code instruction 201
+  STC 32
+; --- p-code instruction 202
+  WRT  0
+; --- p-code instruction 203
+  STC 105
+; --- p-code instruction 204
+  WRT  0
+; --- p-code instruction 205
+  STC 110
+; --- p-code instruction 206
+  WRT  0
+; --- p-code instruction 207
+  STC 32
+; --- p-code instruction 208
+  WRT  0
+; --- p-code instruction 209
+  STC 108
+; --- p-code instruction 210
+  WRT  0
+; --- p-code instruction 211
+  STC 105
+; --- p-code instruction 212
+  WRT  0
+; --- p-code instruction 213
+  STC 110
+; --- p-code instruction 214
+  WRT  0
+; --- p-code instruction 215
+  STC 101
+; --- p-code instruction 216
+  WRT  0
+; --- p-code instruction 217
+  STC 32
+; --- p-code instruction 218
+  WRT  0
+; --- p-code instruction 219
+  STC 51
+; --- p-code instruction 220
+  WRT  0
+; --- p-code instruction 221
+  STC 50
+; --- p-code instruction 222
+  WRT  0
+; --- p-code instruction 223
+  STC 46
+; --- p-code instruction 224
+  WRT  0
+; --- CR/LF
+; --- p-code instruction 225
+  STC 13
+; --- p-code instruction 226
+  WRT  0
+; --- p-code instruction 227
+  STC 10
+; --- p-code instruction 228
+  WRT  0
+; --- p-code instruction 229
+  LVP 
+L9:
+; --- p-code instruction 230
+  ASG 
+; --- Get simple variable/parameter "i".
+; --- p-code instruction 231
+  SRF  0  3
+; --- p-code instruction 232
+  RD  1
+; --- Get simple variable/parameter "c".
+; --- p-code instruction 233
+  SRF  0  5
+; --- p-code instruction 234
+  RD  0
+; --- Write STRING "Hola me llamo " Andrei "
+; --- Standard string writing
+; --- p-code instruction 235
+  STC 72
+; --- p-code instruction 236
+  WRT  0
+; --- p-code instruction 237
+  STC 111
+; --- p-code instruction 238
+  WRT  0
+; --- p-code instruction 239
+  STC 108
+; --- p-code instruction 240
+  WRT  0
+; --- p-code instruction 241
+  STC 97
+; --- p-code instruction 242
+  WRT  0
+; --- p-code instruction 243
+  STC 32
+; --- p-code instruction 244
+  WRT  0
+; --- p-code instruction 245
+  STC 109
+; --- p-code instruction 246
+  WRT  0
+; --- p-code instruction 247
+  STC 101
+; --- p-code instruction 248
+  WRT  0
+; --- p-code instruction 249
+  STC 32
+; --- p-code instruction 250
+  WRT  0
+; --- p-code instruction 251
+  STC 108
+; --- p-code instruction 252
+  WRT  0
+; --- p-code instruction 253
+  STC 108
+; --- p-code instruction 254
+  WRT  0
+; --- p-code instruction 255
+  STC 97
+; --- p-code instruction 256
+  WRT  0
+; --- p-code instruction 257
+  STC 109
+; --- p-code instruction 258
+  WRT  0
+; --- p-code instruction 259
+  STC 111
+; --- p-code instruction 260
+  WRT  0
+; --- p-code instruction 261
+  STC 32
+; --- p-code instruction 262
+  WRT  0
+; --- p-code instruction 263
+  STC 34
+; --- p-code instruction 264
+  WRT  0
+; --- p-code instruction 265
+  STC 32
+; --- p-code instruction 266
+  WRT  0
+; --- p-code instruction 267
+  STC 65
+; --- p-code instruction 268
+  WRT  0
+; --- p-code instruction 269
+  STC 110
+; --- p-code instruction 270
+  WRT  0
+; --- p-code instruction 271
+  STC 100
+; --- p-code instruction 272
+  WRT  0
+; --- p-code instruction 273
+  STC 114
+; --- p-code instruction 274
+  WRT  0
+; --- p-code instruction 275
+  STC 101
+; --- p-code instruction 276
+  WRT  0
+; --- p-code instruction 277
+  STC 105
+; --- p-code instruction 278
+  WRT  0
+; --- p-code instruction 279
+  STC 32
+; --- p-code instruction 280
+  WRT  0
+; --- p-code instruction 281
+  STC 237
+; --- p-code instruction 282
+  STC 237
+; --- check 0 <= int <= 255
+; --- p-code instruction 283
+  DUP 
+; --- p-code instruction 284
+  STC  0
+; --- p-code instruction 285
+  GTE 
+; --- p-code instruction 286
+  JMF L10
+; --- p-code instruction 287
+  STC 255
+; --- p-code instruction 288
+  LTE 
+; --- p-code instruction 289
+  JMF L10
+; --- p-code instruction 290
+  JMP L11
+L10:
+; --- Write STRING "Value "
+; --- Standard string writing
+; --- p-code instruction 291
+  STC 86
+; --- p-code instruction 292
+  WRT  0
+; --- p-code instruction 293
+  STC 97
+; --- p-code instruction 294
+  WRT  0
+; --- p-code instruction 295
+  STC 108
+; --- p-code instruction 296
+  WRT  0
+; --- p-code instruction 297
+  STC 117
+; --- p-code instruction 298
+  WRT  0
+; --- p-code instruction 299
+  STC 101
+; --- p-code instruction 300
+  WRT  0
+; --- p-code instruction 301
+  STC 32
+; --- p-code instruction 302
+  WRT  0
+; --- p-code instruction 303
+  WRT  1
+; --- Write STRING " invalid for int2char in line 34."
+; --- Standard string writing
+; --- p-code instruction 304
+  STC 32
+; --- p-code instruction 305
+  WRT  0
+; --- p-code instruction 306
+  STC 105
+; --- p-code instruction 307
+  WRT  0
+; --- p-code instruction 308
+  STC 110
+; --- p-code instruction 309
+  WRT  0
+; --- p-code instruction 310
+  STC 118
+; --- p-code instruction 311
+  WRT  0
+; --- p-code instruction 312
+  STC 97
+; --- p-code instruction 313
+  WRT  0
+; --- p-code instruction 314
+  STC 108
+; --- p-code instruction 315
+  WRT  0
+; --- p-code instruction 316
+  STC 105
+; --- p-code instruction 317
+  WRT  0
+; --- p-code instruction 318
+  STC 100
+; --- p-code instruction 319
+  WRT  0
+; --- p-code instruction 320
+  STC 32
+; --- p-code instruction 321
+  WRT  0
+; --- p-code instruction 322
+  STC 102
+; --- p-code instruction 323
+  WRT  0
+; --- p-code instruction 324
+  STC 111
+; --- p-code instruction 325
+  WRT  0
+; --- p-code instruction 326
+  STC 114
+; --- p-code instruction 327
+  WRT  0
+; --- p-code instruction 328
+  STC 32
+; --- p-code instruction 329
+  WRT  0
+; --- p-code instruction 330
+  STC 105
+; --- p-code instruction 331
+  WRT  0
+; --- p-code instruction 332
+  STC 110
+; --- p-code instruction 333
+  WRT  0
+; --- p-code instruction 334
+  STC 116
+; --- p-code instruction 335
+  WRT  0
+; --- p-code instruction 336
+  STC 50
+; --- p-code instruction 337
+  WRT  0
+; --- p-code instruction 338
+  STC 99
+; --- p-code instruction 339
+  WRT  0
+; --- p-code instruction 340
+  STC 104
+; --- p-code instruction 341
+  WRT  0
+; --- p-code instruction 342
+  STC 97
+; --- p-code instruction 343
+  WRT  0
+; --- p-code instruction 344
+  STC 114
+; --- p-code instruction 345
+  WRT  0
+; --- p-code instruction 346
+  STC 32
+; --- p-code instruction 347
+  WRT  0
+; --- p-code instruction 348
+  STC 105
+; --- p-code instruction 349
+  WRT  0
+; --- p-code instruction 350
+  STC 110
+; --- p-code instruction 351
+  WRT  0
+; --- p-code instruction 352
+  STC 32
+; --- p-code instruction 353
+  WRT  0
+; --- p-code instruction 354
+  STC 108
+; --- p-code instruction 355
+  WRT  0
+; --- p-code instruction 356
+  STC 105
+; --- p-code instruction 357
+  WRT  0
+; --- p-code instruction 358
+  STC 110
+; --- p-code instruction 359
+  WRT  0
+; --- p-code instruction 360
+  STC 101
+; --- p-code instruction 361
+  WRT  0
+; --- p-code instruction 362
+  STC 32
+; --- p-code instruction 363
+  WRT  0
+; --- p-code instruction 364
+  STC 51
+; --- p-code instruction 365
+  WRT  0
+; --- p-code instruction 366
+  STC 52
+; --- p-code instruction 367
+  WRT  0
+; --- p-code instruction 368
+  STC 46
+; --- p-code instruction 369
+  WRT  0
+; --- CR/LF
+; --- p-code instruction 370
+  STC 13
+; --- p-code instruction 371
+  WRT  0
+; --- p-code instruction 372
+  STC 10
+; --- p-code instruction 373
+  WRT  0
+; --- p-code instruction 374
+  LVP 
+L11:
+; --- Put CHARACTER
+; --- p-code instruction 375
+  WRT  0
+; --- CR/LF
+; --- p-code instruction 376
+  STC 13
+; --- p-code instruction 377
+  WRT  0
+; --- p-code instruction 378
+  STC 10
+; --- p-code instruction 379
+  WRT  0
+; --- p-code instruction 380
+  LVP 
