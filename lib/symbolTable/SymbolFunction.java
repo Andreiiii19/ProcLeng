@@ -17,6 +17,8 @@ public class SymbolFunction extends Symbol implements Cloneable {
     //se eliminan de la tabla, pero la propia función/proc sigue en la tabla, haciendo
     //necesario mantener la información de los parámetros.
     public ArrayList<Symbol> parList;
+    
+    public String etiq="";
 
     public Types returnType; //tipo de la función
 

@@ -241,6 +241,17 @@ void declaracion_procedimiento(CodeBlock cBlock):
 	name = cabecera_procedimiento(att, cparam)
 	( declaracion_variables(cprocvar, false) )?
 	( declaracion_procs_funcs(cprocfun) )?
+	{
+		try{
+		SymbolProcedure S = (SymbolProcedure) st.getSymbol(name.image);
+		S.etiq = etiq;
+		}catch(SymbolNotFoundException ex)
+		{
+			throw new ErrorSemantico(name.image + " no existe.");
+		}
+
+		
+	}
 	<tBEGIN>
 	instrucciones(cbloque)
 	<tEND>
@@ -279,7 +290,16 @@ void declaracion_funcion(CodeBlock cBlock):
 	( declaracion_procs_funcs(cprocfun) )?
 	<tBEGIN>
 	{
+		try{
+		SymbolFunction S = (SymbolFunction) st.getSymbol(name.image);
+		S.etiq = etiq;
+		}catch(SymbolNotFoundException ex)
+		{
+			throw new ErrorSemantico(name.image + " no existe.");
+		}
+
 		
+
 	}
 	instrucciones(cbloque)
 	<tEND>
@@ -700,6 +720,7 @@ void instruccion(CodeBlock cBlock) :
 	|   inst_null(att,cInst)
 	)
 	{
+		//System.out.println(cInst.toString());
 		cBlock.addBlock(cInst);
 	}
 }
@@ -801,18 +822,56 @@ void inst_invocacion_o_asignacion(Attributes att,CodeBlock cBlock):
 				throw new ErrorSemantico("No se puede realizar una asignación a un array entero");
 			}
 			sf.checkTypeFunctionCall(at2);
+
+			/*System.out.println(S.type);
+			
+			if(S.type == Symbol.Types.PROCEDURE||S.type == Symbol.Types.FUNCTION)
+			{
+				for(int i = 0; i<at2.atts.size(); i++)
+				{
+					System.out.println(at2.atts.get(i).code);
+				}
+			}*/
+
+			if(S.type == Symbol.Types.PROCEDURE)
+			{
+				SymbolProcedure SP = (SymbolProcedure) S;
+				cBlock.addOSFInst(st.getInvocIndex(),st.level-S.nivel,SP.etiq);
+			}
+
+			if(S.type == Symbol.Types.FUNCTION)
+			{
+				SymbolFunction SF = (SymbolFunction) S;
+				cBlock.addOSFInst(st.getInvocIndex(),st.level-S.nivel,SF.etiq);
+			}
+
 		} catch (SymbolNotFoundException ex)
 		{
 			throw new ErrorSemantico(t.image + " no existe.");
 		}
 	} 	
-	(<tASIG> expresion(at, cBlock) 
+	(<tASIG>
+	{
+		try {
+			t.image = t.image.toLowerCase();
+			Symbol S = st.getSymbol(t.image);
+
+			cBlock.addInst(PCodeInstruction.OpCode.SRF,st.level,(int)S.dir);
+
+
+		} catch (SymbolNotFoundException ex)
+		{
+			throw new ErrorSemantico(t.image + " no existe.");
+		}
+	} expresion(at, cBlock) 
 	{
 		sf.add_to_atts(att,at);
 		sf.heredar_valores(att,at);
 		sf.checkTypesAsignacion(at,at2);
 		at = new Attributes();
 		at2 = new Attributes();
+
+		cBlock.addInst(PCodeInstruction.OpCode.ASG);
 	}
 	)?
 	{
@@ -823,6 +882,9 @@ void inst_if(Attributes att,CodeBlock cBlock):
 {
 	Attributes at = new Attributes();
 	CodeBlock cbloque=new CodeBlock();
+
+	String endLabel = CGUtils.newLabel();
+	String lbel = null;
 }
 {
 	<tIF> expresion(at, cBlock)
@@ -854,12 +916,31 @@ void inst_if(Attributes att,CodeBlock cBlock):
 		{
 			throw new ErrorSemantico("Solo se admiten expresiones booleanas: "+at.type);
 		}
+
 		sf.add_to_atts(att,at);
 		sf.heredar_valores(att,at);
 		at = new Attributes();
+
+		for(Attributes a : att.atts)
+		{
+			System.out.println(a.code);
+		}
+
+		lbel = CGUtils.newLabel();
+		cBlock.addInst(PCodeInstruction.OpCode.JMF,lbel);
+
+		cBlock.addComment("Inicio Bloque de instrucciones IF");
 	}
-	<tTHEN> instrucciones(cbloque) ((<tELSIF> expresion(at, cBlock)
+	<tTHEN> instrucciones(cbloque)
 	{
+		cBlock.addBlock(cbloque);
+		cbloque=new CodeBlock();
+		cBlock.addComment("Fin Bloque de instrucciones IF");
+		cBlock.addInst(PCodeInstruction.OpCode.JMP,endLabel);
+	} ((<tELSIF>{cBlock.addLabel(lbel);} expresion(at, cBlock)
+	{
+		
+
 		if(at.type==Symbol.Types.ARRAY)
 		{
 			if(at.extraType!=Symbol.Types.BOOL)
@@ -882,8 +963,35 @@ void inst_if(Attributes att,CodeBlock cBlock):
 		sf.heredar_valores(att,at);
 		at = new Attributes();
 
+		lbel = CGUtils.newLabel();
+		cBlock.addInst(PCodeInstruction.OpCode.JMF,lbel);
+		cBlock.addComment("Inicio Bloque de instrucciones ELSIF");
 	}
-	<tTHEN> instrucciones(cbloque))* (<tELSE> instrucciones(cbloque))?) <tENDIF>
+	<tTHEN> instrucciones(cbloque)
+	{
+		cBlock.addBlock(cbloque);
+		cbloque=new CodeBlock();
+		cBlock.addComment("Fin Bloque de instrucciones ELSIF");
+		cBlock.addInst(PCodeInstruction.OpCode.JMP,endLabel);
+	})* 
+	(<tELSE> 
+	{
+		cBlock.addLabel(lbel);
+		cBlock.addComment("Inicio Bloque de instrucciones ELSE");
+	}
+	instrucciones(cbloque)
+	{
+		cBlock.addBlock(cbloque);
+		cbloque=new CodeBlock();
+		cBlock.addComment("Fin Bloque de instrucciones ELSE");
+		cBlock.addInst(PCodeInstruction.OpCode.JMP,endLabel);
+	})?) 
+	<tENDIF>
+	{
+		
+		cBlock.addLabel(lbel);
+		cBlock.addLabel(endLabel);
+	}
 } 
 
 void inst_while(Attributes att,CodeBlock cBlock):
@@ -891,9 +999,16 @@ void inst_while(Attributes att,CodeBlock cBlock):
 	Attributes at = new Attributes();
 
 	CodeBlock cbloque=new CodeBlock();
+
+	String initLabel = CGUtils.newLabel();
+	String endLabel = CGUtils.newLabel();
 }
 {
-	<tWHILE> expresion(at, cBlock)
+	<tWHILE>
+	{
+		cBlock.addLabel(initLabel);
+	}
+	expresion(at, cBlock)
 	{
 		if(at.type==Symbol.Types.ARRAY || at.type==Symbol.Types.FUNCTION)
 		{
@@ -908,9 +1023,16 @@ void inst_while(Attributes att,CodeBlock cBlock):
 		}
 		sf.add_to_atts(att,at);
 		sf.heredar_valores(att,at);
+
+		cBlock.addInst(PCodeInstruction.OpCode.JMF,endLabel);
 	}
 	<tLOOP> instrucciones(cbloque) <tENDLOOP>
 	{
+		cBlock.addComment("Inicio Bloque de instrucciones While");
+		cBlock.addBlock(cbloque);
+		cBlock.addComment("Fin Bloque de instrucciones While");
+		cBlock.addInst(PCodeInstruction.OpCode.JMP,initLabel);
+		cBlock.addLabel(endLabel);
 		//System.err.println("Expresion while condicion: " + att);
 	}
 }
@@ -942,37 +1064,48 @@ void inst_return(Attributes att,CodeBlock cBlock):{
 			}
 			
 			at = new Attributes();
+
+			cBlock.addInst(PCodeInstruction.OpCode.CSF);
 		} catch(SymbolNotFoundException ex) {
 			throw new ErrorSemantico("Error semantico. Funcion no encontrada");
 		}
 	}
 }
 
-void inst_null(Attributes att,CodeBlock cBlock):{}{<tNULL>	}
+void inst_null(Attributes att,CodeBlock cBlock):{}
+{
+	<tNULL> {cBlock.addComment("Bloque sin instrucciones");}
+}
 
 
 void expresion(Attributes att, CodeBlock cBlock):
 {
 	Boolean esBool = false; 
 	Attributes at = new Attributes();
+	CodeBlock cExp = new CodeBlock();
 }
 {
-    relacion(at, cBlock)
+    relacion(at, cExp)
 	{
 		sf.add_to_atts(att,at);
 		sf.heredar_valores(att,at);
 		at = new Attributes();
+
+		cBlock.addBlock(cExp);
+		cExp = new CodeBlock();
 	}
 	( ((<tAND>) 
 	{
 		att.type = Symbol.Types.BOOL;
 		esBool = true;
 	}
-	relacion(at, cBlock) 
+	relacion(at, cExp) 
 	{
 		sf.add_to_atts(att,at);
 		sf.heredar_valores(att,at);
 		at = new Attributes();
+
+		cExp = new CodeBlock();
 	}
 	)+
 	|
@@ -981,11 +1114,14 @@ void expresion(Attributes att, CodeBlock cBlock):
 		att.type = Symbol.Types.BOOL;
 		esBool = true;
 	}
-	relacion(at, cBlock) 
+	relacion(at, cExp) 
 	{
 		sf.add_to_atts(att,at);
 		sf.heredar_valores(att,at);
 		at = new Attributes();
+
+		cBlock.addBlock(cExp);
+		cExp = new CodeBlock();
 	}
 	)+ )?
 	{
@@ -1034,6 +1170,7 @@ void relacion(Attributes att, CodeBlock cBlock):
 	//Attributes atTypes = new Attributes();
 	Boolean tieneOpInts = null;
 	Attributes at = new Attributes();
+	CodeBlock cRel = new CodeBlock();
 }
 {
     expresion_simple(at, cBlock)
@@ -1042,7 +1179,7 @@ void relacion(Attributes att, CodeBlock cBlock):
 		sf.heredar_valores(att,at);
 		at = new Attributes();
 	}
- 	( tieneOpInts = operador_relacional()
+ 	( tieneOpInts = operador_relacional(cRel)
 	expresion_simple(at, cBlock)
 	{
 		sf.add_to_atts(att,at);
@@ -1051,6 +1188,8 @@ void relacion(Attributes att, CodeBlock cBlock):
 	} 
 	)? 
 	{
+		cBlock.addBlock(cRel);
+
 		if(tieneOpInts!=null)
 		{
 			att.type = Symbol.Types.BOOL;
@@ -1097,23 +1236,24 @@ void relacion(Attributes att, CodeBlock cBlock):
 	}
 }
 
-Boolean operador_relacional():
+Boolean operador_relacional(CodeBlock cBlock):
 {
 	
 }
 {    
-	<tEQ>    {return false;}// Char,bool,int
-	| <tLS>  {return true;}// Int
-	| <tGT>  {return true;}// Int
-	| <tLE>  {return true;}// Int
-	| <tGE>  {return true;}// Int
-	| <tNEQ> {return false;}// Char,bool,int
+	<tEQ>    {cBlock.addInst(PCodeInstruction.OpCode.EQ);return false;}// Char,bool,int
+	| <tLS>  {cBlock.addInst(PCodeInstruction.OpCode.LT);return true;}// Int
+	| <tGT>  {cBlock.addInst(PCodeInstruction.OpCode.GT);return true;}// Int
+	| <tLE>  {cBlock.addInst(PCodeInstruction.OpCode.LTE);return true;}// Int
+	| <tGE>  {cBlock.addInst(PCodeInstruction.OpCode.GTE);return true;}// Int
+	| <tNEQ> {cBlock.addInst(PCodeInstruction.OpCode.NEQ);return false;}// Char,bool,int
 }
 
 void expresion_simple(Attributes att, CodeBlock cBlock):
 {
 	boolean esInt=false;
 	Attributes at = new Attributes();
+	CodeBlock cOP = new CodeBlock();
 }
 {
 	(( <tADD> |	<tSUB> )
@@ -1126,7 +1266,7 @@ void expresion_simple(Attributes att, CodeBlock cBlock):
 		sf.heredar_valores(att,at); 
 		at = new Attributes();
 	}
-	( ( <tADD> | <tSUB> ) 
+	( ( <tADD>{cOP.addInst(PCodeInstruction.OpCode.PLUS);} | <tSUB>{cOP.addInst(PCodeInstruction.OpCode.SBT);}) 
 	termino(at, cBlock) 
 	{	
 		sf.add_to_atts(att,at);
@@ -1147,12 +1287,16 @@ void expresion_simple(Attributes att, CodeBlock cBlock):
 				throw new ErrorSemantico("Error de tipos. Se esperaban integers en expresion simple: " + a.type);
 			}
 		}
+
+		cBlock.addBlock(cOP);
+		cOP = new CodeBlock();
 	})*
 }
 
 void termino(Attributes att, CodeBlock cBlock):
 {
 	Attributes at = new Attributes();
+	CodeBlock opMUL = new CodeBlock();
 }
 {
     factor(at, cBlock) 
@@ -1161,7 +1305,7 @@ void termino(Attributes att, CodeBlock cBlock):
 		sf.heredar_valores(att,at);
 		at = new Attributes();
 	}
-	( operador_multiplicativo() factor(at, cBlock)
+	( operador_multiplicativo(opMUL) factor(at, cBlock)
 	{
 		sf.add_to_atts(att,at);
 		sf.heredar_valores(att,at);
@@ -1181,15 +1325,20 @@ void termino(Attributes att, CodeBlock cBlock):
 				throw new ErrorSemantico("Error de tipos. Se esperaban integers en termino: " + att.atts.get(0).type);
 			}
 		}
+
+		cBlock.addBlock(opMUL);
+		opMUL = new CodeBlock();
 	}
 	
 	)*
 }
 
-void operador_multiplicativo():
+void operador_multiplicativo(CodeBlock cBlock):
 {}
 {
-    <tMUL> | <tMOD> | <tDIV>
+    <tMUL>{cBlock.addInst(PCodeInstruction.OpCode.TMS);} 
+	| <tMOD>{cBlock.addInst(PCodeInstruction.OpCode.MOD);} 
+	| <tDIV>{cBlock.addInst(PCodeInstruction.OpCode.DIV);}
 }
 
 void factor(Attributes att, CodeBlock cBlock):
@@ -1229,6 +1378,8 @@ void factor(Attributes att, CodeBlock cBlock):
 			throw new ErrorSemantico("Solo se admiten expresiones booleanas: "+at.type);
 		}
 		at = new Attributes();
+
+		cBlock.addInst(PCodeInstruction.OpCode.NGI);
 	}
 }
 
@@ -1309,7 +1460,24 @@ void primario(Attributes att, CodeBlock cBlock) :
 			sf.cambiarTipos(at, S);
 			sf.asignar_valores(att,at,t.image,S.type, S.parClass, st.level,false);
 			sf.checkPrimarioIds(at);
-			at = new Attributes();			
+			at = new Attributes();
+
+			if(S instanceof SymbolProcedure)
+			{
+				SymbolProcedure SP = (SymbolProcedure) S;
+				cBlock.addOSFInst(st.getInvocIndex(),st.level-S.nivel,SP.etiq);
+			}
+			else if(S instanceof SymbolFunction)
+			{
+				SymbolFunction SF = (SymbolFunction) S;
+				cBlock.addOSFInst(st.getInvocIndex(),st.level-S.nivel,SF.etiq);
+			}
+			else
+			{
+				cBlock.addInst(PCodeInstruction.OpCode.SRF,st.level-S.nivel,(int)S.dir);
+				cBlock.addInst(PCodeInstruction.OpCode.DRF);
+			}
+
 		}
 		catch(SymbolNotFoundException ex)
 		{
