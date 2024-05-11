@@ -9,5 +9,6 @@ procedure tres_en_raya is
 begin
   get(i);
   get(c);
+  get(c);
   put_line(i,c);
 end;

@@ -731,10 +731,6 @@ void parametros_formales(Attributes att, CodeBlock cprog):
 				else if(S.parClass==Symbol.ParameterClass.REF)
 				{
 					cprog.addInst(PCodeInstruction.OpCode.SRF,(st.level - S.nivel),(int)S.dir);
-				}
-				else
-				{
-					cprog.addInst(PCodeInstruction.OpCode.SRF,(st.level - S.nivel),(int)S.dir);
 					cprog.addInst(PCodeInstruction.OpCode.ASGI);
 				}
 
@@ -936,7 +932,7 @@ void inst_invocacion_o_asignacion(Attributes att,CodeBlock cBlock):
 					cBlock.addInst(PCodeInstruction.OpCode.NGI);
 					cBlock.addInst(PCodeInstruction.OpCode.SBT);
 				}
-				else if(SA.minInd>0)
+				else
 				{
 					cBlock.addInst(PCodeInstruction.OpCode.STC,SA.minInd);
 					cBlock.addInst(PCodeInstruction.OpCode.SBT);
@@ -948,7 +944,12 @@ void inst_invocacion_o_asignacion(Attributes att,CodeBlock cBlock):
 	} 	
 	(<tASIG>
 	{
-		cBlock.addInst(PCodeInstruction.OpCode.SRF,st.level,(int)S.dir);
+		cBlock.addInst(PCodeInstruction.OpCode.SRF,(st.level - S.nivel),(int)S.dir);
+
+		if(S.parClass==Symbol.ParameterClass.REF)
+		{
+			cBlock.addInst(PCodeInstruction.OpCode.DRF);
+		}
 		
 		if(S instanceof SymbolArray)
 		{

@@ -704,10 +704,6 @@ S.returnType = atType.type;
                                 else if(S.parClass==Symbol.ParameterClass.REF)
                                 {
                                         cprog.addInst(PCodeInstruction.OpCode.SRF,(st.level - S.nivel),(int)S.dir);
-                                }
-                                else
-                                {
-                                        cprog.addInst(PCodeInstruction.OpCode.SRF,(st.level - S.nivel),(int)S.dir);
                                         cprog.addInst(PCodeInstruction.OpCode.ASGI);
                                 }
 
@@ -944,7 +940,7 @@ try {
                                         cBlock.addInst(PCodeInstruction.OpCode.NGI);
                                         cBlock.addInst(PCodeInstruction.OpCode.SBT);
                                 }
-                                else if(SA.minInd>0)
+                                else
                                 {
                                         cBlock.addInst(PCodeInstruction.OpCode.STC,SA.minInd);
                                         cBlock.addInst(PCodeInstruction.OpCode.SBT);
@@ -955,7 +951,12 @@ try {
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tASIG:{
       jj_consume_token(tASIG);
-cBlock.addInst(PCodeInstruction.OpCode.SRF,st.level,(int)S.dir);
+cBlock.addInst(PCodeInstruction.OpCode.SRF,(st.level - S.nivel),(int)S.dir);
+
+                if(S.parClass==Symbol.ParameterClass.REF)
+                {
+                        cBlock.addInst(PCodeInstruction.OpCode.DRF);
+                }
 
                 if(S instanceof SymbolArray)
                 {
