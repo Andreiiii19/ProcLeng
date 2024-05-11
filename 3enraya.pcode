@@ -1,0 +1,1860 @@
+  ENP L0
+; --- Simple variable "partidafinalizada", type BOOL, level 0, address [3]!
+; --- Simple variable "esturnoia", type BOOL, level 0, address [4]!
+; --- Simple variable "iamaximiza", type BOOL, level 0, address [5]!
+; --- Simple variable "cjugador", type CHAR, level 0, address [6]!
+; --- Array variable "tablero", type CHAR, size 9, level 0, address [7:15]!
+; --Comienzo procedure inicializartablero
+L1:
+  SRF  0  3
+; --- Array parameter "t", type CHAR, size 9, class REF, level 1, address [3]!
+  JMP L7
+; --- Simple variable "i", type INT, level 1, address [4]!
+; --- Simple variable "j", type INT, level 1, address [5]!
+L7:
+  SRF  1  4
+  STC  0
+  ASG
+L3:
+  SRF  0  4
+  DRF
+  STC  3
+  LT
+  JMF L4
+; --Inicio Bloque de instrucciones While
+  SRF  1  5
+  STC  0
+  ASG
+L5:
+  SRF  0  5
+  DRF
+  STC  3
+  LT
+  JMF L6
+; --Inicio Bloque de instrucciones While
+  SRF  0  4
+  DRF
+  STC  3
+  TMS
+  SRF  0  5
+  DRF
+  PLUS
+  SRF  1  3
+  PLUS
+  STC 32
+  ASG
+  SRF  1  5
+  SRF  0  5
+  DRF
+  STC  1
+  PLUS
+  ASG
+; --Fin Bloque de instrucciones While
+  JMP L5
+L6:
+  SRF  1  4
+  SRF  0  4
+  DRF
+  STC  1
+  PLUS
+  ASG
+; --Fin Bloque de instrucciones While
+  JMP L3
+L4:
+; --Fin procedure inicializartablero
+  CSF
+; --Comienzo procedure imprimirtablero
+L8:
+  SRF  0  3
+; --- Array parameter "t", type CHAR, size 9, class REF, level 1, address [3]!
+  JMP L14
+; --- Simple variable "i", type INT, level 1, address [4]!
+; --- Simple variable "j", type INT, level 1, address [5]!
+L14:
+  SRF  1  4
+  STC  0
+  ASG
+; --- Write STRING "-------".
+; --- Write CHAR "-".
+  STC 45
+  WRT  0
+; --- Write CHAR "-".
+  STC 45
+  WRT  0
+; --- Write CHAR "-".
+  STC 45
+  WRT  0
+; --- Write CHAR "-".
+  STC 45
+  WRT  0
+; --- Write CHAR "-".
+  STC 45
+  WRT  0
+; --- Write CHAR "-".
+  STC 45
+  WRT  0
+; --- Write CHAR "-".
+  STC 45
+  WRT  0
+; --- Write CR/LF
+  STC 13
+  WRT  0
+  STC 10
+  WRT  0
+L10:
+  SRF  0  4
+  DRF
+  STC  3
+  LT
+  JMF L11
+; --Inicio Bloque de instrucciones While
+  SRF  1  5
+  STC  0
+  ASG
+  STC 124
+; --- Write CR/LF
+  STC 13
+  WRT  0
+  STC 10
+  WRT  0
+L12:
+  SRF  0  5
+  DRF
+  STC  3
+  LT
+  JMF L13
+; --Inicio Bloque de instrucciones While
+  SRF  0  4
+  DRF
+  STC  3
+  TMS
+  SRF  0  5
+  DRF
+  PLUS
+  SRF  0  3
+  DRF
+  STC 124
+; --- Write CHAR "'|'".
+  STC 39
+  WRT  0
+; --- Write CR/LF
+  STC 13
+  WRT  0
+  STC 10
+  WRT  0
+  SRF  1  5
+  SRF  0  5
+  DRF
+  STC  1
+  PLUS
+  ASG
+; --Fin Bloque de instrucciones While
+  JMP L12
+L13:
+; --- Write CR/LF
+  STC 13
+  WRT  0
+  STC 10
+  WRT  0
+; --- Write STRING "-------".
+; --- Write CHAR "-".
+  STC 45
+  WRT  0
+; --- Write CHAR "-".
+  STC 45
+  WRT  0
+; --- Write CHAR "-".
+  STC 45
+  WRT  0
+; --- Write CHAR "-".
+  STC 45
+  WRT  0
+; --- Write CHAR "-".
+  STC 45
+  WRT  0
+; --- Write CHAR "-".
+  STC 45
+  WRT  0
+; --- Write CHAR "-".
+  STC 45
+  WRT  0
+; --- Write CR/LF
+  STC 13
+  WRT  0
+  STC 10
+  WRT  0
+  SRF  1  4
+  SRF  0  4
+  DRF
+  STC  1
+  PLUS
+  ASG
+; --Fin Bloque de instrucciones While
+  JMP L10
+L11:
+; --Fin procedure imprimirtablero
+  CSF
+; --Comienzo function comprobarvictoria
+L15:
+  SRF  0  3
+; --- Array parameter "t", type CHAR, size 9, class REF, level 1, address [3]!
+  SRF  0  4
+  ASGI
+; --- Simple parameter "player", type CHAR, class VAL, level 1, address [4]!
+  JMP L34
+; --- Simple variable "i", type INT, level 1, address [5]!
+; --- Simple variable "j", type INT, level 1, address [6]!
+L34:
+  SRF  1  5
+  STC  0
+  ASG
+L16:
+  SRF  0  5
+  DRF
+  STC  3
+  LT
+  JMF L17
+; --Inicio Bloque de instrucciones While
+  SRF  0  5
+  DRF
+  STC  3
+  TMS
+  STC  0
+  PLUS
+  SRF  0  3
+  DRF
+  SRF  0  4
+  DRF
+  EQ
+  SRF  0  5
+  DRF
+  STC  3
+  TMS
+  STC  1
+  PLUS
+  SRF  0  3
+  DRF
+  SRF  0  4
+  DRF
+  EQ
+  AND
+  SRF  0  5
+  DRF
+  STC  3
+  TMS
+  STC  2
+  PLUS
+  SRF  0  3
+  DRF
+  SRF  0  4
+  DRF
+  EQ
+  AND
+  JMF L19
+; --Inicio Bloque de instrucciones IF
+  STC  1
+  CSF
+; --Fin Bloque de instrucciones IF
+  JMP L18
+L19:
+L18:
+  STC  0
+  STC  3
+  TMS
+  SRF  0  5
+  DRF
+  PLUS
+  SRF  0  3
+  DRF
+  SRF  0  4
+  DRF
+  EQ
+  STC  1
+  STC  3
+  TMS
+  SRF  0  5
+  DRF
+  PLUS
+  SRF  0  3
+  DRF
+  SRF  0  4
+  DRF
+  EQ
+  AND
+  STC  2
+  STC  3
+  TMS
+  SRF  0  5
+  DRF
+  PLUS
+  SRF  0  3
+  DRF
+  SRF  0  4
+  DRF
+  EQ
+  AND
+  JMF L21
+; --Inicio Bloque de instrucciones IF
+  STC  1
+  CSF
+; --Fin Bloque de instrucciones IF
+  JMP L20
+L21:
+L20:
+  SRF  1  5
+  SRF  0  5
+  DRF
+  STC  1
+  PLUS
+  ASG
+; --Fin Bloque de instrucciones While
+  JMP L16
+L17:
+  STC  0
+  SRF  0  3
+  DRF
+  SRF  0  4
+  DRF
+  EQ
+  JMF L23
+; --Inicio Bloque de instrucciones IF
+  STC  4
+  SRF  0  3
+  DRF
+  SRF  0  4
+  DRF
+  EQ
+  JMF L25
+; --Inicio Bloque de instrucciones IF
+  STC  8
+  SRF  0  3
+  DRF
+  SRF  0  4
+  DRF
+  EQ
+  JMF L27
+; --Inicio Bloque de instrucciones IF
+  STC  1
+  CSF
+; --Fin Bloque de instrucciones IF
+  JMP L26
+L27:
+L26:
+; --Fin Bloque de instrucciones IF
+  JMP L24
+L25:
+L24:
+; --Fin Bloque de instrucciones IF
+  JMP L22
+L23:
+L22:
+  STC  6
+  SRF  0  3
+  DRF
+  SRF  0  4
+  DRF
+  EQ
+  JMF L29
+; --Inicio Bloque de instrucciones IF
+  STC  4
+  SRF  0  3
+  DRF
+  SRF  0  4
+  DRF
+  EQ
+  JMF L31
+; --Inicio Bloque de instrucciones IF
+  STC  2
+  SRF  0  3
+  DRF
+  SRF  0  4
+  DRF
+  EQ
+  JMF L33
+; --Inicio Bloque de instrucciones IF
+  STC  1
+  CSF
+; --Fin Bloque de instrucciones IF
+  JMP L32
+L33:
+L32:
+; --Fin Bloque de instrucciones IF
+  JMP L30
+L31:
+L30:
+; --Fin Bloque de instrucciones IF
+  JMP L28
+L29:
+L28:
+  STC  0
+  CSF
+; --Fin function comprobarvictoria
+  CSF
+; --Comienzo function comprobarempate
+L35:
+  SRF  0  3
+; --- Array parameter "t", type CHAR, size 9, class REF, level 1, address [3]!
+  JMP L40
+; --- Simple variable "i", type INT, level 1, address [4]!
+L40:
+  SRF  1  4
+  STC  0
+  ASG
+L36:
+  SRF  0  4
+  DRF
+  STC  3
+  LT
+  JMF L37
+; --Inicio Bloque de instrucciones While
+  SRF  0  4
+  DRF
+  STC  3
+  TMS
+  STC  0
+  PLUS
+  SRF  0  3
+  DRF
+  STC 32
+  EQ
+  SRF  0  4
+  DRF
+  STC  3
+  TMS
+  STC  1
+  PLUS
+  SRF  0  3
+  DRF
+  STC 32
+  EQ
+  OR
+  SRF  0  4
+  DRF
+  STC  3
+  TMS
+  STC  2
+  PLUS
+  SRF  0  3
+  DRF
+  STC 32
+  EQ
+  OR
+  JMF L39
+; --Inicio Bloque de instrucciones IF
+  STC  0
+  CSF
+; --Fin Bloque de instrucciones IF
+  JMP L38
+L39:
+L38:
+  SRF  1  4
+  SRF  0  4
+  DRF
+  STC  1
+  PLUS
+  ASG
+; --Fin Bloque de instrucciones While
+  JMP L36
+L37:
+  STC  1
+  CSF
+; --Fin function comprobarempate
+  CSF
+; --Comienzo function minimax
+L41:
+  SRF  0  3
+; --- Array parameter "t", type CHAR, size 9, class REF, level 1, address [3]!
+  SRF  0  4
+  ASGI
+; --- Simple parameter "estamaximizando", type BOOL, class VAL, level 1, address [4]!
+  JMP L68
+; --- Simple variable "i", type INT, level 1, address [5]!
+; --- Simple variable "j", type INT, level 1, address [6]!
+; --- Simple variable "score", type INT, level 1, address [7]!
+; --- Simple variable "bestscore", type INT, level 1, address [8]!
+L68:
+  SRF  1  7
+  STC  0
+  ASG
+  SRF  0  3
+  STC 79
+  OSF  9  1 L15
+  JMF L43
+; --Inicio Bloque de instrucciones IF
+  STC  2
+  CSF
+; --Fin Bloque de instrucciones IF
+  JMP L42
+L43:
+  SRF  0  3
+  STC 88
+  OSF  9  1 L15
+  JMF L44
+; --Inicio Bloque de instrucciones ELSIF
+  STC  0
+  CSF
+; --Fin Bloque de instrucciones ELSIF
+  JMP L42
+L44:
+  SRF  0  3
+  OSF  9  1 L35
+  JMF L45
+; --Inicio Bloque de instrucciones ELSIF
+  STC  1
+  CSF
+; --Fin Bloque de instrucciones ELSIF
+  JMP L42
+L45:
+L42:
+  SRF  0  4
+  DRF
+  JMF L47
+; --Inicio Bloque de instrucciones IF
+  SRF  1  8
+  STC  0
+  ASG
+  SRF  1  5
+  STC  0
+  ASG
+L48:
+  SRF  0  5
+  DRF
+  STC  3
+  LT
+  JMF L49
+; --Inicio Bloque de instrucciones While
+  SRF  1  6
+  STC  0
+  ASG
+L50:
+  SRF  0  6
+  DRF
+  STC  3
+  LT
+  JMF L51
+; --Inicio Bloque de instrucciones While
+  SRF  0  5
+  DRF
+  STC  3
+  TMS
+  SRF  0  6
+  DRF
+  PLUS
+  SRF  0  3
+  DRF
+  STC 32
+  EQ
+  JMF L53
+; --Inicio Bloque de instrucciones IF
+  SRF  0  5
+  DRF
+  STC  3
+  TMS
+  SRF  0  6
+  DRF
+  PLUS
+  SRF  1  3
+  PLUS
+  STC 79
+  ASG
+  SRF  1  7
+  SRF  0  3
+  STC  0
+  OSF  9  1 L41
+  ASG
+  SRF  0  5
+  DRF
+  STC  3
+  TMS
+  SRF  0  6
+  DRF
+  PLUS
+  SRF  1  3
+  PLUS
+  STC 32
+  ASG
+  SRF  0  7
+  DRF
+  SRF  0  8
+  DRF
+  GT
+  JMF L55
+; --Inicio Bloque de instrucciones IF
+  SRF  1  8
+  SRF  0  7
+  DRF
+  ASG
+; --Fin Bloque de instrucciones IF
+  JMP L54
+L55:
+L54:
+; --Fin Bloque de instrucciones IF
+  JMP L52
+L53:
+L52:
+  SRF  1  6
+  SRF  0  6
+  DRF
+  STC  1
+  PLUS
+  ASG
+; --Fin Bloque de instrucciones While
+  JMP L50
+L51:
+  SRF  0  8
+  DRF
+  STC  2
+  EQ
+  JMF L57
+; --Inicio Bloque de instrucciones IF
+  SRF  1  6
+  STC  3
+  ASG
+  SRF  1  5
+  STC  3
+  ASG
+; --Fin Bloque de instrucciones IF
+  JMP L56
+L57:
+L56:
+  SRF  1  5
+  SRF  0  5
+  DRF
+  STC  1
+  PLUS
+  ASG
+; --Fin Bloque de instrucciones While
+  JMP L48
+L49:
+; --Fin Bloque de instrucciones IF
+  JMP L46
+L47:
+; --Inicio Bloque de instrucciones ELSE
+  SRF  1  8
+  STC  2
+  ASG
+  SRF  1  5
+  STC  0
+  ASG
+L58:
+  SRF  0  5
+  DRF
+  STC  3
+  LT
+  JMF L59
+; --Inicio Bloque de instrucciones While
+  SRF  1  6
+  STC  0
+  ASG
+L60:
+  SRF  0  6
+  DRF
+  STC  3
+  LT
+  JMF L61
+; --Inicio Bloque de instrucciones While
+  SRF  0  5
+  DRF
+  STC  3
+  TMS
+  SRF  0  6
+  DRF
+  PLUS
+  SRF  0  3
+  DRF
+  STC 32
+  EQ
+  JMF L63
+; --Inicio Bloque de instrucciones IF
+  SRF  0  5
+  DRF
+  STC  3
+  TMS
+  SRF  0  6
+  DRF
+  PLUS
+  SRF  1  3
+  PLUS
+  STC 88
+  ASG
+  SRF  1  7
+  SRF  0  3
+  STC  1
+  OSF  9  1 L41
+  ASG
+  SRF  0  5
+  DRF
+  STC  3
+  TMS
+  SRF  0  6
+  DRF
+  PLUS
+  SRF  1  3
+  PLUS
+  STC 32
+  ASG
+  SRF  0  7
+  DRF
+  SRF  0  8
+  DRF
+  LT
+  JMF L65
+; --Inicio Bloque de instrucciones IF
+  SRF  1  8
+  SRF  0  7
+  DRF
+  ASG
+; --Fin Bloque de instrucciones IF
+  JMP L64
+L65:
+L64:
+; --Fin Bloque de instrucciones IF
+  JMP L62
+L63:
+L62:
+  SRF  0  8
+  DRF
+  STC  0
+  EQ
+  JMF L67
+; --Inicio Bloque de instrucciones IF
+  SRF  1  6
+  STC  3
+  ASG
+  SRF  1  5
+  STC  3
+  ASG
+; --Fin Bloque de instrucciones IF
+  JMP L66
+L67:
+L66:
+  SRF  1  6
+  SRF  0  6
+  DRF
+  STC  1
+  PLUS
+  ASG
+; --Fin Bloque de instrucciones While
+  JMP L60
+L61:
+  SRF  1  5
+  SRF  0  5
+  DRF
+  STC  1
+  PLUS
+  ASG
+; --Fin Bloque de instrucciones While
+  JMP L58
+L59:
+; --Fin Bloque de instrucciones ELSE
+  JMP L46
+L46:
+  SRF  0  8
+  DRF
+  CSF
+; --Fin function minimax
+  CSF
+; --Comienzo procedure iamove
+L69:
+  SRF  0  3
+; --- Array parameter "t", type CHAR, size 9, class REF, level 1, address [3]!
+  SRF  0  4
+  ASGI
+; --- Simple parameter "estamaximizando", type BOOL, class VAL, level 1, address [4]!
+  JMP L93
+; --- Simple variable "i", type INT, level 1, address [5]!
+; --- Simple variable "j", type INT, level 1, address [6]!
+; --- Simple variable "score", type INT, level 1, address [7]!
+; --- Simple variable "bestscore", type INT, level 1, address [8]!
+; --- Simple variable "bestmoverow", type INT, level 1, address [9]!
+; --- Simple variable "bestmovecol", type INT, level 1, address [10]!
+L93:
+  SRF  1  7
+  STC  0
+  ASG
+  SRF  0  4
+  DRF
+  JMF L72
+; --Inicio Bloque de instrucciones IF
+  SRF  1  8
+  STC  0
+  ASG
+  SRF  1  5
+  STC  0
+  ASG
+L73:
+  SRF  0  5
+  DRF
+  STC  3
+  LT
+  JMF L74
+; --Inicio Bloque de instrucciones While
+  SRF  1  6
+  STC  0
+  ASG
+L75:
+  SRF  0  6
+  DRF
+  STC  3
+  LT
+  JMF L76
+; --Inicio Bloque de instrucciones While
+  SRF  0  5
+  DRF
+  STC  3
+  TMS
+  SRF  0  6
+  DRF
+  PLUS
+  SRF  0  3
+  DRF
+  STC 32
+  EQ
+  JMF L78
+; --Inicio Bloque de instrucciones IF
+  SRF  0  5
+  DRF
+  STC  3
+  TMS
+  SRF  0  6
+  DRF
+  PLUS
+  SRF  1  3
+  PLUS
+  STC 79
+  ASG
+  SRF  1  7
+  SRF  0  3
+  STC  0
+  OSF 11  1 L41
+  ASG
+  SRF  0  5
+  DRF
+  STC  3
+  TMS
+  SRF  0  6
+  DRF
+  PLUS
+  SRF  1  3
+  PLUS
+  STC 32
+  ASG
+  SRF  0  7
+  DRF
+  SRF  0  8
+  DRF
+  GT
+  JMF L80
+; --Inicio Bloque de instrucciones IF
+  SRF  1  8
+  SRF  0  7
+  DRF
+  ASG
+  SRF  1 10
+  SRF  0  6
+  DRF
+  ASG
+  SRF  1  9
+  SRF  0  5
+  DRF
+  ASG
+; --Fin Bloque de instrucciones IF
+  JMP L79
+L80:
+L79:
+; --Fin Bloque de instrucciones IF
+  JMP L77
+L78:
+L77:
+  SRF  0  8
+  DRF
+  STC  2
+  EQ
+  JMF L82
+; --Inicio Bloque de instrucciones IF
+  SRF  1  6
+  STC  3
+  ASG
+  SRF  1  5
+  STC  3
+  ASG
+; --Fin Bloque de instrucciones IF
+  JMP L81
+L82:
+L81:
+  SRF  1  6
+  SRF  0  6
+  DRF
+  STC  1
+  PLUS
+  ASG
+; --Fin Bloque de instrucciones While
+  JMP L75
+L76:
+  SRF  1  5
+  SRF  0  5
+  DRF
+  STC  1
+  PLUS
+  ASG
+; --Fin Bloque de instrucciones While
+  JMP L73
+L74:
+  SRF  0  9
+  DRF
+  STC  3
+  TMS
+  SRF  0 10
+  DRF
+  PLUS
+  SRF  1  3
+  PLUS
+  STC 79
+  ASG
+; --Fin Bloque de instrucciones IF
+  JMP L71
+L72:
+; --Inicio Bloque de instrucciones ELSE
+  SRF  1  8
+  STC  2
+  ASG
+  SRF  1  5
+  STC  0
+  ASG
+L83:
+  SRF  0  5
+  DRF
+  STC  3
+  LT
+  JMF L84
+; --Inicio Bloque de instrucciones While
+  SRF  1  6
+  STC  0
+  ASG
+L85:
+  SRF  0  6
+  DRF
+  STC  3
+  LT
+  JMF L86
+; --Inicio Bloque de instrucciones While
+  SRF  0  5
+  DRF
+  STC  3
+  TMS
+  SRF  0  6
+  DRF
+  PLUS
+  SRF  0  3
+  DRF
+  STC 32
+  EQ
+  JMF L88
+; --Inicio Bloque de instrucciones IF
+  SRF  0  5
+  DRF
+  STC  3
+  TMS
+  SRF  0  6
+  DRF
+  PLUS
+  SRF  1  3
+  PLUS
+  STC 88
+  ASG
+  SRF  1  7
+  SRF  0  3
+  STC  1
+  OSF 11  1 L41
+  ASG
+  SRF  0  5
+  DRF
+  STC  3
+  TMS
+  SRF  0  6
+  DRF
+  PLUS
+  SRF  1  3
+  PLUS
+  STC 32
+  ASG
+  SRF  0  7
+  DRF
+  SRF  0  8
+  DRF
+  LT
+  JMF L90
+; --Inicio Bloque de instrucciones IF
+  SRF  1  8
+  SRF  0  7
+  DRF
+  ASG
+  SRF  1 10
+  SRF  0  6
+  DRF
+  ASG
+  SRF  1  9
+  SRF  0  5
+  DRF
+  ASG
+; --Fin Bloque de instrucciones IF
+  JMP L89
+L90:
+L89:
+; --Fin Bloque de instrucciones IF
+  JMP L87
+L88:
+L87:
+  SRF  0  8
+  DRF
+  STC  0
+  EQ
+  JMF L92
+; --Inicio Bloque de instrucciones IF
+  SRF  1  6
+  STC  3
+  ASG
+  SRF  1  5
+  STC  3
+  ASG
+; --Fin Bloque de instrucciones IF
+  JMP L91
+L92:
+L91:
+  SRF  1  6
+  SRF  0  6
+  DRF
+  STC  1
+  PLUS
+  ASG
+; --Fin Bloque de instrucciones While
+  JMP L85
+L86:
+  SRF  1  5
+  SRF  0  5
+  DRF
+  STC  1
+  PLUS
+  ASG
+; --Fin Bloque de instrucciones While
+  JMP L83
+L84:
+  SRF  0  9
+  DRF
+  STC  3
+  TMS
+  SRF  0 10
+  DRF
+  PLUS
+  SRF  1  3
+  PLUS
+  STC 88
+  ASG
+; --Fin Bloque de instrucciones ELSE
+  JMP L71
+L71:
+; --- Write STRING "La IA ha jugado en la fila ".
+; --- Write CHAR "L".
+  STC 76
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "I".
+  STC 73
+  WRT  0
+; --- Write CHAR "A".
+  STC 65
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "h".
+  STC 104
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "j".
+  STC 106
+  WRT  0
+; --- Write CHAR "u".
+  STC 117
+  WRT  0
+; --- Write CHAR "g".
+  STC 103
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR "d".
+  STC 100
+  WRT  0
+; --- Write CHAR "o".
+  STC 111
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "e".
+  STC 101
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "f".
+  STC 102
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+  SRF  0  9
+  DRF
+  STC  1
+  PLUS
+; --- Write STRING " y columna ".
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "y".
+  STC 121
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "c".
+  STC 99
+  WRT  0
+; --- Write CHAR "o".
+  STC 111
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "u".
+  STC 117
+  WRT  0
+; --- Write CHAR "m".
+  STC 109
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+  SRF  0 10
+  DRF
+  STC  1
+  PLUS
+; --- Write CR/LF
+  STC 13
+  WRT  0
+  STC 10
+  WRT  0
+; --Fin procedure iamove
+  CSF
+; --Comienzo procedure playermove
+L94:
+  SRF  0  3
+; --- Array parameter "t", type CHAR, size 9, class REF, level 1, address [3]!
+  SRF  0  4
+  ASGI
+; --- Simple parameter "jugador", type CHAR, class VAL, level 1, address [4]!
+  JMP L98
+; --- Simple variable "row", type INT, level 1, address [5]!
+; --- Simple variable "col", type INT, level 1, address [6]!
+L98:
+; --- Write STRING "Introduzca la fila (0-2)".
+; --- Write CHAR "I".
+  STC 73
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "t".
+  STC 116
+  WRT  0
+; --- Write CHAR "r".
+  STC 114
+  WRT  0
+; --- Write CHAR "o".
+  STC 111
+  WRT  0
+; --- Write CHAR "d".
+  STC 100
+  WRT  0
+; --- Write CHAR "u".
+  STC 117
+  WRT  0
+; --- Write CHAR "z".
+  STC 122
+  WRT  0
+; --- Write CHAR "c".
+  STC 99
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "f".
+  STC 102
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "(".
+  STC 40
+  WRT  0
+; --- Write CHAR "0".
+  STC 48
+  WRT  0
+; --- Write CHAR "-".
+  STC 45
+  WRT  0
+; --- Write CHAR "2".
+  STC 50
+  WRT  0
+; --- Write CHAR ")".
+  STC 41
+  WRT  0
+; --- Write CR/LF
+  STC 13
+  WRT  0
+  STC 10
+  WRT  0
+; --- Get simple variable/parameter "row".
+  SRF  0  5
+  RD  1
+; --- Write STRING "Introduzca la columna (0-2)".
+; --- Write CHAR "I".
+  STC 73
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "t".
+  STC 116
+  WRT  0
+; --- Write CHAR "r".
+  STC 114
+  WRT  0
+; --- Write CHAR "o".
+  STC 111
+  WRT  0
+; --- Write CHAR "d".
+  STC 100
+  WRT  0
+; --- Write CHAR "u".
+  STC 117
+  WRT  0
+; --- Write CHAR "z".
+  STC 122
+  WRT  0
+; --- Write CHAR "c".
+  STC 99
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "c".
+  STC 99
+  WRT  0
+; --- Write CHAR "o".
+  STC 111
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "u".
+  STC 117
+  WRT  0
+; --- Write CHAR "m".
+  STC 109
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "(".
+  STC 40
+  WRT  0
+; --- Write CHAR "0".
+  STC 48
+  WRT  0
+; --- Write CHAR "-".
+  STC 45
+  WRT  0
+; --- Write CHAR "2".
+  STC 50
+  WRT  0
+; --- Write CHAR ")".
+  STC 41
+  WRT  0
+; --- Write CR/LF
+  STC 13
+  WRT  0
+  STC 10
+  WRT  0
+; --- Get simple variable/parameter "col".
+  SRF  0  6
+  RD  1
+  SRF  0  5
+  DRF
+  STC  0
+  GTE
+  SRF  0  5
+  DRF
+  STC  3
+  LT
+  AND
+  SRF  0  6
+  DRF
+  STC  0
+  GTE
+  AND
+  SRF  0  6
+  DRF
+  STC  3
+  LT
+  AND
+  SRF  0  5
+  DRF
+  STC  3
+  TMS
+  SRF  0  6
+  DRF
+  PLUS
+  SRF  0  3
+  DRF
+  STC 32
+  EQ
+  AND
+  JMF L97
+; --Inicio Bloque de instrucciones IF
+  SRF  0  5
+  DRF
+  STC  3
+  TMS
+  SRF  0  6
+  DRF
+  PLUS
+  SRF  1  3
+  PLUS
+  SRF  0  4
+  DRF
+  ASG
+; --Fin Bloque de instrucciones IF
+  JMP L96
+L97:
+; --Inicio Bloque de instrucciones ELSE
+; --- Write STRING "Movimiento invalido.".
+; --- Write CHAR "M".
+  STC 77
+  WRT  0
+; --- Write CHAR "o".
+  STC 111
+  WRT  0
+; --- Write CHAR "v".
+  STC 118
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "m".
+  STC 109
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "e".
+  STC 101
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "t".
+  STC 116
+  WRT  0
+; --- Write CHAR "o".
+  STC 111
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "v".
+  STC 118
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "d".
+  STC 100
+  WRT  0
+; --- Write CHAR "o".
+  STC 111
+  WRT  0
+; --- Write CHAR ".".
+  STC 46
+  WRT  0
+; --- Write CR/LF
+  STC 13
+  WRT  0
+  STC 10
+  WRT  0
+  SRF  0  3
+  SRF  0  4
+  DRF
+  OSF  7  1 L94
+; --Fin Bloque de instrucciones ELSE
+  JMP L96
+L96:
+; --Fin procedure playermove
+  CSF
+; --Comienzo function playerelection
+L99:
+  JMP L103
+; --- Simple variable "p", type CHAR, level 1, address [3]!
+L103:
+; --- Write STRING "Introduzca su ficha(X/O)".
+; --- Write CHAR "I".
+  STC 73
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "t".
+  STC 116
+  WRT  0
+; --- Write CHAR "r".
+  STC 114
+  WRT  0
+; --- Write CHAR "o".
+  STC 111
+  WRT  0
+; --- Write CHAR "d".
+  STC 100
+  WRT  0
+; --- Write CHAR "u".
+  STC 117
+  WRT  0
+; --- Write CHAR "z".
+  STC 122
+  WRT  0
+; --- Write CHAR "c".
+  STC 99
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "s".
+  STC 115
+  WRT  0
+; --- Write CHAR "u".
+  STC 117
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "f".
+  STC 102
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "c".
+  STC 99
+  WRT  0
+; --- Write CHAR "h".
+  STC 104
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR "(".
+  STC 40
+  WRT  0
+; --- Write CHAR "X".
+  STC 88
+  WRT  0
+; --- Write CHAR "/".
+  STC 47
+  WRT  0
+; --- Write CHAR "O".
+  STC 79
+  WRT  0
+; --- Write CHAR ")".
+  STC 41
+  WRT  0
+; --- Write CR/LF
+  STC 13
+  WRT  0
+  STC 10
+  WRT  0
+; --- Get simple variable/parameter "p".
+  SRF  0  3
+  RD  0
+  SRF  0  3
+  DRF
+  STC 88
+  EQ
+  JMF L101
+; --Inicio Bloque de instrucciones IF
+  STC  0
+  CSF
+; --Fin Bloque de instrucciones IF
+  JMP L100
+L101:
+  SRF  0  3
+  DRF
+  STC 79
+  EQ
+  JMF L102
+; --Inicio Bloque de instrucciones ELSIF
+  STC  1
+  CSF
+; --Fin Bloque de instrucciones ELSIF
+  JMP L100
+L102:
+; --Inicio Bloque de instrucciones ELSE
+; --- Write STRING "Ficha invalida.".
+; --- Write CHAR "F".
+  STC 70
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "c".
+  STC 99
+  WRT  0
+; --- Write CHAR "h".
+  STC 104
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "v".
+  STC 118
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "d".
+  STC 100
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR ".".
+  STC 46
+  WRT  0
+; --- Write CR/LF
+  STC 13
+  WRT  0
+  STC 10
+  WRT  0
+  OSF  4  1 L99
+  CSF
+; --Fin Bloque de instrucciones ELSE
+  JMP L100
+L100:
+; --Fin function playerelection
+  CSF
+; --Comienzo main
+L0:
+  SRF  0  7
+  OSF 16  0 L1
+  SRF  0  4
+  OSF 16  0 L99
+  ASG
+  SRF  0  3
+  STC  0
+  ASG
+  SRF  0  5
+  SRF  0  4
+  DRF
+  NGB
+  ASG
+  SRF  0  4
+  DRF
+  JMF L105
+; --Inicio Bloque de instrucciones IF
+  SRF  0  6
+  STC 79
+  ASG
+; --Fin Bloque de instrucciones IF
+  JMP L104
+L105:
+; --Inicio Bloque de instrucciones ELSE
+  SRF  0  6
+  STC 88
+  ASG
+; --Fin Bloque de instrucciones ELSE
+  JMP L104
+L104:
+L106:
+  SRF  0  3
+  DRF
+  NGB
+  JMF L107
+; --Inicio Bloque de instrucciones While
+  SRF  0  7
+  OSF 16  0 L8
+  SRF  0  4
+  DRF
+  JMF L109
+; --Inicio Bloque de instrucciones IF
+  SRF  0  7
+  SRF  0  5
+  DRF
+  OSF 16  0 L69
+; --Fin Bloque de instrucciones IF
+  JMP L108
+L109:
+; --Inicio Bloque de instrucciones ELSE
+  SRF  0  7
+  SRF  0  6
+  DRF
+  OSF 16  0 L94
+; --Fin Bloque de instrucciones ELSE
+  JMP L108
+L108:
+  SRF  0  7
+  STC 88
+  OSF 16  0 L15
+  JMF L111
+; --Inicio Bloque de instrucciones IF
+  SRF  0  7
+  OSF 16  0 L8
+; --- Write STRING "Ganaron X".
+; --- Write CHAR "G".
+  STC 71
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR "r".
+  STC 114
+  WRT  0
+; --- Write CHAR "o".
+  STC 111
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "X".
+  STC 88
+  WRT  0
+; --- Write CR/LF
+  STC 13
+  WRT  0
+  STC 10
+  WRT  0
+  SRF  0  3
+  STC  1
+  ASG
+; --Fin Bloque de instrucciones IF
+  JMP L110
+L111:
+  SRF  0  7
+  STC 79
+  OSF 16  0 L15
+  JMF L112
+; --Inicio Bloque de instrucciones ELSIF
+  SRF  0  7
+  OSF 16  0 L8
+; --- Write STRING "Ganaron O".
+; --- Write CHAR "G".
+  STC 71
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR "r".
+  STC 114
+  WRT  0
+; --- Write CHAR "o".
+  STC 111
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "O".
+  STC 79
+  WRT  0
+; --- Write CR/LF
+  STC 13
+  WRT  0
+  STC 10
+  WRT  0
+  SRF  0  3
+  STC  1
+  ASG
+; --Fin Bloque de instrucciones ELSIF
+  JMP L110
+L112:
+  SRF  0  7
+  OSF 16  0 L35
+  JMF L113
+; --Inicio Bloque de instrucciones ELSIF
+  SRF  0  7
+  OSF 16  0 L8
+; --- Write STRING "Empate.".
+; --- Write CHAR "E".
+  STC 69
+  WRT  0
+; --- Write CHAR "m".
+  STC 109
+  WRT  0
+; --- Write CHAR "p".
+  STC 112
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR "t".
+  STC 116
+  WRT  0
+; --- Write CHAR "e".
+  STC 101
+  WRT  0
+; --- Write CHAR ".".
+  STC 46
+  WRT  0
+; --- Write CR/LF
+  STC 13
+  WRT  0
+  STC 10
+  WRT  0
+  SRF  0  3
+  STC  1
+  ASG
+; --Fin Bloque de instrucciones ELSIF
+  JMP L110
+L113:
+L110:
+  SRF  0  4
+  SRF  0  4
+  DRF
+  NGB
+  ASG
+; --Fin Bloque de instrucciones While
+  JMP L106
+L107:
+; --Fin main
+  LVP

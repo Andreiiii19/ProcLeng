@@ -1,0 +1,28 @@
+  ENP L0
+; --- Simple variable "i", type INT, level 0, address [3]!
+; --- Simple variable "c", type CHAR, level 0, address [4]!
+; --Comienzo main
+L0:
+; --- Get simple variable/parameter "i".
+  SRF  0  3
+  RD  1
+; --- Get simple variable/parameter "c".
+  SRF  0  4
+  RD  0
+; --- Get simple variable/parameter "c".
+  SRF  0  4
+  RD  0
+  SRF  0  3
+  DRF
+  SRF  0  4
+  DRF
+; --- Write CHAR "c".
+  STC 99
+  WRT  0
+; --- Write CR/LF
+  STC 13
+  WRT  0
+  STC 10
+  WRT  0
+; --Fin main
+  LVP

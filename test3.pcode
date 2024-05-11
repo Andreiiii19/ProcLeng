@@ -1,0 +1,61 @@
+  ENP L0
+; --- Array variable "i", type INT, size 5, level 0, address [3:7]!
+; --- Simple variable "ii", type INT, level 0, address [8]!
+; --Comienzo procedure x
+L1:
+  SRF  0  8
+  ASGI
+  SRF  0  7
+  ASGI
+  SRF  0  6
+  ASGI
+  SRF  0  5
+  ASGI
+  SRF  0  4
+  ASGI
+; --- Array parameter "j", type INT, size 5, class VAL, level 1, address [3:7]!
+  JMP L3
+L3:
+; --Bloque sin instrucciones
+; --Fin procedure x
+  CSF
+; --Comienzo function xxx
+L4:
+  SRF  0  3
+  ASGI
+; --- Simple parameter "j", type INT, class VAL, level 1, address [3]!
+  JMP L5
+L5:
+  SRF  0  3
+  DRF
+  STC  1
+  PLUS
+  CSF
+; --Fin function xxx
+  CSF
+; --Comienzo main
+L0:
+  STC  1
+  NGI
+  STC  2
+  NGI
+  SBT
+  SRF  0  3
+  PLUS
+  STC  1
+  ASG
+  SRF  0  8
+  DRF
+  STC  2
+  NGI
+  SBT
+  SRF  0  3
+  PLUS
+  STC  3
+  OSF  9  0 L4
+  ASG
+  SRF  0  3
+  DRF
+  OSF  9  0 L1
+; --Fin main
+  LVP

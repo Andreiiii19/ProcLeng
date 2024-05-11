@@ -2,37 +2,23 @@
 --  3enraya.al
 ------------------------------------------------------------------------
 procedure tres_en_raya is
-	i: integer;
- 
-function x(j: integer) return integer is
+	i: array(-2..2) of integer;
+  ii: integer;
+  
+procedure x(j: array(-2..2) of integer) is
 
 begin
-  if j=1 then
-    return 1;
-  else
-    return 2;
-  end if;
+  null;
 end;
 
-function xx(j: ref integer) return integer is
+function xxx(j: integer) return integer is
 
 begin
-  j:=1;
-  return 0;
-end;
-
-function xxx return integer is
-
-begin
-  return 0;
+  return j+1;
 end;
 -----------------------------------------------------------
 begin
-
-	i:=x(i);
-  i:=xx(i);
-  i:=xxx;
+  i(-1):=1;
+  i(ii):=xxx(3);
+  x(i);
 end;
-
-
--- Falta cabezera procedimiento y cabecera funcion

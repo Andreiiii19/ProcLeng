@@ -28,31 +28,21 @@ public class SymbolTable {
     private ArrayList<HashMap<String, Symbol>> st;
     private Set<String> reservedWords;
 
-    private ArrayList<Integer> dir;
     
 
     public int level; //nivel actual
 
     public SymbolTable() {
         st = new ArrayList<HashMap<String, Symbol>>(ST_SIZE);
-        dir = new ArrayList<Integer>();
-
-        dir.add(3);
 
         level = -1; //aún no hay ningún bloque intoducido
         insertBlock();
-    }
-    
-    public int getInvocIndex()
-    {
-        return dir.get(dir.size()-1);
     }
 
     //apila un nuevo bloque
     public void insertBlock() {
         //System.out.println("Creando bloque");
         st.add(new HashMap<String, Symbol>(HASH_SIZE));
-        dir.add(3);
         level++;
     }
 
@@ -60,7 +50,6 @@ public class SymbolTable {
     public void removeBlock() {
         //System.out.println("Borrando bloque");
         st.remove(st.size()-1);
-        dir.remove(level+1);
         level--;
     }
     
@@ -69,18 +58,7 @@ public class SymbolTable {
     public void insertSymbol(Symbol s) throws AlreadyDefinedSymbolException {
         HashMap<String, Symbol> currentBlock = st.get(st.size()-1);
 
-        s.dir = dir.get(level+1);
-
-        if(s instanceof SymbolArray)
-        {
-            SymbolArray SA = (SymbolArray) s;
-
-            dir.set(level+1,dir.get(level+1)+(SA.maxInd-SA.minInd));
-        }
-        else if(!(s instanceof SymbolFunction||s instanceof SymbolProcedure))
-        {
-            dir.set(level+1,dir.get(level+1)+1);
-        }
+       
 
         //System.out.println("Insertando simbolo: "+s.name);
         //System.out.println(st.toString());

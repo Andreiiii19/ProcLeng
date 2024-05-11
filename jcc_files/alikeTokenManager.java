@@ -11,6 +11,7 @@ import lib.errores.*;
 import lib.tools.SemanticFunctions;
 import lib.tools.codeGeneration.*;
 import static lib.symbolTable.Symbol.Types.*;
+import java.io.*;
 
 /** Token Manager. */
 @SuppressWarnings ("unused")

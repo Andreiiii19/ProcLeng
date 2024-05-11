@@ -12,6 +12,7 @@ import lib.errores.*;
 import lib.tools.SemanticFunctions;
 import lib.tools.codeGeneration.*;
 import static lib.symbolTable.Symbol.Types.*;
+import java.io.*;
 
 public class alike implements alikeConstants {
 
@@ -47,7 +48,7 @@ public class alike implements alikeConstants {
                            parser = new alike(new java.io.FileInputStream(args[0]));
                    }
                    //Programa es el símbolo inicial de la gramática
-                   parser.Programa();
+                   parser.Programa(args[0]);
                    //...
                    System.out.println("***** An\u00e1lisis terminado con \u00e9xito *****");
            }
@@ -68,13 +69,13 @@ public class alike implements alikeConstants {
    }
 
 //------------ Símbolo inicial de la gramática. Para análisis léxico no hace falta más
-  static final public void Programa() throws ParseException {Token name;
+  static final public void Programa(String filename) throws ParseException {Token name;
         Attributes at = new Attributes();
 
         CodeBlock cprog=new CodeBlock(), cprocvar=new CodeBlock(),cprocfun=new CodeBlock(),cbloque=new CodeBlock();
 cprog = new CodeBlock();
                 String etiq = CGUtils.newLabel();
-                CGUtils.setLevel();
+                CGUtils.initializeCGUtils();
     jj_consume_token(tPROC);
     name = jj_consume_token(tID);
 try{
@@ -94,17 +95,6 @@ try{
                 {
                         {if (true) throw new ErrorSemantico("Simbolo ya existente");}
                 }
-    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-    case tAP:{
-      jj_consume_token(tAP);
-      parametros_formales(at, cprog);
-      jj_consume_token(tCP);
-      break;
-      }
-    default:
-      jj_la1[0] = jj_gen;
-      ;
-    }
     jj_consume_token(tIS);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tID:{
@@ -112,7 +102,7 @@ try{
       break;
       }
     default:
-      jj_la1[1] = jj_gen;
+      jj_la1[0] = jj_gen;
       ;
     }
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -128,14 +118,14 @@ try{
           break;
           }
         default:
-          jj_la1[2] = jj_gen;
+          jj_la1[1] = jj_gen;
           break label_1;
         }
       }
       break;
       }
     default:
-      jj_la1[3] = jj_gen;
+      jj_la1[2] = jj_gen;
       ;
     }
     jj_consume_token(tBEGIN);
@@ -151,14 +141,33 @@ try{
                 cprog.addBlock(cbloque);
                 cprog.addComment("Fin main");
                 cprog.addInst(PCodeInstruction.OpCode.LVP);
-                System.out.println(cprog.toString());
+                //System.out.println(cprog.toString());
+
+                File f = new File(filename);
+
+                String fName = f.getName();
+                int pos = fName.lastIndexOf(".");
+                if (pos > 0) {
+                        fName = fName.substring(0, pos);
+                }
+
+                f = new File(fName+".pcode");
+
+                try{
+                        BufferedWriter writer = new BufferedWriter(new FileWriter(f));
+                        writer.write(cprog.toString());
+                        writer.close();
+                } catch(IOException ex)
+                {
+                        System.err.println("Error en la escritura a fichero");
+                }
 }
 
   static final public void declaracion_procedimiento(CodeBlock cBlock) throws ParseException {Token name;
         Attributes att = new Attributes();
 
         CodeBlock cprog=new CodeBlock(),cparam = new CodeBlock(),cprocfun=new CodeBlock(),cprocvar=new CodeBlock(),cbloque=new CodeBlock();
-        CGUtils.setLevel();
+        CGUtils.addLevel();
         String etiq = CGUtils.newLabel();
     name = cabecera_procedimiento(att, cparam);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -167,7 +176,7 @@ try{
       break;
       }
     default:
-      jj_la1[4] = jj_gen;
+      jj_la1[3] = jj_gen;
       ;
     }
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -177,7 +186,7 @@ try{
       break;
       }
     default:
-      jj_la1[5] = jj_gen;
+      jj_la1[4] = jj_gen;
       ;
     }
 try{
@@ -193,11 +202,19 @@ try{
     jj_consume_token(tPC);
 //System.err.println("Bloque " + name.image + " terminado \n" + st.toString());
                 st.removeBlock();
+                CGUtils.removeLevel();
+
                 cprog.addComment("Comienzo procedure "+name.image);
+                cprog.addLabel(etiq);
                 cprog.addBlock(cparam);
+
+                String labelCode = CGUtils.newLabel();
+                cprog.addInst(PCodeInstruction.OpCode.JMP,labelCode);
+
                 cprog.addBlock(cprocvar);
                 cprog.addBlock(cprocfun);
-                cprog.addLabel(etiq);
+
+                cprog.addLabel(labelCode);
                 cprog.addBlock(cbloque);
                 cprog.addComment("Fin procedure "+name.image);
                 cprog.addInst(PCodeInstruction.OpCode.CSF);
@@ -210,7 +227,7 @@ try{
         Token name;
         String etiq = CGUtils.newLabel();
         CodeBlock cprog=new CodeBlock(),cparam = new CodeBlock(), cprocvar=new CodeBlock(),cprocfun=new CodeBlock(),cbloque=new CodeBlock();
-        CGUtils.setLevel();
+        CGUtils.addLevel();
     name = cabecera_funcion(atType,atIsArray,atts, cparam);
 tipoReturn.add(name);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -219,7 +236,7 @@ tipoReturn.add(name);
       break;
       }
     default:
-      jj_la1[6] = jj_gen;
+      jj_la1[5] = jj_gen;
       ;
     }
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -229,7 +246,7 @@ tipoReturn.add(name);
       break;
       }
     default:
-      jj_la1[7] = jj_gen;
+      jj_la1[6] = jj_gen;
       ;
     }
     jj_consume_token(tBEGIN);
@@ -245,6 +262,8 @@ try{
     jj_consume_token(tPC);
 //System.err.println("Bloque " + name.image + " terminado \n"+ st.toString());
                 st.removeBlock();
+                CGUtils.removeLevel();
+
                 if(atType.type == Symbol.Types.ARRAY)
                 {
                         {if (true) throw new ErrorSemantico("No se permiten funciones con retorno de vectores");}
@@ -253,10 +272,17 @@ try{
                 tipoReturn.remove(tipoReturn.size()-1);
 
                 cprog.addComment("Comienzo function "+name.image);
+                cprog.addLabel(etiq);
                 cprog.addBlock(cparam);
+
+                String labelCode = CGUtils.newLabel();
+                cprog.addInst(PCodeInstruction.OpCode.JMP,labelCode);
+
                 cprog.addBlock(cprocvar);
                 cprog.addBlock(cprocfun);
-                cprog.addLabel(etiq);
+
+                cprog.addLabel(labelCode);
+
                 cprog.addBlock(cbloque);
                 cprog.addComment("Fin function "+name.image);
                 cprog.addInst(PCodeInstruction.OpCode.CSF);
@@ -274,7 +300,7 @@ try{
       break;
       }
     default:
-      jj_la1[8] = jj_gen;
+      jj_la1[7] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -301,7 +327,7 @@ cBlock.addBlock(cInst);
         break;
         }
       default:
-        jj_la1[9] = jj_gen;
+        jj_la1[8] = jj_gen;
         break label_2;
       }
     }
@@ -318,7 +344,7 @@ cBlock.addBlock(cInst);
         break;
         }
       default:
-        jj_la1[10] = jj_gen;
+        jj_la1[9] = jj_gen;
         break label_3;
       }
     }
@@ -337,7 +363,7 @@ atType.parClass = Symbol.ParameterClass.REF;
       break;
       }
     default:
-      jj_la1[11] = jj_gen;
+      jj_la1[10] = jj_gen;
       ;
     }
     tipo_variable(atType,atIsArray);
@@ -369,13 +395,13 @@ if(atType.parClass==Symbol.ParameterClass.NONE)atType.parClass=Symbol.ParameterC
                                         Symbol.Types type = Symbol.Types.UNDEFINED;
                                         long inicio=0, fin = 0;
                                         if(S.type == Symbol.Types.ARRAY) {
-                                                inicio = CGUtils.getLevel();
+                                                inicio = CGUtils.getDir();
                                                 S.dir = inicio;
                                                 if(S.parClass != Symbol.ParameterClass.REF){
                                                         for (int i = atType.inicio+1; i < atType.fin; i++) {
-                                                                fin = CGUtils.getLevel();
+                                                                fin = CGUtils.getDir();
                                                         }
-                                                        fin = CGUtils.getLevel();
+                                                        fin = CGUtils.getDir();
                                                 }
                                                 name = "Array";
                                                 SymbolArray symbolArrayInstance = (SymbolArray) S;
@@ -387,9 +413,9 @@ if(atType.parClass==Symbol.ParameterClass.NONE)atType.parClass=Symbol.ParameterC
                                                         cprocvar.addComment("- " + name +" parameter \"" + t.image + "\", type " + type + ", size " + ( symbolArrayInstance.maxInd-symbolArrayInstance.minInd+1) + ", class " + S.parClass + ", level " + st.level + ", address [" + inicio + ":" + fin + "]!");
                                                 }
                                         } else {
-                                        S.dir = CGUtils.getLevel();
-                                        if(!esParametro && S.type != Symbol.Types.ARRAY) cprocvar.addComment("- Simple variable \"" + t.image + "\", type " + type + ", level " + st.level + ", address [" + S.dir + "]!");
-                                        else cprocvar.addComment("- Simple parameter \"" + t.image + "\", type " + type + ", class " + S.parClass + ", level " + st.level + ", address [" + S.dir + "]!");
+                                        S.dir = CGUtils.getDir();
+                                        if(!esParametro && S.type != Symbol.Types.ARRAY) {type = S.type; cprocvar.addComment("- Simple variable \"" + t.image + "\", type " + type + ", level " + st.level + ", address [" + S.dir + "]!");}
+                                        else {type = S.type;cprocvar.addComment("- Simple parameter \"" + t.image + "\", type " + type + ", class " + S.parClass + ", level " + st.level + ", address [" + S.dir + "]!");}
                                         }
                                         st.insertSymbol(S);
                                 } catch (AlreadyDefinedSymbolException e)
@@ -416,7 +442,7 @@ if(atType.parClass==Symbol.ParameterClass.NONE)atType.parClass=Symbol.ParameterC
       break;
       }
     default:
-      jj_la1[12] = jj_gen;
+      jj_la1[11] = jj_gen;
       ;
     }
 t.image = t.image.toLowerCase();
@@ -448,7 +474,7 @@ t.image = t.image.toLowerCase();
         break;
         }
       default:
-        jj_la1[13] = jj_gen;
+        jj_la1[12] = jj_gen;
         break label_4;
       }
       jj_consume_token(tCOMA);
@@ -461,7 +487,7 @@ t.image = t.image.toLowerCase();
         break;
         }
       default:
-        jj_la1[14] = jj_gen;
+        jj_la1[13] = jj_gen;
         ;
       }
 t.image = t.image.toLowerCase();
@@ -511,7 +537,7 @@ t.image = t.image.toLowerCase();
         break;
         }
       default:
-        jj_la1[15] = jj_gen;
+        jj_la1[14] = jj_gen;
         break label_5;
       }
       jj_consume_token(tCOMA);
@@ -556,7 +582,7 @@ att.atts.add(at.clone());
         break;
         }
       default:
-        jj_la1[16] = jj_gen;
+        jj_la1[15] = jj_gen;
         break label_6;
       }
       jj_consume_token(tCOMA);
@@ -597,6 +623,7 @@ att.type = att.atts.get(0).type;
 }
 
   static final public Token cabecera_procedimiento(Attributes att, CodeBlock cprog) throws ParseException {Token name;
+        String lbel = CGUtils.newLabel();
     jj_consume_token(tPROC);
     name = jj_consume_token(tID);
 try {
@@ -616,7 +643,7 @@ try {
       break;
       }
     default:
-      jj_la1[17] = jj_gen;
+      jj_la1[16] = jj_gen;
       ;
     }
     jj_consume_token(tIS);
@@ -645,7 +672,7 @@ try{
       break;
       }
     default:
-      jj_la1[18] = jj_gen;
+      jj_la1[17] = jj_gen;
       ;
     }
     jj_consume_token(tRETURN);
@@ -663,6 +690,27 @@ S.returnType = atType.type;
                         for(Symbol S : symbols)
                         {
                                 att.parList.add(S);
+
+                                if(S instanceof SymbolArray && S.parClass!=Symbol.ParameterClass.REF)
+                                {
+                                        SymbolArray SA = (SymbolArray) S;
+
+                                        for(int i = SA.maxInd-SA.minInd+1;i>0;i--)
+                                        {
+                                                cprog.addInst(PCodeInstruction.OpCode.SRF,(st.level - S.nivel),(int)S.dir+i);
+                                                cprog.addInst(PCodeInstruction.OpCode.ASGI);
+                                        }
+                                }
+                                else if(S.parClass==Symbol.ParameterClass.REF)
+                                {
+                                        cprog.addInst(PCodeInstruction.OpCode.SRF,(st.level - S.nivel),(int)S.dir);
+                                }
+                                else
+                                {
+                                        cprog.addInst(PCodeInstruction.OpCode.SRF,(st.level - S.nivel),(int)S.dir);
+                                        cprog.addInst(PCodeInstruction.OpCode.ASGI);
+                                }
+
                 // 		st.insertSymbol(S);
                         }
                         cprog.addBlock(cprocvar);
@@ -680,7 +728,7 @@ S.returnType = atType.type;
         break;
         }
       default:
-        jj_la1[19] = jj_gen;
+        jj_la1[18] = jj_gen;
         break label_7;
       }
       jj_consume_token(tPC);
@@ -688,6 +736,26 @@ S.returnType = atType.type;
 for(Symbol S : symbols)
                 {
                         att.parList.add(S);
+
+                        if(S instanceof SymbolArray && S.parClass!=Symbol.ParameterClass.REF)
+                        {
+                                SymbolArray SA = (SymbolArray) S;
+
+                                for(int i = SA.maxInd-SA.minInd+1;i>0;i--)
+                                {
+                                        cprog.addInst(PCodeInstruction.OpCode.SRF,(st.level - S.nivel),(int)S.dir+i);
+                                        cprog.addInst(PCodeInstruction.OpCode.ASGI);
+                                }
+                        }
+                        else if(S.parClass==Symbol.ParameterClass.REF)
+                        {
+                                cprog.addInst(PCodeInstruction.OpCode.SRF,(st.level - S.nivel),(int)S.dir);
+                        }
+                        else
+                        {
+                                cprog.addInst(PCodeInstruction.OpCode.SRF,(st.level - S.nivel),(int)S.dir);
+                                cprog.addInst(PCodeInstruction.OpCode.ASGI);
+                        }
                         // st.insertSymbol(S);
                 }
                 cprog.addBlock(cprocvar);
@@ -734,7 +802,7 @@ for(Symbol S : symbols)
       break;
       }
     default:
-      jj_la1[20] = jj_gen;
+      jj_la1[19] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -766,7 +834,7 @@ for (Attributes a : att.atts)
     jj_consume_token(tSKIP);
 String et = CGUtils.newLabel();
                 cBlock.addLabel(et);
-                long dir = CGUtils.getLevel();
+                long dir = CGUtils.getDir();
                 cBlock.addInst(PCodeInstruction.OpCode.SRF, 0, (int)dir);
                 cBlock.addInst(PCodeInstruction.OpCode.RD, 0);
                 cBlock.addInst(PCodeInstruction.OpCode.SRF, 0, (int)dir);
@@ -801,7 +869,7 @@ sf.check_inst_escribir(st,att);
       break;
       }
     default:
-      jj_la1[21] = jj_gen;
+      jj_la1[20] = jj_gen;
       ;
     }
 if(att.atts.size()>0)
@@ -817,23 +885,29 @@ if(att.atts.size()>0)
 
   static final public void inst_invocacion_o_asignacion(Attributes att,CodeBlock cBlock) throws ParseException {Attributes at = new Attributes();
         Attributes at2 = new Attributes();
+        Symbol S = null;
         Token t;
     t = jj_consume_token(tID);
+try {
+                        t.image = t.image.toLowerCase();
+                        S = st.getSymbol(t.image);
+
+                } catch (SymbolNotFoundException ex)
+                {
+                        {if (true) throw new ErrorSemantico(t.image + " no existe.");}
+                }
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tAP:{
       jj_consume_token(tAP);
-      function_call(at2);
+      function_call(at2,cBlock,S);
       jj_consume_token(tCP);
       break;
       }
     default:
-      jj_la1[22] = jj_gen;
+      jj_la1[21] = jj_gen;
       ;
     }
-try {
-                        t.image = t.image.toLowerCase();
-                        Symbol S = st.getSymbol(t.image);
-                        //System.err.println("Tipo de la funcion: " + at2);	
+//System.err.println("Tipo de la funcion: " + at2);	
                         sf.cambiarTipos(at2, S);
                         //System.err.println("Tipo de la funcion: " + at2);	
                         sf.asignar_valores(att,at2,t.image,S.type, S.parClass, st.level,false);
@@ -843,45 +917,49 @@ try {
                         }
                         sf.checkTypeFunctionCall(at2);
 
-                        /*System.out.println(S.type);
-			
-			if(S.type == Symbol.Types.PROCEDURE||S.type == Symbol.Types.FUNCTION)
-			{
-				for(int i = 0; i<at2.atts.size(); i++)
-				{
-					System.out.println(at2.atts.get(i).code);
-				}
-			}*/
+                        for(int i = 0; i<at2.atts.size(); i++)
+                        {
+                                System.out.println("\t"+at2.atts.get(i).parClass);
+                        }
 
                         if(S.type == Symbol.Types.PROCEDURE)
                         {
                                 SymbolProcedure SP = (SymbolProcedure) S;
-                                cBlock.addOSFInst(st.getInvocIndex(),st.level-S.nivel,SP.etiq);
+                                cBlock.addOSFInst(CGUtils.getInvocDir(),st.level-S.nivel,SP.etiq);
                         }
 
                         if(S.type == Symbol.Types.FUNCTION)
                         {
                                 SymbolFunction SF = (SymbolFunction) S;
-                                cBlock.addOSFInst(st.getInvocIndex(),st.level-S.nivel,SF.etiq);
+                                cBlock.addOSFInst(CGUtils.getInvocDir(),st.level-S.nivel,SF.etiq);
                         }
 
-                } catch (SymbolNotFoundException ex)
-                {
-                        {if (true) throw new ErrorSemantico(t.image + " no existe.");}
-                }
+                        if(S.type == Symbol.Types.ARRAY)
+                        {
+                                SymbolArray SA = (SymbolArray) S;
+
+                                if(SA.minInd<0)
+                                {
+                                        cBlock.addInst(PCodeInstruction.OpCode.STC,-SA.minInd);
+                                        cBlock.addInst(PCodeInstruction.OpCode.NGI);
+                                        cBlock.addInst(PCodeInstruction.OpCode.SBT);
+                                }
+                                else if(SA.minInd>0)
+                                {
+                                        cBlock.addInst(PCodeInstruction.OpCode.STC,SA.minInd);
+                                        cBlock.addInst(PCodeInstruction.OpCode.SBT);
+                                }
+
+
+                        }
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tASIG:{
       jj_consume_token(tASIG);
-try {
-                        t.image = t.image.toLowerCase();
-                        Symbol S = st.getSymbol(t.image);
+cBlock.addInst(PCodeInstruction.OpCode.SRF,st.level,(int)S.dir);
 
-                        cBlock.addInst(PCodeInstruction.OpCode.SRF,st.level,(int)S.dir);
-
-
-                } catch (SymbolNotFoundException ex)
+                if(S instanceof SymbolArray)
                 {
-                        {if (true) throw new ErrorSemantico(t.image + " no existe.");}
+                        cBlock.addInst(PCodeInstruction.OpCode.PLUS);
                 }
       expresion(at, cBlock);
 sf.add_to_atts(att,at);
@@ -894,7 +972,7 @@ sf.add_to_atts(att,at);
       break;
       }
     default:
-      jj_la1[23] = jj_gen;
+      jj_la1[22] = jj_gen;
       ;
     }
 
@@ -954,6 +1032,7 @@ cBlock.addBlock(cbloque);
                 cbloque=new CodeBlock();
                 cBlock.addComment("Fin Bloque de instrucciones IF");
                 cBlock.addInst(PCodeInstruction.OpCode.JMP,endLabel);
+                cBlock.addLabel(lbel);
     label_8:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -962,11 +1041,10 @@ cBlock.addBlock(cbloque);
         break;
         }
       default:
-        jj_la1[24] = jj_gen;
+        jj_la1[23] = jj_gen;
         break label_8;
       }
       jj_consume_token(tELSIF);
-cBlock.addLabel(lbel);
       expresion(at, cBlock);
 if(at.type==Symbol.Types.ARRAY)
                 {
@@ -999,12 +1077,12 @@ cBlock.addBlock(cbloque);
                 cbloque=new CodeBlock();
                 cBlock.addComment("Fin Bloque de instrucciones ELSIF");
                 cBlock.addInst(PCodeInstruction.OpCode.JMP,endLabel);
+                cBlock.addLabel(lbel);
     }
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tELSE:{
       jj_consume_token(tELSE);
-cBlock.addLabel(lbel);
-                cBlock.addComment("Inicio Bloque de instrucciones ELSE");
+cBlock.addComment("Inicio Bloque de instrucciones ELSE");
       instrucciones(cbloque);
 cBlock.addBlock(cbloque);
                 cbloque=new CodeBlock();
@@ -1013,12 +1091,11 @@ cBlock.addBlock(cbloque);
       break;
       }
     default:
-      jj_la1[25] = jj_gen;
+      jj_la1[24] = jj_gen;
       ;
     }
     jj_consume_token(tENDIF);
-cBlock.addLabel(lbel);
-                cBlock.addLabel(endLabel);
+cBlock.addLabel(endLabel);
 }
 
   static final public void inst_while(Attributes att,CodeBlock cBlock) throws ParseException {Attributes at = new Attributes();
@@ -1118,6 +1195,8 @@ sf.add_to_atts(att,at);
                 sf.heredar_valores(att,at);
                 at = new Attributes();
 
+                cBlock.addBlock(cExp);
+                cBlock.addInst(PCodeInstruction.OpCode.AND);
                 cExp = new CodeBlock();
           switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
           case tAND:{
@@ -1125,7 +1204,7 @@ sf.add_to_atts(att,at);
             break;
             }
           default:
-            jj_la1[26] = jj_gen;
+            jj_la1[25] = jj_gen;
             break label_9;
           }
         }
@@ -1143,6 +1222,7 @@ sf.add_to_atts(att,at);
                 at = new Attributes();
 
                 cBlock.addBlock(cExp);
+                cBlock.addInst(PCodeInstruction.OpCode.OR);
                 cExp = new CodeBlock();
           switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
           case tOR:{
@@ -1150,21 +1230,21 @@ sf.add_to_atts(att,at);
             break;
             }
           default:
-            jj_la1[27] = jj_gen;
+            jj_la1[26] = jj_gen;
             break label_10;
           }
         }
         break;
         }
       default:
-        jj_la1[28] = jj_gen;
+        jj_la1[27] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
       break;
       }
     default:
-      jj_la1[29] = jj_gen;
+      jj_la1[28] = jj_gen;
       ;
     }
 // ( 2+3+4) + 5 + (2+3)
@@ -1227,7 +1307,7 @@ sf.add_to_atts(att,at);
       break;
       }
     default:
-      jj_la1[30] = jj_gen;
+      jj_la1[29] = jj_gen;
       ;
     }
 cBlock.addBlock(cRel);
@@ -1310,7 +1390,7 @@ cBlock.addInst(PCodeInstruction.OpCode.NEQ);{if ("" != null) return false;}
       break;
       }
     default:
-      jj_la1[31] = jj_gen;
+      jj_la1[30] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1330,10 +1410,11 @@ cBlock.addInst(PCodeInstruction.OpCode.NEQ);{if ("" != null) return false;}
         }
       case tSUB:{
         jj_consume_token(tSUB);
+cOP.addInst(PCodeInstruction.OpCode.NGI);
         break;
         }
       default:
-        jj_la1[32] = jj_gen;
+        jj_la1[31] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -1341,13 +1422,16 @@ esInt=true;att.type=Symbol.Types.INT;
       break;
       }
     default:
-      jj_la1[33] = jj_gen;
+      jj_la1[32] = jj_gen;
       ;
     }
     termino(at, cBlock);
 sf.add_to_atts(att,at);
                 sf.heredar_valores(att,at);
                 at = new Attributes();
+
+                cBlock.addBlock(cOP);
+                cOP = new CodeBlock();
     label_11:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -1357,7 +1441,7 @@ sf.add_to_atts(att,at);
         break;
         }
       default:
-        jj_la1[34] = jj_gen;
+        jj_la1[33] = jj_gen;
         break label_11;
       }
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -1372,7 +1456,7 @@ cOP.addInst(PCodeInstruction.OpCode.SBT);
         break;
         }
       default:
-        jj_la1[35] = jj_gen;
+        jj_la1[34] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -1417,7 +1501,7 @@ sf.add_to_atts(att,at);
         break;
         }
       default:
-        jj_la1[36] = jj_gen;
+        jj_la1[35] = jj_gen;
         break label_12;
       }
       operador_multiplicativo(opMUL);
@@ -1464,7 +1548,7 @@ cBlock.addInst(PCodeInstruction.OpCode.DIV);
       break;
       }
     default:
-      jj_la1[37] = jj_gen;
+      jj_la1[36] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1514,11 +1598,11 @@ att.type = Symbol.Types.BOOL;
                 }
                 at = new Attributes();
 
-                cBlock.addInst(PCodeInstruction.OpCode.NGI);
+                cBlock.addInst(PCodeInstruction.OpCode.NGB);
       break;
       }
     default:
-      jj_la1[38] = jj_gen;
+      jj_la1[37] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1602,22 +1686,27 @@ if(at.type!=Symbol.Types.CHAR)
       }
     case tID:{
       t = jj_consume_token(tID);
-      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case tAP:{
-        jj_consume_token(tAP);
-        function_call(at);
-        jj_consume_token(tCP);
-        break;
-        }
-      default:
-        jj_la1[39] = jj_gen;
-        ;
-      }
 try
                 {
                         t.image = t.image.toLowerCase();
                         S = st.getSymbol(t.image);
-                        sf.cambiarTipos(at, S);
+                }
+                catch(SymbolNotFoundException ex)
+                {
+                        {if (true) throw new ErrorSemantico(t.image + " no existe.");}
+                }
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case tAP:{
+        jj_consume_token(tAP);
+        function_call(at,cBlock,S);
+        jj_consume_token(tCP);
+        break;
+        }
+      default:
+        jj_la1[38] = jj_gen;
+        ;
+      }
+sf.cambiarTipos(at, S);
                         sf.asignar_valores(att,at,t.image,S.type, S.parClass, st.level,false);
                         sf.checkPrimarioIds(at);
                         at = new Attributes();
@@ -1625,24 +1714,18 @@ try
                         if(S instanceof SymbolProcedure)
                         {
                                 SymbolProcedure SP = (SymbolProcedure) S;
-                                cBlock.addOSFInst(st.getInvocIndex(),st.level-S.nivel,SP.etiq);
+                                cBlock.addOSFInst(CGUtils.getInvocDir(),st.level-S.nivel,SP.etiq);
                         }
                         else if(S instanceof SymbolFunction)
                         {
                                 SymbolFunction SF = (SymbolFunction) S;
-                                cBlock.addOSFInst(st.getInvocIndex(),st.level-S.nivel,SF.etiq);
+                                cBlock.addOSFInst(CGUtils.getInvocDir(),st.level-S.nivel,SF.etiq);
                         }
                         else
                         {
                                 cBlock.addInst(PCodeInstruction.OpCode.SRF,st.level-S.nivel,(int)S.dir);
                                 cBlock.addInst(PCodeInstruction.OpCode.DRF);
                         }
-
-                }
-                catch(SymbolNotFoundException ex)
-                {
-                        {if (true) throw new ErrorSemantico(t.image + " no existe.");}
-                }
       break;
       }
     case tSUB:
@@ -1653,7 +1736,7 @@ try
         break;
         }
       default:
-        jj_la1[40] = jj_gen;
+        jj_la1[39] = jj_gen;
         ;
       }
       t = jj_consume_token(tCONST_INT);
@@ -1689,17 +1772,72 @@ cBlock.addInst(PCodeInstruction.OpCode.STC, 0);
       break;
       }
     default:
-      jj_la1[41] = jj_gen;
+      jj_la1[40] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
 }
 
-  static final public void function_call(Attributes att) throws ParseException {Attributes at = new Attributes();
+  static final public void function_call(Attributes att,CodeBlock cBloque,Symbol S) throws ParseException {Attributes at = new Attributes();
         CodeBlock cBlock = new CodeBlock();
+        int i=0;
     expresion(at, cBlock);
-sf.add_to_atts(att,at);
+//System.out.println(at.parClass);
+
+        //System.out.println(at.toString());
+
+        if(S instanceof SymbolProcedure)
+        {
+                SymbolProcedure SP = (SymbolProcedure) S;
+                //System.out.println(SP.parList.get(i).parClass);
+                at.parClass = SP.parList.get(i).parClass;
+                i++;
+        }
+
+        if(S instanceof SymbolFunction)
+        {
+                SymbolFunction SF = (SymbolFunction) S;
+                //System.out.println(SF.parList.get(i).parClass);
+                at.parClass = SF.parList.get(i).parClass;
+                i++;
+        }
+
+        sf.add_to_atts(att,at);
         sf.heredar_valores(att,at);
+
+        if(at.esConstante&&at.parClass==Symbol.ParameterClass.REF)
+        {
+                {if (true) throw new ErrorSemantico("No puedes pasar una constante como valor por referencia");}
+        }
+
+        //System.out.println(at.parClass);	
+
+        if(at.parClass==Symbol.ParameterClass.REF)
+        {
+                cBlock.removeLastInst();
+        }
+        else if(at.type==Symbol.Types.ARRAY)
+        {
+                SymbolArray SA = null;
+
+                try
+                {
+                        SA = (SymbolArray)st.getSymbol(at.code);
+                } catch(SymbolNotFoundException ex)
+                {
+                        {if (true) throw new ErrorSemantico(at.code+" no existe");}
+                }
+
+                for(int j=1;j<SA.maxInd-SA.minInd+1;j++)
+                {
+                        cBlock.addInst(PCodeInstruction.OpCode.SRF,(st.level - SA.nivel),(int)SA.dir+j);
+                        cBlock.addInst(PCodeInstruction.OpCode.DRF);
+                }
+        }
+
+        cBloque.addBlock(cBlock);
+        cBlock = new CodeBlock();
+
         at = new Attributes();
     label_13:
     while (true) {
@@ -1709,13 +1847,61 @@ sf.add_to_atts(att,at);
         break;
         }
       default:
-        jj_la1[42] = jj_gen;
+        jj_la1[41] = jj_gen;
         break label_13;
       }
       jj_consume_token(tCOMA);
       expresion(at, cBlock);
-sf.add_to_atts(att,at);
+if(S instanceof SymbolProcedure)
+        {
+                SymbolProcedure SP = (SymbolProcedure) S;
+                //System.out.println(SP.parList.get(i).parClass);
+                at.parClass = SP.parList.get(i).parClass;
+                i++;
+        }
+
+        if(S instanceof SymbolFunction)
+        {
+                SymbolFunction SF = (SymbolFunction) S;
+                //System.out.println(SF.parList.get(i).parClass);
+                at.parClass = SF.parList.get(i).parClass;
+                i++;
+        }
+
+        sf.add_to_atts(att,at);
         sf.heredar_valores(att,at);
+
+        if(at.esConstante&&at.parClass==Symbol.ParameterClass.REF)
+        {
+                {if (true) throw new ErrorSemantico("No puedes pasar una constante como valor por referencia");}
+        }
+
+        //System.out.println(at.parClass);
+        if(at.parClass==Symbol.ParameterClass.REF)
+        {
+                cBlock.removeLastInst();
+        }else if(at.type==Symbol.Types.ARRAY)
+        {
+                SymbolArray SA = null;
+
+                try
+                {
+                        SA = (SymbolArray)st.getSymbol(at.code);
+                } catch(SymbolNotFoundException ex)
+                {
+                        {if (true) throw new ErrorSemantico(at.code+" no existe");}
+                }
+
+                for(int j=1;j<SA.maxInd-SA.minInd+1;j++)
+                {
+                        cBlock.addInst(PCodeInstruction.OpCode.SRF,(st.level - SA.nivel),(int)SA.dir+j);
+                        cBlock.addInst(PCodeInstruction.OpCode.DRF);
+                }
+        }
+
+        cBloque.addBlock(cBlock);
+        cBlock = new CodeBlock();
+
         at = new Attributes();
     }
 
@@ -1734,7 +1920,7 @@ esNegativo=true;
         break;
         }
       default:
-        jj_la1[43] = jj_gen;
+        jj_la1[42] = jj_gen;
         ;
       }
       i = jj_consume_token(tCONST_INT);
@@ -1752,7 +1938,7 @@ esNegativo=true;
         break;
         }
       default:
-        jj_la1[44] = jj_gen;
+        jj_la1[43] = jj_gen;
         ;
       }
       i = jj_consume_token(tCONST_INT);
@@ -1773,7 +1959,7 @@ if(esNegativo)  atTypes.fin = -Integer.parseInt(i.image);
       break;
       }
     default:
-      jj_la1[45] = jj_gen;
+      jj_la1[44] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1797,7 +1983,7 @@ at.type = Symbol.Types.INT;
       break;
       }
     default:
-      jj_la1[46] = jj_gen;
+      jj_la1[45] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1813,7 +1999,7 @@ at.type = Symbol.Types.INT;
   static public Token jj_nt;
   static private int jj_ntk;
   static private int jj_gen;
-  static final private int[] jj_la1 = new int[47];
+  static final private int[] jj_la1 = new int[46];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static private int[] jj_la1_2;
@@ -1823,13 +2009,13 @@ at.type = Symbol.Types.INT;
 	   jj_la1_init_2();
 	}
 	private static void jj_la1_init_0() {
-	   jj_la1_0 = new int[] {0x40000000,0x0,0x800,0x800,0x0,0x800,0x0,0x800,0x800,0x38041000,0x0,0x400000,0x40000000,0x0,0x40000000,0x0,0x0,0x40000000,0x40000000,0x4000000,0x38041000,0x40000000,0x40000000,0x0,0x4000,0x8000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x42000000,0x40000000,0x0,0x40000000,0x0,0x0,0x0,0x780,0x380,};
+	   jj_la1_0 = new int[] {0x0,0x800,0x800,0x0,0x800,0x0,0x800,0x800,0x38041000,0x0,0x400000,0x40000000,0x0,0x40000000,0x0,0x0,0x40000000,0x40000000,0x4000000,0x38041000,0x40000000,0x40000000,0x0,0x4000,0x8000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x42000000,0x40000000,0x0,0x40000000,0x0,0x0,0x0,0x780,0x380,};
 	}
 	private static void jj_la1_init_1() {
-	   jj_la1_1 = new int[] {0x0,0x8000000,0x20000,0x20000,0x8000000,0x20000,0x8000000,0x20000,0x20000,0x80d0000,0x8000000,0x0,0x0,0x4000,0x0,0x4000,0x4000,0x0,0x0,0x0,0x80d0000,0x0,0x0,0x1,0x0,0x0,0x100,0x200,0x300,0x300,0x7e,0x7e,0xc00,0xc00,0xc00,0xc00,0xb000,0xb000,0xff00800,0x0,0x800,0xff00800,0x4000,0x800,0x800,0x0,0x0,};
+	   jj_la1_1 = new int[] {0x8000000,0x20000,0x20000,0x8000000,0x20000,0x8000000,0x20000,0x20000,0x80d0000,0x8000000,0x0,0x0,0x4000,0x0,0x4000,0x4000,0x0,0x0,0x0,0x80d0000,0x0,0x0,0x1,0x0,0x0,0x100,0x200,0x300,0x300,0x7e,0x7e,0xc00,0xc00,0xc00,0xc00,0xb000,0xb000,0xff00800,0x0,0x800,0xff00800,0x4000,0x800,0x800,0x0,0x0,};
 	}
 	private static void jj_la1_init_2() {
-	   jj_la1_2 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+	   jj_la1_2 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
 	}
 
   /** Constructor with InputStream. */
@@ -1850,7 +2036,7 @@ at.type = Symbol.Types.INT;
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 47; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 46; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -1864,7 +2050,7 @@ at.type = Symbol.Types.INT;
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 47; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 46; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -1881,7 +2067,7 @@ at.type = Symbol.Types.INT;
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 47; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 46; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -1899,7 +2085,7 @@ at.type = Symbol.Types.INT;
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 47; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 46; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -1915,7 +2101,7 @@ at.type = Symbol.Types.INT;
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 47; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 46; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -1924,7 +2110,7 @@ at.type = Symbol.Types.INT;
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 47; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 46; i++) jj_la1[i] = -1;
   }
 
   static private Token jj_consume_token(int kind) throws ParseException {
@@ -1980,7 +2166,7 @@ at.type = Symbol.Types.INT;
 	   la1tokens[jj_kind] = true;
 	   jj_kind = -1;
 	 }
-	 for (int i = 0; i < 47; i++) {
+	 for (int i = 0; i < 46; i++) {
 	   if (jj_la1[i] == jj_gen) {
 		 for (int j = 0; j < 32; j++) {
 		   if ((jj_la1_0[i] & (1<<j)) != 0) {
