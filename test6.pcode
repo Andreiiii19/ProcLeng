@@ -1,14 +1,347 @@
   ENP L0
 ; --- Simple variable "i", type CHAR, level 0, address [3]!
 ; --- Simple variable "j", type INT, level 0, address [4]!
-; --Comienzo main
-L0:
+; --Comienzo function x
+L1: 
+  JMP L2
+L2: 
   SRF  0  3
+  STC  0
+  ASG
+  SRF  0  3
+  STC  1
+  ASG
+  STC 97
+  CSF
+; -- - Fin function x
+; -- - Comprobación del retorno de la función
+  SRF  0  3
+  DRF
+  JMT L3
+; --- Write STRING "No return statement found in function x!".
+  STC 78
+  WRT  0
+  STC 111
+  WRT  0
+  STC 32
+  WRT  0
+  STC 114
+  WRT  0
+  STC 101
+  WRT  0
+  STC 116
+  WRT  0
+  STC 117
+  WRT  0
+  STC 114
+  WRT  0
+  STC 110
+  WRT  0
+  STC 32
+  WRT  0
+  STC 115
+  WRT  0
+  STC 116
+  WRT  0
+  STC 97
+  WRT  0
+  STC 116
+  WRT  0
+  STC 101
+  WRT  0
+  STC 109
+  WRT  0
+  STC 101
+  WRT  0
+  STC 110
+  WRT  0
+  STC 116
+  WRT  0
+  STC 32
+  WRT  0
+  STC 102
+  WRT  0
+  STC 111
+  WRT  0
+  STC 117
+  WRT  0
+  STC 110
+  WRT  0
+  STC 100
+  WRT  0
+  STC 32
+  WRT  0
+  STC 105
+  WRT  0
+  STC 110
+  WRT  0
+  STC 32
+  WRT  0
+  STC 102
+  WRT  0
+  STC 117
+  WRT  0
+  STC 110
+  WRT  0
+  STC 99
+  WRT  0
+  STC 116
+  WRT  0
+  STC 105
+  WRT  0
+  STC 111
+  WRT  0
+  STC 110
+  WRT  0
+  STC 32
+  WRT  0
+  STC 120
+  WRT  0
+  STC 33
+  WRT  0
+L3: 
+  CSF
+; --Comienzo main
+L0: 
+  SRF  0  3
+; --- Variable/parameter/function "j".
   SRF  0  4
   DRF
+; --- Check if int is in range [0,255].
+  DUP
+  STC  0
+  GTE
+  JMF L4
+  DUP
+  STC 255
+  LTE
+  JMF L4
+  JMP L5
+L4: 
+; --- Write STRING "invalid for int2char in line(18)".
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "v".
+  STC 118
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "d".
+  STC 100
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "f".
+  STC 102
+  WRT  0
+; --- Write CHAR "o".
+  STC 111
+  WRT  0
+; --- Write CHAR "r".
+  STC 114
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "t".
+  STC 116
+  WRT  0
+; --- Write CHAR "2".
+  STC 50
+  WRT  0
+; --- Write CHAR "c".
+  STC 99
+  WRT  0
+; --- Write CHAR "h".
+  STC 104
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR "r".
+  STC 114
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "e".
+  STC 101
+  WRT  0
+; --- Write CHAR "(".
+  STC 40
+  WRT  0
+; --- Write CHAR "1".
+  STC 49
+  WRT  0
+; --- Write CHAR "8".
+  STC 56
+  WRT  0
+; --- Write CHAR ")".
+  STC 41
+  WRT  0
+; --- Write CR/LF
+  STC 13
+  WRT  0
+  STC 10
+  WRT  0
+L5: 
   ASG
   SRF  0  3
   STC 220
+; --- Check if int is in range [0,255].
+  DUP
+  STC  0
+  GTE
+  JMF L6
+  DUP
+  STC 255
+  LTE
+  JMF L6
+  JMP L7
+L6: 
+; --- Write STRING "invalid for int2char in line(20)".
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "v".
+  STC 118
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "d".
+  STC 100
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "f".
+  STC 102
+  WRT  0
+; --- Write CHAR "o".
+  STC 111
+  WRT  0
+; --- Write CHAR "r".
+  STC 114
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "t".
+  STC 116
+  WRT  0
+; --- Write CHAR "2".
+  STC 50
+  WRT  0
+; --- Write CHAR "c".
+  STC 99
+  WRT  0
+; --- Write CHAR "h".
+  STC 104
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR "r".
+  STC 114
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "e".
+  STC 101
+  WRT  0
+; --- Write CHAR "(".
+  STC 40
+  WRT  0
+; --- Write CHAR "2".
+  STC 50
+  WRT  0
+; --- Write CHAR "0".
+  STC 48
+  WRT  0
+; --- Write CHAR ")".
+  STC 41
+  WRT  0
+; --- Write CR/LF
+  STC 13
+  WRT  0
+  STC 10
+  WRT  0
+L7: 
+  ASG
+  SRF  0  4
+; --- Variable/parameter/function "x".
+  OSF  5  0 L1
   ASG
 ; --Fin main
   LVP

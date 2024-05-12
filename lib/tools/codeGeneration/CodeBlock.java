@@ -51,7 +51,7 @@ public class CodeBlock {
 	}
 	
 	public void addComment (String comment) {
-		//code.add(new Comment(comment)); 
+		code.add(new Comment(comment)); 
 	}
 	
 	public void addLabel (String label) {

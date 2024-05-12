@@ -1,0 +1,762 @@
+  ENP L0
+; --- Simple variable "num", type INT, level 0, address [3]!
+; --- Simple variable "base", type INT, level 0, address [4]!
+; --- Simple variable "enb", type INT, level 0, address [5]!
+; --- Write STRING "No return statement found in function b_dec!".
+  STC 78
+  WRT  0
+  STC 111
+  WRT  0
+  STC 32
+  WRT  0
+  STC 114
+  WRT  0
+  STC 101
+  WRT  0
+  STC 116
+  WRT  0
+  STC 117
+  WRT  0
+  STC 114
+  WRT  0
+  STC 110
+  WRT  0
+  STC 32
+  WRT  0
+  STC 115
+  WRT  0
+  STC 116
+  WRT  0
+  STC 97
+  WRT  0
+  STC 116
+  WRT  0
+  STC 101
+  WRT  0
+  STC 109
+  WRT  0
+  STC 101
+  WRT  0
+  STC 110
+  WRT  0
+  STC 116
+  WRT  0
+  STC 32
+  WRT  0
+  STC 102
+  WRT  0
+  STC 111
+  WRT  0
+  STC 117
+  WRT  0
+  STC 110
+  WRT  0
+  STC 100
+  WRT  0
+  STC 32
+  WRT  0
+  STC 105
+  WRT  0
+  STC 110
+  WRT  0
+  STC 32
+  WRT  0
+  STC 102
+  WRT  0
+  STC 117
+  WRT  0
+  STC 110
+  WRT  0
+  STC 99
+  WRT  0
+  STC 116
+  WRT  0
+  STC 105
+  WRT  0
+  STC 111
+  WRT  0
+  STC 110
+  WRT  0
+  STC 32
+  WRT  0
+  STC 98
+  WRT  0
+  STC 95
+  WRT  0
+  STC 100
+  WRT  0
+  STC 101
+  WRT  0
+  STC 99
+  WRT  0
+  STC 33
+  WRT  0
+; --Comienzo function b_dec
+L1: 
+; --- Simple parameter "n", type INT, class VAL, level 1, address [4]!
+; --- Simple parameter "b", type INT, class VAL, level 1, address [5]!
+; --- Recover simple / array of  val / ref parameter "b".
+  SRF  0  5
+  ASGI
+; --- Recover simple / array of  val / ref parameter "n".
+  SRF  0  4
+  ASGI
+  JMP L2
+; --- Simple variable "uc", type INT, level 1, address [6]!
+; --- Simple variable "valrec", type INT, level 1, address [7]!
+L2: 
+  SRF  0  3
+  STC  0
+  ASG
+; --- Variable/parameter/function "n".
+  SRF  0  4
+  DRF
+  STC  0
+  EQ
+  JMF L3
+; --Inicio Bloque de instrucciones IF
+  SRF  0  3
+  STC  1
+  ASG
+  STC  0
+  CSF
+; --Fin Bloque de instrucciones IF
+  JMP L4
+L3: 
+; --Inicio Bloque de instrucciones ELSE
+  SRF  0  6
+; --- Variable/parameter/function "n".
+  SRF  0  4
+  DRF
+  STC 10
+  MOD
+  ASG
+  SRF  0  7
+; --- Variable/parameter/function "b_dec".
+; --- Variable/parameter/function "n".
+  SRF  0  4
+  DRF
+  STC 10
+  DIV
+; --- Variable/parameter/function "b".
+  SRF  0  5
+  DRF
+  OSF  8  1 L1
+  ASG
+  SRF  0  3
+  STC  1
+  ASG
+; --- Variable/parameter/function "valrec".
+  SRF  0  7
+  DRF
+; --- Variable/parameter/function "b".
+  SRF  0  5
+  DRF
+  TMS
+; --- Variable/parameter/function "uc".
+  SRF  0  6
+  DRF
+  PLUS
+  CSF
+; --Fin Bloque de instrucciones ELSE
+L4: 
+; -- - Fin function b_dec
+; -- - Comprobación del retorno de la función
+  SRF  0  3
+  DRF
+  JMT L5
+L5: 
+  CSF
+; --- Write STRING "No return statement found in function dec_b!".
+  STC 78
+  WRT  0
+  STC 111
+  WRT  0
+  STC 32
+  WRT  0
+  STC 114
+  WRT  0
+  STC 101
+  WRT  0
+  STC 116
+  WRT  0
+  STC 117
+  WRT  0
+  STC 114
+  WRT  0
+  STC 110
+  WRT  0
+  STC 32
+  WRT  0
+  STC 115
+  WRT  0
+  STC 116
+  WRT  0
+  STC 97
+  WRT  0
+  STC 116
+  WRT  0
+  STC 101
+  WRT  0
+  STC 109
+  WRT  0
+  STC 101
+  WRT  0
+  STC 110
+  WRT  0
+  STC 116
+  WRT  0
+  STC 32
+  WRT  0
+  STC 102
+  WRT  0
+  STC 111
+  WRT  0
+  STC 117
+  WRT  0
+  STC 110
+  WRT  0
+  STC 100
+  WRT  0
+  STC 32
+  WRT  0
+  STC 105
+  WRT  0
+  STC 110
+  WRT  0
+  STC 32
+  WRT  0
+  STC 102
+  WRT  0
+  STC 117
+  WRT  0
+  STC 110
+  WRT  0
+  STC 99
+  WRT  0
+  STC 116
+  WRT  0
+  STC 105
+  WRT  0
+  STC 111
+  WRT  0
+  STC 110
+  WRT  0
+  STC 32
+  WRT  0
+  STC 100
+  WRT  0
+  STC 101
+  WRT  0
+  STC 99
+  WRT  0
+  STC 95
+  WRT  0
+  STC 98
+  WRT  0
+  STC 33
+  WRT  0
+; --Comienzo function dec_b
+L6: 
+; --- Simple parameter "n", type INT, class VAL, level 1, address [4]!
+; --- Simple parameter "b", type INT, class VAL, level 1, address [5]!
+  SRF  0  5
+  ASGI
+; --- Recover simple / array of  val / ref parameter "n".
+  SRF  0  4
+  ASGI
+  JMP L7
+; --- Simple variable "resto", type INT, level 1, address [6]!
+; --- Simple variable "valrec", type INT, level 1, address [7]!
+L7: 
+  SRF  0  3
+  STC  0
+  ASG
+; --- Variable/parameter/function "n".
+  SRF  0  4
+  DRF
+; --- Variable/parameter/function "b".
+  SRF  0  5
+  DRF
+  LT
+  JMF L8
+; --Inicio Bloque de instrucciones IF
+  SRF  0  3
+  STC  1
+  ASG
+; --- Variable/parameter/function "n".
+  SRF  0  4
+  DRF
+  CSF
+; --Fin Bloque de instrucciones IF
+  JMP L9
+L8: 
+; --Inicio Bloque de instrucciones ELSE
+  SRF  0  6
+; --- Variable/parameter/function "n".
+  SRF  0  4
+  DRF
+; --- Variable/parameter/function "b".
+  SRF  0  5
+  DRF
+  MOD
+  ASG
+  SRF  0  7
+; --- Variable/parameter/function "dec_b".
+; --- Variable/parameter/function "n".
+  SRF  0  4
+  DRF
+; --- Variable/parameter/function "b".
+  SRF  0  5
+  DRF
+  DIV
+; --- Variable/parameter/function "b".
+  SRF  0  5
+  DRF
+  OSF  8  1 L6
+  ASG
+  SRF  0  3
+  STC  1
+  ASG
+; --- Variable/parameter/function "valrec".
+  SRF  0  7
+  DRF
+  STC 10
+  TMS
+; --- Variable/parameter/function "resto".
+  SRF  0  6
+  DRF
+  PLUS
+  CSF
+; --Fin Bloque de instrucciones ELSE
+L9: 
+; -- - Fin function dec_b
+; -- - Comprobación del retorno de la función
+  SRF  0  3
+  DRF
+  JMT L10
+L10: 
+  CSF
+; --Comienzo main
+L0: 
+  SRF  0  3
+  STC  4
+  ASG
+  SRF  0  4
+  STC  2
+  ASG
+; --- Write STRING "Este programa convierte n=".
+; --- Write CHAR "E".
+  STC 69
+  WRT  0
+; --- Write CHAR "s".
+  STC 115
+  WRT  0
+; --- Write CHAR "t".
+  STC 116
+  WRT  0
+; --- Write CHAR "e".
+  STC 101
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "p".
+  STC 112
+  WRT  0
+; --- Write CHAR "r".
+  STC 114
+  WRT  0
+; --- Write CHAR "o".
+  STC 111
+  WRT  0
+; --- Write CHAR "g".
+  STC 103
+  WRT  0
+; --- Write CHAR "r".
+  STC 114
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR "m".
+  STC 109
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "c".
+  STC 99
+  WRT  0
+; --- Write CHAR "o".
+  STC 111
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "v".
+  STC 118
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "e".
+  STC 101
+  WRT  0
+; --- Write CHAR "r".
+  STC 114
+  WRT  0
+; --- Write CHAR "t".
+  STC 116
+  WRT  0
+; --- Write CHAR "e".
+  STC 101
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "=".
+  STC 61
+  WRT  0
+; --- Variable/parameter/function "num".
+  SRF  0  3
+  DRF
+; --Put INTEGER
+  WRT  1
+; --- Write STRING " a base b=".
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "b".
+  STC 98
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR "s".
+  STC 115
+  WRT  0
+; --- Write CHAR "e".
+  STC 101
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "b".
+  STC 98
+  WRT  0
+; --- Write CHAR "=".
+  STC 61
+  WRT  0
+; --- Variable/parameter/function "base".
+  SRF  0  4
+  DRF
+; --Put INTEGER
+  WRT  1
+; --- Write CR/LF
+; --- Write STRING ", y luego efectúa la conversión inversa.".
+; --- Write CHAR ",".
+  STC 44
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "y".
+  STC 121
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "u".
+  STC 117
+  WRT  0
+; --- Write CHAR "e".
+  STC 101
+  WRT  0
+; --- Write CHAR "g".
+  STC 103
+  WRT  0
+; --- Write CHAR "o".
+  STC 111
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "e".
+  STC 101
+  WRT  0
+; --- Write CHAR "f".
+  STC 102
+  WRT  0
+; --- Write CHAR "e".
+  STC 101
+  WRT  0
+; --- Write CHAR "c".
+  STC 99
+  WRT  0
+; --- Write CHAR "t".
+  STC 116
+  WRT  0
+; --- Write CHAR "ú".
+  STC 250
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "c".
+  STC 99
+  WRT  0
+; --- Write CHAR "o".
+  STC 111
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "v".
+  STC 118
+  WRT  0
+; --- Write CHAR "e".
+  STC 101
+  WRT  0
+; --- Write CHAR "r".
+  STC 114
+  WRT  0
+; --- Write CHAR "s".
+  STC 115
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "ó".
+  STC 243
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Write CHAR "i".
+  STC 105
+  WRT  0
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR "v".
+  STC 118
+  WRT  0
+; --- Write CHAR "e".
+  STC 101
+  WRT  0
+; --- Write CHAR "r".
+  STC 114
+  WRT  0
+; --- Write CHAR "s".
+  STC 115
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR ".".
+  STC 46
+  WRT  0
+; --- Write CR/LF
+  STC 13
+  WRT  0
+  STC 10
+  WRT  0
+; --- Write CR/LF
+  STC 13
+  WRT  0
+  STC 10
+  WRT  0
+; --- Write STRING "n: ".
+; --- Write CHAR "n".
+  STC 110
+  WRT  0
+; --- Write CHAR ":".
+  STC 58
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Variable/parameter/function "num".
+  SRF  0  3
+  DRF
+; --Put INTEGER
+  WRT  1
+; --- Write CR/LF
+  STC 13
+  WRT  0
+  STC 10
+  WRT  0
+; --- Write STRING "b: ".
+; --- Write CHAR "b".
+  STC 98
+  WRT  0
+; --- Write CHAR ":".
+  STC 58
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Variable/parameter/function "base".
+  SRF  0  4
+  DRF
+; --Put INTEGER
+  WRT  1
+; --- Write CR/LF
+  STC 13
+  WRT  0
+  STC 10
+  WRT  0
+  SRF  0  5
+; --- Variable/parameter/function "dec_b".
+; --- Variable/parameter/function "num".
+  SRF  0  3
+  DRF
+; --- Variable/parameter/function "base".
+  SRF  0  4
+  DRF
+  OSF  6  0 L6
+  ASG
+; --- Write STRING "dec_b(".
+; --- Write CHAR "d".
+  STC 100
+  WRT  0
+; --- Write CHAR "e".
+  STC 101
+  WRT  0
+; --- Write CHAR "c".
+  STC 99
+  WRT  0
+; --- Write CHAR "_".
+  STC 95
+  WRT  0
+; --- Write CHAR "b".
+  STC 98
+  WRT  0
+; --- Write CHAR "(".
+  STC 40
+  WRT  0
+; --- Variable/parameter/function "num".
+  SRF  0  3
+  DRF
+; --Put INTEGER
+  WRT  1
+; --- Write STRING ",".
+; --- Write CHAR ",".
+  STC 44
+  WRT  0
+; --- Variable/parameter/function "base".
+  SRF  0  4
+  DRF
+; --Put INTEGER
+  WRT  1
+; --- Write STRING "): ".
+; --- Write CHAR ")".
+  STC 41
+  WRT  0
+; --- Write CHAR ":".
+  STC 58
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Variable/parameter/function "enb".
+  SRF  0  5
+  DRF
+; --Put INTEGER
+  WRT  1
+; --- Write CR/LF
+  STC 13
+  WRT  0
+  STC 10
+  WRT  0
+; --- Write STRING "b_dec(".
+; --- Write CHAR "b".
+  STC 98
+  WRT  0
+; --- Write CHAR "_".
+  STC 95
+  WRT  0
+; --- Write CHAR "d".
+  STC 100
+  WRT  0
+; --- Write CHAR "e".
+  STC 101
+  WRT  0
+; --- Write CHAR "c".
+  STC 99
+  WRT  0
+; --- Write CHAR "(".
+  STC 40
+  WRT  0
+; --- Variable/parameter/function "enb".
+  SRF  0  5
+  DRF
+; --Put INTEGER
+  WRT  1
+; --- Write STRING ",".
+; --- Write CHAR ",".
+  STC 44
+  WRT  0
+; --- Variable/parameter/function "base".
+  SRF  0  4
+  DRF
+; --Put INTEGER
+  WRT  1
+; --- Write STRING "): ".
+; --- Write CHAR ")".
+  STC 41
+  WRT  0
+; --- Write CHAR ":".
+  STC 58
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+; --- Variable/parameter/function "b_dec".
+; --- Variable/parameter/function "enb".
+  SRF  0  5
+  DRF
+; --- Variable/parameter/function "base".
+  SRF  0  4
+  DRF
+  OSF  6  0 L1
+; --Put INTEGER returning from function
+  WRT  1
+; --- Write CR/LF
+  STC 13
+  WRT  0
+  STC 10
+  WRT  0
+; --Fin main
+  LVP

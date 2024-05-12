@@ -51,7 +51,9 @@ public class alike implements alikeConstants {
                    //Programa es el símbolo inicial de la gramática
                    parser.Programa(args[0]);
                    //...
+
                    System.out.println("***** An\u00e1lisis terminado con \u00e9xito *****");
+                   System.out.println("***** Fichero generado: " + args[0].substring(0, args[0].lastIndexOf(".")) + ".pcode *****");
            }
            catch (java.io.FileNotFoundException e) {
                    System.err.println ("Fichero " + args[0] + " no encontrado.");
@@ -170,6 +172,7 @@ try{
         CodeBlock cprog=new CodeBlock(),cparam = new CodeBlock(),cprocfun=new CodeBlock(),cprocvar=new CodeBlock(),cbloque=new CodeBlock();
         CGUtils.addLevel();
         String etiq = CGUtils.newLabel();
+        String labelCode = CGUtils.newLabel();
     name = cabecera_procedimiento(att, cparam);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tID:{
@@ -209,7 +212,6 @@ try{
                 cprog.addLabel(etiq);
                 cprog.addBlock(cparam);
 
-                String labelCode = CGUtils.newLabel();
                 cprog.addInst(PCodeInstruction.OpCode.JMP,labelCode);
 
                 cprog.addBlock(cprocvar);
@@ -226,9 +228,11 @@ try{
         Attributes atIsArray = new Attributes();
         Attributes atts = new Attributes();
         Token name;
-        String etiq = CGUtils.newLabel();
         CodeBlock cprog=new CodeBlock(),cparam = new CodeBlock(), cprocvar=new CodeBlock(),cprocfun=new CodeBlock(),cbloque=new CodeBlock();
         CGUtils.addLevel();
+        CGUtils.getDir();
+        String etiq = CGUtils.newLabel();
+        String labelCode = CGUtils.newLabel();
     name = cabecera_funcion(atType,atIsArray,atts, cparam);
 tipoReturn.add(name);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -253,6 +257,7 @@ tipoReturn.add(name);
     jj_consume_token(tBEGIN);
 try{
                 SymbolFunction S = (SymbolFunction) st.getSymbol(name.image);
+
                 S.etiq = etiq;
                 }catch(SymbolNotFoundException ex)
                 {
@@ -276,16 +281,38 @@ try{
                 cprog.addLabel(etiq);
                 cprog.addBlock(cparam);
 
-                String labelCode = CGUtils.newLabel();
                 cprog.addInst(PCodeInstruction.OpCode.JMP,labelCode);
 
                 cprog.addBlock(cprocvar);
                 cprog.addBlock(cprocfun);
 
                 cprog.addLabel(labelCode);
+                cprog.addInst(PCodeInstruction.OpCode.SRF, 0, 3);
+                cprog.addInst(PCodeInstruction.OpCode.STC, 0);
+                cprog.addInst(PCodeInstruction.OpCode.ASG);
 
                 cprog.addBlock(cbloque);
-                cprog.addComment("Fin function "+name.image);
+                cprog.addComment(" - Fin function "+name.image);
+                cprog.addComment(" - Comprobaci\u00f3n del retorno de la funci\u00f3n");
+                String finalLabel = CGUtils.newLabel();
+                cprog.addInst(PCodeInstruction.OpCode.SRF, 0, 3);
+                cprog.addInst(PCodeInstruction.OpCode.DRF);
+                cprog.addInst(PCodeInstruction.OpCode.JMT, finalLabel);
+
+                String code = "No return statement found in function " + name.image + "!";
+                if (code.startsWith("\"") && code.endsWith("\"")) {
+                        code = code.substring(1, code.length() - 1);
+                }
+                if (code.contains("\"\"")) {
+                        code = code.replace("\"\"", "\"");
+                }
+                cprog.addComment("- Write STRING \"" + code + "\".");
+                for(char c: code.toCharArray()) {
+                        cprog.addInst(PCodeInstruction.OpCode.STC, (int)c);
+                        cprog.addInst(PCodeInstruction.OpCode.WRT, 0);
+                }
+
+                cprog.addLabel(finalLabel);
                 cprog.addInst(PCodeInstruction.OpCode.CSF);
                 cBlock.addBlock(cprog);
 }
@@ -556,8 +583,73 @@ t.image = t.image.toLowerCase();
     expresion(at, cBlock);
 att.atts.add(at.clone());
                 switch (at.type){
-                        case STRING:
-                                String code = at.code;
+                        case CHAR:
+                                cBlock.addComment("- Write CHAR \"" + at.code + "\".");
+                                cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+                                break;
+                        case INT:
+                                // System.err.println("Expresion: " + at);
+                                cBlock.addComment("Put INTEGER");
+                                cBlock.addInst(PCodeInstruction.OpCode.WRT, 1);
+                                break;
+                        case FUNCTION:
+                                System.err.println("Expresion: " + at);
+                                try {
+                                        SymbolFunction SF = (SymbolFunction) st.getSymbol(at.code);
+                                        if (SF.returnType == Symbol.Types.INT) {
+                                                cBlock.addComment("Put INTEGER returning from function");
+                                                cBlock.addInst(PCodeInstruction.OpCode.WRT, 1);
+                                        } else if (SF.returnType == Symbol.Types.CHAR){
+                                                cBlock.addComment("Put CHAR returning from function");
+                                                cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+                                        } else if (SF.returnType == Symbol.Types.BOOL){
+                                                cBlock.addComment("- Put BOOLEAN returning from function");
+                                                String lTrue = CGUtils.newLabel();
+                                                String lFalse = CGUtils.newLabel();
+                                                cBlock.addInst(PCodeInstruction.OpCode.JMF, lFalse);
+                                                cBlock.addComment("- Write STRING \"true\"");
+                                                String code = "true";
+                                                if (code.startsWith("\"") && code.endsWith("\"")) {
+                                                        code = code.substring(1, code.length() - 1);
+                                                }
+                                                if (code.contains("\"\"")) {
+                                                        code = code.replace("\"\"", "\"");
+                                                }
+                                                cBlock.addComment("- Write STRING \"" + code + "\".");
+                                                for(char c: code.toCharArray()) {
+                                                        cBlock.addComment("- Write CHAR \"" + c + "\".");
+                                                        cBlock.addInst(PCodeInstruction.OpCode.STC, (int)c);
+                                                        cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+                                                }
+                                                cBlock.addInst(PCodeInstruction.OpCode.JMP, lTrue);
+                                                cBlock.addLabel(lFalse);
+                                                cBlock.addComment("- Write STRING \"false\"");
+                                                code = "false";
+                                                if (code.startsWith("\"") && code.endsWith("\"")) {
+                                                        code = code.substring(1, code.length() - 1);
+                                                }
+                                                if (code.contains("\"\"")) {
+                                                        code = code.replace("\"\"", "\"");
+                                                }
+                                                cBlock.addComment("- Write STRING \"" + code + "\".");
+                                                for(char c: code.toCharArray()) {
+                                                        cBlock.addComment("- Write CHAR \"" + c + "\".");
+                                                        cBlock.addInst(PCodeInstruction.OpCode.STC, (int)c);
+                                                        cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+                                                }
+                                                cBlock.addLabel(lTrue);
+                                        }
+                                } catch (SymbolNotFoundException ex) {
+                                        {if (true) throw new ErrorSemantico(at.code + " no existe.");}
+                                }
+                                break;
+                        case BOOL:
+                                cBlock.addComment("- Put BOOLEAN");
+                                String lTrue = CGUtils.newLabel();
+                                String lFalse = CGUtils.newLabel();
+                                cBlock.addInst(PCodeInstruction.OpCode.JMF, lFalse);
+                                cBlock.addComment("- Write STRING \"true\"");
+                                String code = "true";
                                 if (code.startsWith("\"") && code.endsWith("\"")) {
                                         code = code.substring(1, code.length() - 1);
                                 }
@@ -570,17 +662,23 @@ att.atts.add(at.clone());
                                         cBlock.addInst(PCodeInstruction.OpCode.STC, (int)c);
                                         cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
                                 }
-                                break;
-                        case CHAR:
-                                cBlock.addComment("- Write CHAR \"" + at.code + "\".");
-
-                                if(!at.code.contains("int2char"))
-                                {
-                                        //cBlock.addInst(PCodeInstruction.OpCode.STC, (int)at.code.charAt(0));
-                                        cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
-                                } else {
+                                cBlock.addInst(PCodeInstruction.OpCode.JMP, lTrue);
+                                cBlock.addLabel(lFalse);
+                                cBlock.addComment("- Write STRING \"false\"");
+                                code = "false";
+                                if (code.startsWith("\"") && code.endsWith("\"")) {
+                                        code = code.substring(1, code.length() - 1);
+                                }
+                                if (code.contains("\"\"")) {
+                                        code = code.replace("\"\"", "\"");
+                                }
+                                cBlock.addComment("- Write STRING \"" + code + "\".");
+                                for(char c: code.toCharArray()) {
+                                        cBlock.addComment("- Write CHAR \"" + c + "\".");
+                                        cBlock.addInst(PCodeInstruction.OpCode.STC, (int)c);
                                         cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
                                 }
+                                cBlock.addLabel(lTrue);
                                 break;
 
                 }
@@ -601,8 +699,73 @@ att.atts.add(at.clone());
       expresion(at, cBlock);
 att.atts.add(at.clone());
                 switch (at.type){
-                        case STRING:
-                                String code = at.code;
+                        case CHAR:
+                                cBlock.addComment("- Write CHAR \"" + at.code + "\".");
+                                cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+                                break;
+                        case INT:
+                                // System.err.println("Expresion: " + at);
+                                cBlock.addComment("Put INTEGER");
+                                cBlock.addInst(PCodeInstruction.OpCode.WRT, 1);
+                                break;
+                        case FUNCTION:
+                                System.err.println("Expresion: " + at);
+                                try {
+                                        SymbolFunction SF = (SymbolFunction) st.getSymbol(at.code);
+                                        if (SF.returnType == Symbol.Types.INT) {
+                                                cBlock.addComment("Put INTEGER returning from function");
+                                                cBlock.addInst(PCodeInstruction.OpCode.WRT, 1);
+                                        } else if (SF.returnType == Symbol.Types.CHAR){
+                                                cBlock.addComment("Put CHAR returning from function");
+                                                cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+                                        } else if (SF.returnType == Symbol.Types.BOOL){
+                                                cBlock.addComment("- Put BOOLEAN returning from function");
+                                                String lTrue = CGUtils.newLabel();
+                                                String lFalse = CGUtils.newLabel();
+                                                cBlock.addInst(PCodeInstruction.OpCode.JMF, lFalse);
+                                                cBlock.addComment("- Write STRING \"true\"");
+                                                String code = "true";
+                                                if (code.startsWith("\"") && code.endsWith("\"")) {
+                                                        code = code.substring(1, code.length() - 1);
+                                                }
+                                                if (code.contains("\"\"")) {
+                                                        code = code.replace("\"\"", "\"");
+                                                }
+                                                cBlock.addComment("- Write STRING \"" + code + "\".");
+                                                for(char c: code.toCharArray()) {
+                                                        cBlock.addComment("- Write CHAR \"" + c + "\".");
+                                                        cBlock.addInst(PCodeInstruction.OpCode.STC, (int)c);
+                                                        cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+                                                }
+                                                cBlock.addInst(PCodeInstruction.OpCode.JMP, lTrue);
+                                                cBlock.addLabel(lFalse);
+                                                cBlock.addComment("- Write STRING \"false\"");
+                                                code = "false";
+                                                if (code.startsWith("\"") && code.endsWith("\"")) {
+                                                        code = code.substring(1, code.length() - 1);
+                                                }
+                                                if (code.contains("\"\"")) {
+                                                        code = code.replace("\"\"", "\"");
+                                                }
+                                                cBlock.addComment("- Write STRING \"" + code + "\".");
+                                                for(char c: code.toCharArray()) {
+                                                        cBlock.addComment("- Write CHAR \"" + c + "\".");
+                                                        cBlock.addInst(PCodeInstruction.OpCode.STC, (int)c);
+                                                        cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+                                                }
+                                                cBlock.addLabel(lTrue);
+                                        }
+                                } catch (SymbolNotFoundException ex) {
+                                        {if (true) throw new ErrorSemantico(at.code + " no existe.");}
+                                }
+                                break;
+                        case BOOL:
+                                cBlock.addComment("- Put BOOLEAN");
+                                String lTrue = CGUtils.newLabel();
+                                String lFalse = CGUtils.newLabel();
+                                cBlock.addInst(PCodeInstruction.OpCode.JMF, lFalse);
+                                cBlock.addComment("- Write STRING \"true\"");
+                                String code = "true";
                                 if (code.startsWith("\"") && code.endsWith("\"")) {
                                         code = code.substring(1, code.length() - 1);
                                 }
@@ -615,18 +778,26 @@ att.atts.add(at.clone());
                                         cBlock.addInst(PCodeInstruction.OpCode.STC, (int)c);
                                         cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
                                 }
-                                break;
-                        case CHAR:
-                                if(!at.code.contains("int2char"))
-                                {
-                                        cBlock.addComment("- Write CHAR \"" + at.code + "\".");
-                                        //cBlock.addInst(PCodeInstruction.OpCode.STC, (int)at.code.charAt(0));
-                                        cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
-                                } else {
-                                        cBlock.addComment("- Write CHAR \"" + at.code + "\".");
+                                cBlock.addInst(PCodeInstruction.OpCode.JMP, lTrue);
+                                cBlock.addLabel(lFalse);
+                                cBlock.addComment("- Write STRING \"false\"");
+                                code = "false";
+                                if (code.startsWith("\"") && code.endsWith("\"")) {
+                                        code = code.substring(1, code.length() - 1);
                                 }
-
+                                if (code.contains("\"\"")) {
+                                        code = code.replace("\"\"", "\"");
+                                }
+                                cBlock.addComment("- Write STRING \"" + code + "\".");
+                                for(char c: code.toCharArray()) {
+                                        cBlock.addComment("- Write CHAR \"" + c + "\".");
+                                        cBlock.addInst(PCodeInstruction.OpCode.STC, (int)c);
+                                        cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+                                }
+                                cBlock.addLabel(lTrue);
                                 break;
+
+
 
                 }
 
@@ -690,6 +861,7 @@ try{
     }
     jj_consume_token(tRETURN);
     tipo_variable_simple(atType);
+
     jj_consume_token(tIS);
 S.returnType = atType.type;
                 {if ("" != null) return name;}
@@ -713,6 +885,8 @@ S.returnType = atType.type;
                                 Symbol S = symbols.get(j);
 
                                 att.parList.add(S);
+
+                                auxBlock1.addComment("- Recover simple / array of  val / ref parameter \"" + S.name + "\".");
 
                                 if(S instanceof SymbolArray && S.parClass!=Symbol.ParameterClass.REF)
                                 {
@@ -898,7 +1072,7 @@ String et = CGUtils.newLabel();
     lista_ids_o_string_o_inv(att, cBlock);
     jj_consume_token(tCP);
 sf.check_inst_escribir(st,att);
-                //cBlock.addComment("- Write CR/LF");
+                cBlock.addComment("- Write CR/LF");
                 /*cBlock.addInst(PCodeInstruction.OpCode.STC, 13);
 		cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
 		cBlock.addInst(PCodeInstruction.OpCode.STC, 10);
@@ -1037,8 +1211,10 @@ sf.add_to_atts(att,at);
   static final public void inst_if(Attributes att,CodeBlock cBlock) throws ParseException {Attributes at = new Attributes();
         CodeBlock cbloque=new CodeBlock();
 
+        String lbel = CGUtils.newLabel();
+        System.out.println("Label ini: "+lbel);
         String endLabel = CGUtils.newLabel();
-        String lbel = null;
+        System.out.println("Label end: "+endLabel);
     jj_consume_token(tIF);
     expresion(at, cBlock);
 if(at.type==Symbol.Types.ARRAY)
@@ -1078,7 +1254,6 @@ if(at.type==Symbol.Types.ARRAY)
                         System.out.println(a.code);
                 }
 
-                lbel = CGUtils.newLabel();
                 cBlock.addInst(PCodeInstruction.OpCode.JMF,lbel);
 
                 cBlock.addComment("Inicio Bloque de instrucciones IF");
@@ -1143,7 +1318,6 @@ cBlock.addComment("Inicio Bloque de instrucciones ELSE");
 cBlock.addBlock(cbloque);
                 cbloque=new CodeBlock();
                 cBlock.addComment("Fin Bloque de instrucciones ELSE");
-                cBlock.addInst(PCodeInstruction.OpCode.JMP,endLabel);
       break;
       }
     default:
@@ -1192,6 +1366,9 @@ cBlock.addComment("Inicio Bloque de instrucciones While");
 
   static final public void inst_return(Attributes att,CodeBlock cBlock) throws ParseException {Attributes at = new Attributes();
     jj_consume_token(tRETURN);
+cBlock.addInst(PCodeInstruction.OpCode.SRF, 0, 3);
+                cBlock.addInst(PCodeInstruction.OpCode.STC, 1);
+                cBlock.addInst(PCodeInstruction.OpCode.ASG);
     expresion(at, cBlock);
 try{
                         Symbol S = st.getSymbol(tipoReturn.get(tipoReturn.size()-1).image);
@@ -1214,7 +1391,6 @@ try{
                         }
 
                         at = new Attributes();
-
                         cBlock.addInst(PCodeInstruction.OpCode.CSF);
                 } catch(SymbolNotFoundException ex) {
                         {if (true) throw new ErrorSemantico("Error semantico. Funcion no encontrada");}
@@ -1690,8 +1866,41 @@ if(at.type!=Symbol.Types.INT)
                 if(at.atts.size()!=1){
                         {if (true) throw new ErrorSemantico("int2char solo acepta un entero");}
                 }
+                String et = CGUtils.newLabel();
+                String et2 = CGUtils.newLabel();
+                cBlock.addComment("- Check if int is in range [0,255].");
+                cBlock.addInst(PCodeInstruction.OpCode.DUP);
+                cBlock.addInst(PCodeInstruction.OpCode.STC, 0);
+                cBlock.addInst(PCodeInstruction.OpCode.GTE);
+                cBlock.addInst(PCodeInstruction.OpCode.JMF, et);
+                cBlock.addInst(PCodeInstruction.OpCode.DUP);
+                cBlock.addInst(PCodeInstruction.OpCode.STC, 255);
+                cBlock.addInst(PCodeInstruction.OpCode.LTE);
+                cBlock.addInst(PCodeInstruction.OpCode.JMF, et);
+                cBlock.addInst(PCodeInstruction.OpCode.JMP, et2);
+                cBlock.addLabel(et);
 
-                //cBlock.addInst(PCodeInstruction.OpCode.ASG);
+                String code = "invalid for int2char in line(" + linea + ")";
+                if (code.startsWith("\"") && code.endsWith("\"")) {
+                        code = code.substring(1, code.length() - 1);
+                }
+                if (code.contains("\"\"")) {
+                        code = code.replace("\"\"", "\"");
+                }
+                cBlock.addComment("- Write STRING \"" + code + "\".");
+                for(char c: code.toCharArray()) {
+                        cBlock.addComment("- Write CHAR \"" + c + "\".");
+                        cBlock.addInst(PCodeInstruction.OpCode.STC, (int)c);
+                        cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+                }
+
+                cBlock.addComment("- Write CR/LF");
+                cBlock.addInst(PCodeInstruction.OpCode.STC, 13);
+                cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+                cBlock.addInst(PCodeInstruction.OpCode.STC, 10);
+                cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+
+                cBlock.addLabel(et2);
 
                 sf.asignar_valores(att,at,at.code,Symbol.Types.CHAR, Symbol.ParameterClass.VAL, st.level, true);
                 sf.heredar_valores(att,at);
@@ -1702,13 +1911,16 @@ if(at.type!=Symbol.Types.INT)
       jj_consume_token(tAP);
       expresion(at, cBlock);
       jj_consume_token(tCP);
-if(at.type!=Symbol.Types.CHAR)
+System.out.println("CHAR2INT at: "+at);
+                if(!(at.type==Symbol.Types.CHAR || at.type == FUNCTION && at.extraType == Symbol.Types.CHAR ))
                 {
                         {if (true) throw new ErrorSemantico("char2int solo acepta caracteres");}
                 }
                 if(at.atts.size()!=1){
                         {if (true) throw new ErrorSemantico("char2int solo acepta un caracter");}
                 }
+
+
 
                 sf.asignar_valores(att,at,"char2int(" + at.code + ")",Symbol.Types.INT, Symbol.ParameterClass.VAL, st.level,true);
                 sf.heredar_valores(att,at);
@@ -1720,6 +1932,7 @@ try
                 {
                         t.image = t.image.toLowerCase();
                         S = st.getSymbol(t.image);
+                        cBlock.addComment("- Variable/parameter/function \"" + t.image + "\".");
                 }
                 catch(SymbolNotFoundException ex)
                 {
@@ -1840,6 +2053,19 @@ char charValue = t.image.charAt(1);
     case tCONST_STRING:{
       t = jj_consume_token(tCONST_STRING);
 // cBlock.addInst(PCodeInstruction.OpCode.STC, Integer.parseInt(t.image));
+                String code = t.image;
+                if (code.startsWith("\"") && code.endsWith("\"")) {
+                        code = code.substring(1, code.length() - 1);
+                }
+                if (code.contains("\"\"")) {
+                        code = code.replace("\"\"", "\"");
+                }
+                cBlock.addComment("- Write STRING \"" + code + "\".");
+                for(char c: code.toCharArray()) {
+                        cBlock.addComment("- Write CHAR \"" + c + "\".");
+                        cBlock.addInst(PCodeInstruction.OpCode.STC, (int)c);
+                        cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+                }
                 sf.asignar_valores(att,at,t.image,Symbol.Types.STRING, Symbol.ParameterClass.VAL, st.level,true);
       break;
       }
