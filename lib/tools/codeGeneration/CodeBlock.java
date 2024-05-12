@@ -51,7 +51,7 @@ public class CodeBlock {
 	}
 	
 	public void addComment (String comment) {
-		code.add(new Comment(comment)); 
+		//code.add(new Comment(comment)); 
 	}
 	
 	public void addLabel (String label) {
@@ -72,7 +72,7 @@ public class CodeBlock {
 			if (element instanceof XMLTag) {
 				if (generationMode == BlockMode.XML) {
 					strBldr.append(element.toString());
-					strBldr.append("\n"); 
+					//strBldr.append("\n"); 
 				}
 			}
 			else {

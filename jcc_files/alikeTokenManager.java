@@ -7,6 +7,7 @@ import lib.symbolTable.*;
 import lib.attributes.*;
 import lib.symbolTable.exceptions.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import lib.errores.*;
 import lib.tools.SemanticFunctions;
 import lib.tools.codeGeneration.*;

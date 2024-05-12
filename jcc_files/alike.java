@@ -8,6 +8,7 @@ import lib.symbolTable.*;
 import lib.attributes.*;
 import lib.symbolTable.exceptions.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import lib.errores.*;
 import lib.tools.SemanticFunctions;
 import lib.tools.codeGeneration.*;
@@ -570,6 +571,17 @@ att.atts.add(at.clone());
                                         cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
                                 }
                                 break;
+                        case CHAR:
+                                cBlock.addComment("- Write CHAR \"" + at.code + "\".");
+
+                                if(!at.code.contains("int2char"))
+                                {
+                                        //cBlock.addInst(PCodeInstruction.OpCode.STC, (int)at.code.charAt(0));
+                                        cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+                                } else {
+                                        cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+                                }
+                                break;
 
                 }
 
@@ -608,11 +620,12 @@ att.atts.add(at.clone());
                                 if(!at.code.contains("int2char"))
                                 {
                                         cBlock.addComment("- Write CHAR \"" + at.code + "\".");
-                                        cBlock.addInst(PCodeInstruction.OpCode.STC, (int)at.code.charAt(0));
+                                        //cBlock.addInst(PCodeInstruction.OpCode.STC, (int)at.code.charAt(0));
                                         cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
                                 } else {
                                         cBlock.addComment("- Write CHAR \"" + at.code + "\".");
                                 }
+
                                 break;
 
                 }
@@ -685,10 +698,20 @@ S.returnType = atType.type;
 
   static final public void parametros_formales(Attributes att, CodeBlock cprog) throws ParseException {ArrayList<Symbol> symbols;
         CodeBlock cprocvar = new CodeBlock();
+        CodeBlock auxBlock = new CodeBlock();
+        CodeBlock auxBlock1 = new CodeBlock();
+        CodeBlock auxBlock2 = new CodeBlock();
+        boolean rightSweepingSide = true;
     symbols = declaracion_var(cprocvar, true);
 // try {
-                        for(Symbol S : symbols)
-                        {
+
+                        cprog.addBlock(cprocvar);
+                        cprocvar = new CodeBlock();
+
+                        for (int j = symbols.size() - 1; j >= 0; j--) {
+                                // whatever
+                                Symbol S = symbols.get(j);
+
                                 att.parList.add(S);
 
                                 if(S instanceof SymbolArray && S.parClass!=Symbol.ParameterClass.REF)
@@ -697,20 +720,20 @@ S.returnType = atType.type;
 
                                         for(int i = SA.maxInd-SA.minInd+1;i>0;i--)
                                         {
-                                                cprog.addInst(PCodeInstruction.OpCode.SRF,(st.level - S.nivel),(int)S.dir+i);
-                                                cprog.addInst(PCodeInstruction.OpCode.ASGI);
+                                                auxBlock1.addInst(PCodeInstruction.OpCode.SRF,(st.level - S.nivel),(int)S.dir+i);
+                                                auxBlock1.addInst(PCodeInstruction.OpCode.ASGI);
                                         }
                                 }
-                                else if(S.parClass==Symbol.ParameterClass.REF)
+                                else
                                 {
-                                        cprog.addInst(PCodeInstruction.OpCode.SRF,(st.level - S.nivel),(int)S.dir);
-                                        cprog.addInst(PCodeInstruction.OpCode.ASGI);
+                                        auxBlock1.addInst(PCodeInstruction.OpCode.SRF,(st.level - S.nivel),(int)S.dir);
+                                        auxBlock1.addInst(PCodeInstruction.OpCode.ASGI);
                                 }
-
-                // 		st.insertSymbol(S);
                         }
-                        cprog.addBlock(cprocvar);
-                        cprocvar = new CodeBlock();
+
+                        auxBlock = auxBlock1;
+
+
                 // } catch (AlreadyDefinedSymbolException ex)
                 // {
                 // 	System.err.println("Error semantico. Simbolo ya existente");
@@ -729,8 +752,13 @@ S.returnType = atType.type;
       }
       jj_consume_token(tPC);
       symbols = declaracion_var(cprocvar, true);
-for(Symbol S : symbols)
-                {
+cprog.addBlock(cprocvar);
+                cprocvar = new CodeBlock();
+
+                for (int j = symbols.size() - 1; j >= 0; j--) {
+                        // whatever
+                        Symbol S = symbols.get(j);
+
                         att.parList.add(S);
 
                         if(S instanceof SymbolArray && S.parClass!=Symbol.ParameterClass.REF)
@@ -739,23 +767,47 @@ for(Symbol S : symbols)
 
                                 for(int i = SA.maxInd-SA.minInd+1;i>0;i--)
                                 {
-                                        cprog.addInst(PCodeInstruction.OpCode.SRF,(st.level - S.nivel),(int)S.dir+i);
-                                        cprog.addInst(PCodeInstruction.OpCode.ASGI);
+                                        if(rightSweepingSide)
+                                        {
+                                                auxBlock2.addInst(PCodeInstruction.OpCode.SRF,(st.level - S.nivel),(int)S.dir+i);
+                                                auxBlock2.addInst(PCodeInstruction.OpCode.ASGI);
+                                        }
+                                        else
+                                        {
+                                                auxBlock1.addInst(PCodeInstruction.OpCode.SRF,(st.level - S.nivel),(int)S.dir+i);
+                                                auxBlock1.addInst(PCodeInstruction.OpCode.ASGI);
+                                        }
                                 }
-                        }
-                        else if(S.parClass==Symbol.ParameterClass.REF)
-                        {
-                                cprog.addInst(PCodeInstruction.OpCode.SRF,(st.level - S.nivel),(int)S.dir);
                         }
                         else
                         {
-                                cprog.addInst(PCodeInstruction.OpCode.SRF,(st.level - S.nivel),(int)S.dir);
-                                cprog.addInst(PCodeInstruction.OpCode.ASGI);
+                                if(rightSweepingSide)
+                                {
+                                        auxBlock2.addInst(PCodeInstruction.OpCode.SRF,(st.level - S.nivel),(int)S.dir);
+                                        auxBlock2.addInst(PCodeInstruction.OpCode.ASGI);
+                                }
+                                else
+                                {
+                                        auxBlock1.addInst(PCodeInstruction.OpCode.SRF,(st.level - S.nivel),(int)S.dir);
+                                        auxBlock1.addInst(PCodeInstruction.OpCode.ASGI);
+                                }
                         }
-                        // st.insertSymbol(S);
                 }
-                cprog.addBlock(cprocvar);
+
+                if(rightSweepingSide)
+                {
+                        auxBlock2.addBlock(auxBlock1);
+                        auxBlock = auxBlock2;
+                }
+                else
+                {
+                        auxBlock1.addBlock(auxBlock2);
+                        auxBlock = auxBlock1;
+                }
+
+                rightSweepingSide = !rightSweepingSide;
     }
+cprog.addBlock(auxBlock);
 }
 
   static final public void instruccion(CodeBlock cBlock) throws ParseException {Attributes att = new Attributes();
@@ -846,11 +898,11 @@ String et = CGUtils.newLabel();
     lista_ids_o_string_o_inv(att, cBlock);
     jj_consume_token(tCP);
 sf.check_inst_escribir(st,att);
-                cBlock.addComment("- Write CR/LF");
-                cBlock.addInst(PCodeInstruction.OpCode.STC, 13);
-                cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
-                cBlock.addInst(PCodeInstruction.OpCode.STC, 10);
-                cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+                //cBlock.addComment("- Write CR/LF");
+                /*cBlock.addInst(PCodeInstruction.OpCode.STC, 13);
+		cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+		cBlock.addInst(PCodeInstruction.OpCode.STC, 10);
+		cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);*/
                 //System.err.println("Expresion: " + att);
 
 }
@@ -940,7 +992,7 @@ try {
                                         cBlock.addInst(PCodeInstruction.OpCode.NGI);
                                         cBlock.addInst(PCodeInstruction.OpCode.SBT);
                                 }
-                                else
+                                else if(SA.minInd>0)
                                 {
                                         cBlock.addInst(PCodeInstruction.OpCode.STC,SA.minInd);
                                         cBlock.addInst(PCodeInstruction.OpCode.SBT);
@@ -960,7 +1012,10 @@ cBlock.addInst(PCodeInstruction.OpCode.SRF,(st.level - S.nivel),(int)S.dir);
 
                 if(S instanceof SymbolArray)
                 {
+                        SymbolArray SA = (SymbolArray) S;
+
                         cBlock.addInst(PCodeInstruction.OpCode.PLUS);
+
                 }
       expresion(at, cBlock);
 sf.add_to_atts(att,at);
@@ -1613,6 +1668,7 @@ att.type = Symbol.Types.BOOL;
 
         Token t;
         Symbol S;
+        boolean minus = false;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case tAP:{
       jj_consume_token(tAP);
@@ -1634,37 +1690,9 @@ if(at.type!=Symbol.Types.INT)
                 if(at.atts.size()!=1){
                         {if (true) throw new ErrorSemantico("int2char solo acepta un entero");}
                 }
-                if(at.esConstante) {
-                        cBlock.addInst(PCodeInstruction.OpCode.STC, Integer.parseInt(at.code));
-                }
-                String etiq1 = CGUtils.newLabel();
-                String etiq2 = CGUtils.newLabel();
-                cBlock.addComment("- check 0 <= int <= 255");
-                cBlock.addInst(PCodeInstruction.OpCode.DUP);
-                cBlock.addInst(PCodeInstruction.OpCode.STC, 0);
-                cBlock.addInst(PCodeInstruction.OpCode.GTE);
-                cBlock.addInst(PCodeInstruction.OpCode.JMF, etiq1);
-                cBlock.addInst(PCodeInstruction.OpCode.STC, 255);
-                cBlock.addInst(PCodeInstruction.OpCode.LTE);
-                cBlock.addInst(PCodeInstruction.OpCode.JMF, etiq1);
-                cBlock.addInst(PCodeInstruction.OpCode.JMP, etiq2);
-                cBlock.addLabel(etiq1);
-                String code = "Value invalid for int2char in line ("+ linea + ").";
-                                if (code.startsWith("\"") && code.endsWith("\"")) {
-                                        code = code.substring(1, code.length() - 1);
-                                }
-                                if (code.contains("\"\"")) {
-                                        code = code.replace("\"\"", "\"");
-                                }
-                                cBlock.addComment("- Write STRING \"" + code + "\".");
-                                for(char c: code.toCharArray()) {
-                                        cBlock.addComment("- Write CHAR \"" + c + "\".");
-                                        cBlock.addInst(PCodeInstruction.OpCode.STC, (int)c);
-                                        cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
-                                }
-                cBlock.addInst(PCodeInstruction.OpCode.LVP);
-                cBlock.addLabel(etiq2);
-                cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+
+                //cBlock.addInst(PCodeInstruction.OpCode.ASG);
+
                 sf.asignar_valores(att,at,at.code,Symbol.Types.CHAR, Symbol.ParameterClass.VAL, st.level, true);
                 sf.heredar_valores(att,at);
       break;
@@ -1681,6 +1709,7 @@ if(at.type!=Symbol.Types.CHAR)
                 if(at.atts.size()!=1){
                         {if (true) throw new ErrorSemantico("char2int solo acepta un caracter");}
                 }
+
                 sf.asignar_valores(att,at,"char2int(" + at.code + ")",Symbol.Types.INT, Symbol.ParameterClass.VAL, st.level,true);
                 sf.heredar_valores(att,at);
       break;
@@ -1710,7 +1739,7 @@ try
 sf.cambiarTipos(at, S);
                         sf.asignar_valores(att,at,t.image,S.type, S.parClass, st.level,false);
                         sf.checkPrimarioIds(at);
-                        at = new Attributes();
+
 
                         if(S instanceof SymbolProcedure)
                         {
@@ -1721,6 +1750,60 @@ sf.cambiarTipos(at, S);
                         {
                                 SymbolFunction SF = (SymbolFunction) S;
                                 cBlock.addOSFInst(CGUtils.getInvocDir(),st.level-S.nivel,SF.etiq);
+                        }
+                        else if(S.type == Symbol.Types.ARRAY)
+                        {
+                                SymbolArray SA = (SymbolArray) S;
+
+                                //cBlock.addComment(at.type+"");
+
+                                if(at.type==Symbol.Types.ARRAY)
+                                {
+                                        cBlock.addComment("Array completo 2");
+                                        //cBlock.addInst(PCodeInstruction.OpCode.SRF,(st.level - S.nivel),(int)S.dir);
+
+                                        cBlock.addInst(PCodeInstruction.OpCode.SRF,(st.level - S.nivel),(int)S.dir);
+
+                                        if(S.parClass == Symbol.ParameterClass.REF)
+                                        {
+                                                cBlock.addInst(PCodeInstruction.OpCode.DRF);
+                                        }
+                                }else
+                                {
+                                        cBlock.addComment("Componente Array");
+                                        if(SA.minInd<0)
+                                        {
+                                                cBlock.addInst(PCodeInstruction.OpCode.STC,-SA.minInd);
+                                                cBlock.addInst(PCodeInstruction.OpCode.NGI);
+                                                cBlock.addInst(PCodeInstruction.OpCode.SBT);
+                                        }
+                                        else if(SA.minInd>0)
+                                        {
+                                                cBlock.addInst(PCodeInstruction.OpCode.STC,SA.minInd);
+                                                cBlock.addInst(PCodeInstruction.OpCode.SBT);
+                                        }
+
+                                        cBlock.addInst(PCodeInstruction.OpCode.SRF,(st.level - S.nivel),(int)S.dir);
+
+                                        if(S.parClass == Symbol.ParameterClass.REF)
+                                        {
+                                                cBlock.addInst(PCodeInstruction.OpCode.DRF);
+                                        }
+
+                                        if(at.type!=Symbol.Types.ARRAY)
+                                        {
+                                                cBlock.addInst(PCodeInstruction.OpCode.PLUS);
+                                                cBlock.addInst(PCodeInstruction.OpCode.DRF);
+                                        }
+                                }
+
+
+
+
+
+                                at = new Attributes();
+
+
                         }
                         else
                         {
@@ -1734,6 +1817,7 @@ sf.cambiarTipos(at, S);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case tSUB:{
         jj_consume_token(tSUB);
+minus = true;
         break;
         }
       default:
@@ -1742,14 +1826,13 @@ sf.cambiarTipos(at, S);
       }
       t = jj_consume_token(tCONST_INT);
 cBlock.addInst(PCodeInstruction.OpCode.STC, Integer.parseInt(t.image));
+                if(minus){cBlock.addInst(PCodeInstruction.OpCode.NGI);}
                 sf.asignar_valores(att,at,t.image,Symbol.Types.INT, Symbol.ParameterClass.VAL, st.level,true);
       break;
       }
     case tCONST_CHAR:{
       t = jj_consume_token(tCONST_CHAR);
-String charWithoutQuotes = t.image.substring(1, t.image.length() - 1);
-                System.out.println("Char: " + charWithoutQuotes);
-                char charValue = charWithoutQuotes.charAt(0);
+char charValue = t.image.charAt(1);
                 cBlock.addInst(PCodeInstruction.OpCode.STC, (int) charValue);
                 sf.asignar_valores(att,at,t.image,Symbol.Types.CHAR, Symbol.ParameterClass.VAL, st.level,true);
       break;
@@ -1813,11 +1896,7 @@ cBlock.addInst(PCodeInstruction.OpCode.STC, 0);
 
         //System.out.println(at.parClass);	
 
-        if(at.parClass==Symbol.ParameterClass.REF)
-        {
-                cBlock.removeLastInst();
-        }
-        else if(at.type==Symbol.Types.ARRAY)
+        if(at.type==Symbol.Types.ARRAY&&at.parClass==Symbol.ParameterClass.VAL)
         {
                 SymbolArray SA = null;
 
@@ -1878,10 +1957,7 @@ if(S instanceof SymbolProcedure)
         }
 
         //System.out.println(at.parClass);
-        if(at.parClass==Symbol.ParameterClass.REF)
-        {
-                cBlock.removeLastInst();
-        }else if(at.type==Symbol.Types.ARRAY)
+        if(at.type==Symbol.Types.ARRAY&&at.parClass==Symbol.ParameterClass.VAL)
         {
                 SymbolArray SA = null;
 

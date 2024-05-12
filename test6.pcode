@@ -1,0 +1,14 @@
+  ENP L0
+; --- Simple variable "i", type CHAR, level 0, address [3]!
+; --- Simple variable "j", type INT, level 0, address [4]!
+; --Comienzo main
+L0:
+  SRF  0  3
+  SRF  0  4
+  DRF
+  ASG
+  SRF  0  3
+  STC 220
+  ASG
+; --Fin main
+  LVP

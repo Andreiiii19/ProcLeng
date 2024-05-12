@@ -1,13 +1,13 @@
   ENP L0
-L1:
+L1: 
   SRF  0  3
   ASGI
   JMP L7
-L7:
+L7: 
   SRF  0  4
   STC  0
   ASG
-L3:
+L3: 
   SRF  0  4
   DRF
   STC  3
@@ -16,7 +16,7 @@ L3:
   SRF  0  5
   STC  0
   ASG
-L5:
+L5: 
   SRF  0  5
   DRF
   STC  3
@@ -29,8 +29,6 @@ L5:
   SRF  0  5
   DRF
   PLUS
-  STC  0
-  SBT
   SRF  0  3
   DRF
   PLUS
@@ -43,7 +41,7 @@ L5:
   PLUS
   ASG
   JMP L5
-L6:
+L6: 
   SRF  0  4
   SRF  0  4
   DRF
@@ -51,13 +49,13 @@ L6:
   PLUS
   ASG
   JMP L3
-L4:
+L4: 
   CSF
-L8:
+L8: 
   SRF  0  3
   ASGI
   JMP L14
-L14:
+L14: 
   SRF  0  4
   STC  0
   ASG
@@ -79,7 +77,7 @@ L14:
   WRT  0
   STC 10
   WRT  0
-L10:
+L10: 
   SRF  0  4
   DRF
   STC  3
@@ -89,11 +87,8 @@ L10:
   STC  0
   ASG
   STC 124
-  STC 13
   WRT  0
-  STC 10
-  WRT  0
-L12:
+L12: 
   SRF  0  5
   DRF
   STC  3
@@ -108,12 +103,10 @@ L12:
   PLUS
   SRF  0  3
   DRF
+  PLUS
+  DRF
+  WRT  0
   STC 124
-  STC 39
-  WRT  0
-  STC 13
-  WRT  0
-  STC 10
   WRT  0
   SRF  0  5
   SRF  0  5
@@ -122,7 +115,7 @@ L12:
   PLUS
   ASG
   JMP L12
-L13:
+L13: 
   STC 13
   WRT  0
   STC 10
@@ -152,19 +145,19 @@ L13:
   PLUS
   ASG
   JMP L10
-L11:
+L11: 
   CSF
-L15:
-  SRF  0  3
-  ASGI
+L15: 
   SRF  0  4
   ASGI
+  SRF  0  3
+  ASGI
   JMP L34
-L34:
+L34: 
   SRF  0  5
   STC  0
   ASG
-L16:
+L16: 
   SRF  0  5
   DRF
   STC  3
@@ -178,6 +171,8 @@ L16:
   PLUS
   SRF  0  3
   DRF
+  PLUS
+  DRF
   SRF  0  4
   DRF
   EQ
@@ -188,6 +183,8 @@ L16:
   STC  1
   PLUS
   SRF  0  3
+  DRF
+  PLUS
   DRF
   SRF  0  4
   DRF
@@ -200,6 +197,8 @@ L16:
   STC  2
   PLUS
   SRF  0  3
+  DRF
+  PLUS
   DRF
   SRF  0  4
   DRF
@@ -209,8 +208,8 @@ L16:
   STC  1
   CSF
   JMP L18
-L19:
-L18:
+L19: 
+L18: 
   STC  0
   STC  3
   TMS
@@ -218,6 +217,8 @@ L18:
   DRF
   PLUS
   SRF  0  3
+  DRF
+  PLUS
   DRF
   SRF  0  4
   DRF
@@ -230,6 +231,8 @@ L18:
   PLUS
   SRF  0  3
   DRF
+  PLUS
+  DRF
   SRF  0  4
   DRF
   EQ
@@ -241,6 +244,8 @@ L18:
   DRF
   PLUS
   SRF  0  3
+  DRF
+  PLUS
   DRF
   SRF  0  4
   DRF
@@ -250,8 +255,8 @@ L18:
   STC  1
   CSF
   JMP L20
-L21:
-L20:
+L21: 
+L20: 
   SRF  0  5
   SRF  0  5
   DRF
@@ -259,9 +264,11 @@ L20:
   PLUS
   ASG
   JMP L16
-L17:
+L17: 
   STC  0
   SRF  0  3
+  DRF
+  PLUS
   DRF
   SRF  0  4
   DRF
@@ -270,12 +277,16 @@ L17:
   STC  4
   SRF  0  3
   DRF
+  PLUS
+  DRF
   SRF  0  4
   DRF
   EQ
   JMF L25
   STC  8
   SRF  0  3
+  DRF
+  PLUS
   DRF
   SRF  0  4
   DRF
@@ -284,16 +295,18 @@ L17:
   STC  1
   CSF
   JMP L26
-L27:
-L26:
+L27: 
+L26: 
   JMP L24
-L25:
-L24:
+L25: 
+L24: 
   JMP L22
-L23:
-L22:
+L23: 
+L22: 
   STC  6
   SRF  0  3
+  DRF
+  PLUS
   DRF
   SRF  0  4
   DRF
@@ -302,12 +315,16 @@ L22:
   STC  4
   SRF  0  3
   DRF
+  PLUS
+  DRF
   SRF  0  4
   DRF
   EQ
   JMF L31
   STC  2
   SRF  0  3
+  DRF
+  PLUS
   DRF
   SRF  0  4
   DRF
@@ -316,26 +333,26 @@ L22:
   STC  1
   CSF
   JMP L32
-L33:
-L32:
+L33: 
+L32: 
   JMP L30
-L31:
-L30:
+L31: 
+L30: 
   JMP L28
-L29:
-L28:
+L29: 
+L28: 
   STC  0
   CSF
   CSF
-L35:
+L35: 
   SRF  0  3
   ASGI
   JMP L40
-L40:
+L40: 
   SRF  0  4
   STC  0
   ASG
-L36:
+L36: 
   SRF  0  4
   DRF
   STC  3
@@ -349,6 +366,8 @@ L36:
   PLUS
   SRF  0  3
   DRF
+  PLUS
+  DRF
   STC 32
   EQ
   SRF  0  4
@@ -358,6 +377,8 @@ L36:
   STC  1
   PLUS
   SRF  0  3
+  DRF
+  PLUS
   DRF
   STC 32
   EQ
@@ -369,6 +390,8 @@ L36:
   STC  2
   PLUS
   SRF  0  3
+  DRF
+  PLUS
   DRF
   STC 32
   EQ
@@ -377,8 +400,8 @@ L36:
   STC  0
   CSF
   JMP L38
-L39:
-L38:
+L39: 
+L38: 
   SRF  0  4
   SRF  0  4
   DRF
@@ -386,44 +409,47 @@ L38:
   PLUS
   ASG
   JMP L36
-L37:
+L37: 
   STC  1
   CSF
   CSF
-L41:
-  SRF  0  3
-  ASGI
+L41: 
   SRF  0  4
   ASGI
+  SRF  0  3
+  ASGI
   JMP L68
-L68:
+L68: 
   SRF  0  7
   STC  0
   ASG
   SRF  0  3
+  DRF
   STC 79
   OSF  9  1 L15
   JMF L43
   STC  2
   CSF
   JMP L42
-L43:
+L43: 
   SRF  0  3
+  DRF
   STC 88
   OSF  9  1 L15
   JMF L44
   STC  0
   CSF
   JMP L42
-L44:
+L44: 
   SRF  0  3
+  DRF
   OSF  9  1 L35
   JMF L45
   STC  1
   CSF
   JMP L42
-L45:
-L42:
+L45: 
+L42: 
   SRF  0  4
   DRF
   JMF L47
@@ -433,7 +459,7 @@ L42:
   SRF  0  5
   STC  0
   ASG
-L48:
+L48: 
   SRF  0  5
   DRF
   STC  3
@@ -442,7 +468,7 @@ L48:
   SRF  0  6
   STC  0
   ASG
-L50:
+L50: 
   SRF  0  6
   DRF
   STC  3
@@ -457,6 +483,8 @@ L50:
   PLUS
   SRF  0  3
   DRF
+  PLUS
+  DRF
   STC 32
   EQ
   JMF L53
@@ -467,8 +495,6 @@ L50:
   SRF  0  6
   DRF
   PLUS
-  STC  0
-  SBT
   SRF  0  3
   DRF
   PLUS
@@ -476,6 +502,7 @@ L50:
   ASG
   SRF  0  7
   SRF  0  3
+  DRF
   STC  0
   OSF  9  1 L41
   ASG
@@ -486,8 +513,6 @@ L50:
   SRF  0  6
   DRF
   PLUS
-  STC  0
-  SBT
   SRF  0  3
   DRF
   PLUS
@@ -504,11 +529,11 @@ L50:
   DRF
   ASG
   JMP L54
-L55:
-L54:
+L55: 
+L54: 
   JMP L52
-L53:
-L52:
+L53: 
+L52: 
   SRF  0  6
   SRF  0  6
   DRF
@@ -516,7 +541,7 @@ L52:
   PLUS
   ASG
   JMP L50
-L51:
+L51: 
   SRF  0  8
   DRF
   STC  2
@@ -529,8 +554,8 @@ L51:
   STC  3
   ASG
   JMP L56
-L57:
-L56:
+L57: 
+L56: 
   SRF  0  5
   SRF  0  5
   DRF
@@ -538,16 +563,16 @@ L56:
   PLUS
   ASG
   JMP L48
-L49:
+L49: 
   JMP L46
-L47:
+L47: 
   SRF  0  8
   STC  2
   ASG
   SRF  0  5
   STC  0
   ASG
-L58:
+L58: 
   SRF  0  5
   DRF
   STC  3
@@ -556,7 +581,7 @@ L58:
   SRF  0  6
   STC  0
   ASG
-L60:
+L60: 
   SRF  0  6
   DRF
   STC  3
@@ -571,6 +596,8 @@ L60:
   PLUS
   SRF  0  3
   DRF
+  PLUS
+  DRF
   STC 32
   EQ
   JMF L63
@@ -581,8 +608,6 @@ L60:
   SRF  0  6
   DRF
   PLUS
-  STC  0
-  SBT
   SRF  0  3
   DRF
   PLUS
@@ -590,6 +615,7 @@ L60:
   ASG
   SRF  0  7
   SRF  0  3
+  DRF
   STC  1
   OSF  9  1 L41
   ASG
@@ -600,8 +626,6 @@ L60:
   SRF  0  6
   DRF
   PLUS
-  STC  0
-  SBT
   SRF  0  3
   DRF
   PLUS
@@ -618,11 +642,11 @@ L60:
   DRF
   ASG
   JMP L64
-L65:
-L64:
+L65: 
+L64: 
   JMP L62
-L63:
-L62:
+L63: 
+L62: 
   SRF  0  8
   DRF
   STC  0
@@ -635,8 +659,8 @@ L62:
   STC  3
   ASG
   JMP L66
-L67:
-L66:
+L67: 
+L66: 
   SRF  0  6
   SRF  0  6
   DRF
@@ -644,7 +668,7 @@ L66:
   PLUS
   ASG
   JMP L60
-L61:
+L61: 
   SRF  0  5
   SRF  0  5
   DRF
@@ -652,20 +676,20 @@ L61:
   PLUS
   ASG
   JMP L58
-L59:
+L59: 
   JMP L46
-L46:
+L46: 
   SRF  0  8
   DRF
   CSF
   CSF
-L69:
-  SRF  0  3
-  ASGI
+L69: 
   SRF  0  4
   ASGI
+  SRF  0  3
+  ASGI
   JMP L93
-L93:
+L93: 
   SRF  0  7
   STC  0
   ASG
@@ -678,7 +702,7 @@ L93:
   SRF  0  5
   STC  0
   ASG
-L73:
+L73: 
   SRF  0  5
   DRF
   STC  3
@@ -687,7 +711,7 @@ L73:
   SRF  0  6
   STC  0
   ASG
-L75:
+L75: 
   SRF  0  6
   DRF
   STC  3
@@ -702,6 +726,8 @@ L75:
   PLUS
   SRF  0  3
   DRF
+  PLUS
+  DRF
   STC 32
   EQ
   JMF L78
@@ -712,8 +738,6 @@ L75:
   SRF  0  6
   DRF
   PLUS
-  STC  0
-  SBT
   SRF  0  3
   DRF
   PLUS
@@ -721,6 +745,7 @@ L75:
   ASG
   SRF  0  7
   SRF  0  3
+  DRF
   STC  0
   OSF 11  1 L41
   ASG
@@ -731,8 +756,6 @@ L75:
   SRF  0  6
   DRF
   PLUS
-  STC  0
-  SBT
   SRF  0  3
   DRF
   PLUS
@@ -757,11 +780,11 @@ L75:
   DRF
   ASG
   JMP L79
-L80:
-L79:
+L80: 
+L79: 
   JMP L77
-L78:
-L77:
+L78: 
+L77: 
   SRF  0  8
   DRF
   STC  2
@@ -774,8 +797,8 @@ L77:
   STC  3
   ASG
   JMP L81
-L82:
-L81:
+L82: 
+L81: 
   SRF  0  6
   SRF  0  6
   DRF
@@ -783,7 +806,7 @@ L81:
   PLUS
   ASG
   JMP L75
-L76:
+L76: 
   SRF  0  5
   SRF  0  5
   DRF
@@ -791,7 +814,7 @@ L76:
   PLUS
   ASG
   JMP L73
-L74:
+L74: 
   SRF  0  9
   DRF
   STC  3
@@ -799,22 +822,20 @@ L74:
   SRF  0 10
   DRF
   PLUS
-  STC  0
-  SBT
   SRF  0  3
   DRF
   PLUS
   STC 79
   ASG
   JMP L71
-L72:
+L72: 
   SRF  0  8
   STC  2
   ASG
   SRF  0  5
   STC  0
   ASG
-L83:
+L83: 
   SRF  0  5
   DRF
   STC  3
@@ -823,7 +844,7 @@ L83:
   SRF  0  6
   STC  0
   ASG
-L85:
+L85: 
   SRF  0  6
   DRF
   STC  3
@@ -838,6 +859,8 @@ L85:
   PLUS
   SRF  0  3
   DRF
+  PLUS
+  DRF
   STC 32
   EQ
   JMF L88
@@ -848,8 +871,6 @@ L85:
   SRF  0  6
   DRF
   PLUS
-  STC  0
-  SBT
   SRF  0  3
   DRF
   PLUS
@@ -857,6 +878,7 @@ L85:
   ASG
   SRF  0  7
   SRF  0  3
+  DRF
   STC  1
   OSF 11  1 L41
   ASG
@@ -867,8 +889,6 @@ L85:
   SRF  0  6
   DRF
   PLUS
-  STC  0
-  SBT
   SRF  0  3
   DRF
   PLUS
@@ -893,11 +913,11 @@ L85:
   DRF
   ASG
   JMP L89
-L90:
-L89:
+L90: 
+L89: 
   JMP L87
-L88:
-L87:
+L88: 
+L87: 
   SRF  0  8
   DRF
   STC  0
@@ -910,8 +930,8 @@ L87:
   STC  3
   ASG
   JMP L91
-L92:
-L91:
+L92: 
+L91: 
   SRF  0  6
   SRF  0  6
   DRF
@@ -919,7 +939,7 @@ L91:
   PLUS
   ASG
   JMP L85
-L86:
+L86: 
   SRF  0  5
   SRF  0  5
   DRF
@@ -927,7 +947,7 @@ L86:
   PLUS
   ASG
   JMP L83
-L84:
+L84: 
   SRF  0  9
   DRF
   STC  3
@@ -935,15 +955,13 @@ L84:
   SRF  0 10
   DRF
   PLUS
-  STC  0
-  SBT
   SRF  0  3
   DRF
   PLUS
   STC 88
   ASG
   JMP L71
-L71:
+L71: 
   STC 76
   WRT  0
   STC 97
@@ -1033,13 +1051,13 @@ L71:
   STC 10
   WRT  0
   CSF
-L94:
-  SRF  0  3
-  ASGI
+L94: 
   SRF  0  4
   ASGI
+  SRF  0  3
+  ASGI
   JMP L98
-L98:
+L98: 
   STC 73
   WRT  0
   STC 110
@@ -1156,6 +1174,22 @@ L98:
   RD  1
   SRF  0  5
   DRF
+  STC  3
+  TMS
+  SRF  0  6
+  DRF
+  PLUS
+  SRF  0  3
+  DRF
+  PLUS
+  DRF
+  WRT  0
+  STC 13
+  WRT  0
+  STC 10
+  WRT  0
+  SRF  0  5
+  DRF
   STC  0
   GTE
   SRF  0  5
@@ -1181,6 +1215,8 @@ L98:
   DRF
   PLUS
   SRF  0  3
+  DRF
+  PLUS
   DRF
   STC 32
   EQ
@@ -1193,8 +1229,6 @@ L98:
   SRF  0  6
   DRF
   PLUS
-  STC  0
-  SBT
   SRF  0  3
   DRF
   PLUS
@@ -1202,7 +1236,7 @@ L98:
   DRF
   ASG
   JMP L96
-L97:
+L97: 
   STC 77
   WRT  0
   STC 111
@@ -1248,15 +1282,16 @@ L97:
   STC 10
   WRT  0
   SRF  0  3
+  DRF
   SRF  0  4
   DRF
   OSF  7  1 L94
   JMP L96
-L96:
+L96: 
   CSF
-L99:
+L99: 
   JMP L103
-L103:
+L103: 
   STC 73
   WRT  0
   STC 110
@@ -1319,7 +1354,7 @@ L103:
   STC  0
   CSF
   JMP L100
-L101:
+L101: 
   SRF  0  3
   DRF
   STC 79
@@ -1328,7 +1363,7 @@ L101:
   STC  1
   CSF
   JMP L100
-L102:
+L102: 
   STC 70
   WRT  0
   STC 105
@@ -1366,9 +1401,9 @@ L102:
   OSF  4  1 L99
   CSF
   JMP L100
-L100:
+L100: 
   CSF
-L0:
+L0: 
   SRF  0  7
   OSF 16  0 L1
   SRF  0  4
@@ -1389,13 +1424,13 @@ L0:
   STC 79
   ASG
   JMP L104
-L105:
+L105: 
   SRF  0  6
   STC 88
   ASG
   JMP L104
-L104:
-L106:
+L104: 
+L106: 
   SRF  0  3
   DRF
   NGB
@@ -1410,13 +1445,13 @@ L106:
   DRF
   OSF 16  0 L69
   JMP L108
-L109:
+L109: 
   SRF  0  7
   SRF  0  6
   DRF
   OSF 16  0 L94
   JMP L108
-L108:
+L108: 
   SRF  0  7
   STC 88
   OSF 16  0 L15
@@ -1449,7 +1484,7 @@ L108:
   STC  1
   ASG
   JMP L110
-L111:
+L111: 
   SRF  0  7
   STC 79
   OSF 16  0 L15
@@ -1482,7 +1517,7 @@ L111:
   STC  1
   ASG
   JMP L110
-L112:
+L112: 
   SRF  0  7
   OSF 16  0 L35
   JMF L113
@@ -1510,13 +1545,13 @@ L112:
   STC  1
   ASG
   JMP L110
-L113:
-L110:
+L113: 
+L110: 
   SRF  0  4
   SRF  0  4
   DRF
   NGB
   ASG
   JMP L106
-L107:
+L107: 
   LVP

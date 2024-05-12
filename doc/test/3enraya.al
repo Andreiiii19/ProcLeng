@@ -252,6 +252,8 @@ begin
 	get(row);
 	put_line("Introduzca la columna (0-2)");
 	get(col);
+
+	put_line(t(row*3+col));
 	
 	if row>=0 and row <3 and col>=0 and col<3 and t(row*3+col)=' ' then
 		t(row*3+col) := jugador;
@@ -284,7 +286,7 @@ end;
 -----------------------------------------------------------
 begin
 	inicializarTablero(tablero);
-	
+
 	esTurnoIA:=playerElection;
 	partidaFinalizada:=false;
  
