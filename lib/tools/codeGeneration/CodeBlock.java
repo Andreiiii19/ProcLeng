@@ -45,6 +45,14 @@ public class CodeBlock {
 		}
 	}
 
+	public void duplicateLastInst()
+	{
+		if(code.size()>0)
+		{
+			code.add(code.get(code.size()-1));
+		}
+	}
+
 	public void encloseXMLTags(String XMLLabel) {
 		code.add(0, new XMLTag("<"+XMLLabel+">"));
 		code.add(new XMLTag("</"+XMLLabel+">")); 

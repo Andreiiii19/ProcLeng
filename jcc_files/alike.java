@@ -1072,7 +1072,7 @@ String et = CGUtils.newLabel();
     lista_ids_o_string_o_inv(att, cBlock);
     jj_consume_token(tCP);
 sf.check_inst_escribir(st,att);
-                cBlock.addComment("- Write CR/LF");
+                //cBlock.addComment("- Write CR/LF");
                 /*cBlock.addInst(PCodeInstruction.OpCode.STC, 13);
 		cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
 		cBlock.addInst(PCodeInstruction.OpCode.STC, 10);
@@ -1139,10 +1139,10 @@ try {
                         }
                         sf.checkTypeFunctionCall(at2);
 
-                        for(int i = 0; i<at2.atts.size(); i++)
-                        {
-                                System.out.println("\t"+at2.atts.get(i).parClass);
-                        }
+                        /*for(int i = 0; i<at2.atts.size(); i++)
+			{
+				System.out.println("\t"+at2.atts.get(i).parClass);
+			}*/
 
                         if(S.type == Symbol.Types.PROCEDURE)
                         {
@@ -1198,6 +1198,7 @@ sf.add_to_atts(att,at);
                 at = new Attributes();
                 at2 = new Attributes();
 
+
                 cBlock.addInst(PCodeInstruction.OpCode.ASG);
       break;
       }
@@ -1212,9 +1213,10 @@ sf.add_to_atts(att,at);
         CodeBlock cbloque=new CodeBlock();
 
         String lbel = CGUtils.newLabel();
-        System.out.println("Label ini: "+lbel);
+        //System.out.println("Label ini: "+lbel);
         String endLabel = CGUtils.newLabel();
-        System.out.println("Label end: "+endLabel);
+        //System.out.println("Label end: "+endLabel);
+
     jj_consume_token(tIF);
     expresion(at, cBlock);
 if(at.type==Symbol.Types.ARRAY)
@@ -1249,10 +1251,10 @@ if(at.type==Symbol.Types.ARRAY)
                 sf.heredar_valores(att,at);
                 at = new Attributes();
 
-                for(Attributes a : att.atts)
-                {
-                        System.out.println(a.code);
-                }
+                /*for(Attributes a : att.atts)
+		{
+			System.out.println(a.code);
+		}*/
 
                 cBlock.addInst(PCodeInstruction.OpCode.JMF,lbel);
 
@@ -1868,25 +1870,41 @@ if(at.type!=Symbol.Types.INT)
                 }
                 String et = CGUtils.newLabel();
                 String et2 = CGUtils.newLabel();
+
                 cBlock.addComment("- Check if int is in range [0,255].");
+                cBlock.duplicateLastInst();
                 cBlock.addInst(PCodeInstruction.OpCode.DUP);
                 cBlock.addInst(PCodeInstruction.OpCode.STC, 0);
                 cBlock.addInst(PCodeInstruction.OpCode.GTE);
                 cBlock.addInst(PCodeInstruction.OpCode.JMF, et);
-                cBlock.addInst(PCodeInstruction.OpCode.DUP);
+                //cBlock.addInst(PCodeInstruction.OpCode.DUP);
                 cBlock.addInst(PCodeInstruction.OpCode.STC, 255);
                 cBlock.addInst(PCodeInstruction.OpCode.LTE);
                 cBlock.addInst(PCodeInstruction.OpCode.JMF, et);
                 cBlock.addInst(PCodeInstruction.OpCode.JMP, et2);
                 cBlock.addLabel(et);
 
-                String code = "invalid for int2char in line(" + linea + ")";
+                String code = "Value ";
+                cBlock.addComment("- Write STRING \"" + code + "\".");
+                for(char c: code.toCharArray()) {
+                        cBlock.addComment("- Write CHAR \"" + c + "\".");
+                        cBlock.addInst(PCodeInstruction.OpCode.STC, (int)c);
+                        cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+                }
+                cBlock.addInst(PCodeInstruction.OpCode.WRT,1);
+                cBlock.addInst(PCodeInstruction.OpCode.STC,32);
+                cBlock.addInst(PCodeInstruction.OpCode.WRT,0);
+
+                code = "invalid for int2char in line(" + linea + ")";
                 if (code.startsWith("\"") && code.endsWith("\"")) {
                         code = code.substring(1, code.length() - 1);
                 }
                 if (code.contains("\"\"")) {
                         code = code.replace("\"\"", "\"");
                 }
+
+
+
                 cBlock.addComment("- Write STRING \"" + code + "\".");
                 for(char c: code.toCharArray()) {
                         cBlock.addComment("- Write CHAR \"" + c + "\".");
@@ -1900,6 +1918,8 @@ if(at.type!=Symbol.Types.INT)
                 cBlock.addInst(PCodeInstruction.OpCode.STC, 10);
                 cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
 
+                cBlock.addInst(PCodeInstruction.OpCode.LVP);
+
                 cBlock.addLabel(et2);
 
                 sf.asignar_valores(att,at,at.code,Symbol.Types.CHAR, Symbol.ParameterClass.VAL, st.level, true);
@@ -1911,7 +1931,7 @@ if(at.type!=Symbol.Types.INT)
       jj_consume_token(tAP);
       expresion(at, cBlock);
       jj_consume_token(tCP);
-System.out.println("CHAR2INT at: "+at);
+//("CHAR2INT at: "+at);
                 if(!(at.type==Symbol.Types.CHAR || at.type == FUNCTION && at.extraType == Symbol.Types.CHAR ))
                 {
                         {if (true) throw new ErrorSemantico("char2int solo acepta caracteres");}
@@ -1922,7 +1942,7 @@ System.out.println("CHAR2INT at: "+at);
 
 
 
-                sf.asignar_valores(att,at,"char2int(" + at.code + ")",Symbol.Types.INT, Symbol.ParameterClass.VAL, st.level,true);
+                sf.asignar_valores(att,at,at.code,Symbol.Types.INT, Symbol.ParameterClass.VAL, st.level,true);
                 sf.heredar_valores(att,at);
       break;
       }
@@ -2022,6 +2042,11 @@ sf.cambiarTipos(at, S);
                         {
                                 cBlock.addInst(PCodeInstruction.OpCode.SRF,st.level-S.nivel,(int)S.dir);
                                 cBlock.addInst(PCodeInstruction.OpCode.DRF);
+
+                                if(S.parClass==Symbol.ParameterClass.REF)
+                                {
+                                        cBlock.addInst(PCodeInstruction.OpCode.DRF);
+                                }
                         }
       break;
       }
@@ -2101,6 +2126,14 @@ cBlock.addInst(PCodeInstruction.OpCode.STC, 0);
                 SymbolProcedure SP = (SymbolProcedure) S;
                 //System.out.println(SP.parList.get(i).parClass);
                 at.parClass = SP.parList.get(i).parClass;
+
+                //System.out.println(SP.parList.get(i).parClass+" "+SP.parList.get(i).type);
+
+                if(SP.parList.get(i).parClass==Symbol.ParameterClass.REF&&!(SP.parList.get(i) instanceof SymbolArray))
+                {
+                        cBlock.removeLastInst();
+                }
+
                 i++;
         }
 
@@ -2109,11 +2142,21 @@ cBlock.addInst(PCodeInstruction.OpCode.STC, 0);
                 SymbolFunction SF = (SymbolFunction) S;
                 //System.out.println(SF.parList.get(i).parClass);
                 at.parClass = SF.parList.get(i).parClass;
+
+                if(SF.parList.get(i).parClass==Symbol.ParameterClass.REF&&!(SF.parList.get(i) instanceof SymbolArray))
+                {
+                        cBlock.removeLastInst();
+                }
+
                 i++;
         }
 
+
+
         sf.add_to_atts(att,at);
         sf.heredar_valores(att,at);
+
+
 
         if(at.esConstante&&at.parClass==Symbol.ParameterClass.REF)
         {
@@ -2163,6 +2206,12 @@ if(S instanceof SymbolProcedure)
                 SymbolProcedure SP = (SymbolProcedure) S;
                 //System.out.println(SP.parList.get(i).parClass);
                 at.parClass = SP.parList.get(i).parClass;
+
+                if(SP.parList.get(i).parClass==Symbol.ParameterClass.REF&&!(SP.parList.get(i) instanceof SymbolArray))
+                {
+                        cBlock.removeLastInst();
+                }
+
                 i++;
         }
 
@@ -2171,6 +2220,13 @@ if(S instanceof SymbolProcedure)
                 SymbolFunction SF = (SymbolFunction) S;
                 //System.out.println(SF.parList.get(i).parClass);
                 at.parClass = SF.parList.get(i).parClass;
+
+                if(SF.parList.get(i).parClass==Symbol.ParameterClass.REF&&!(SF.parList.get(i) instanceof SymbolArray))
+                {
+                        cBlock.removeLastInst();
+                }
+
+
                 i++;
         }
 

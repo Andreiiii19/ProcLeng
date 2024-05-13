@@ -37,6 +37,7 @@ L2:
 ; --- Variable/parameter/function "numtrues".
   SRF  0  5
   DRF
+  DRF
   STC  1
   PLUS
   ASG
@@ -48,6 +49,7 @@ L5:
   DRF
 ; --- Variable/parameter/function "numformulas".
   SRF  0  4
+  DRF
   DRF
   STC  1
   PLUS
@@ -483,10 +485,8 @@ L0:
   AND
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "b1".
   SRF  0  9
@@ -501,10 +501,8 @@ L0:
   AND
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "b1".
   SRF  0  9
@@ -532,10 +530,8 @@ L0:
   AND
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "b1".
   SRF  0  9
@@ -559,10 +555,8 @@ L0:
   OR
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "b1".
   SRF  0  9
@@ -582,10 +576,8 @@ L0:
   OR
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "b1".
   SRF  0  9
@@ -603,10 +595,8 @@ L0:
   AND
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "b1".
   SRF  0  9
@@ -625,10 +615,8 @@ L0:
   OR
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "b1".
   SRF  0  9
@@ -652,10 +640,8 @@ L0:
   OR
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "b1".
   SRF  0  9
@@ -676,10 +662,8 @@ L0:
   OR
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "b1".
   SRF  0  9
@@ -698,10 +682,8 @@ L0:
   EQ
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "b1".
   SRF  0  9
@@ -717,10 +699,8 @@ L0:
   OR
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "b1".
   SRF  0  9
@@ -747,10 +727,8 @@ L0:
   AND
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "b1".
   SRF  0  9
@@ -770,10 +748,8 @@ L0:
   NGB
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "b1".
   SRF  0  9
@@ -800,10 +776,8 @@ L0:
   OR
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "b1".
   SRF  0  9
@@ -823,10 +797,8 @@ L0:
   AND
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "b1".
   SRF  0  9
@@ -846,10 +818,8 @@ L0:
   OR
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "b1".
   SRF  0  9
@@ -868,10 +838,8 @@ L0:
   EQ
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "b1".
   SRF  0  9
@@ -898,10 +866,8 @@ L0:
   AND
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "b1".
   SRF  0  9
@@ -917,10 +883,8 @@ L0:
   NGB
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "i1".
   SRF  0  3
@@ -935,10 +899,8 @@ L0:
   AND
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "i1".
   SRF  0  3
@@ -959,10 +921,8 @@ L0:
   GTE
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "i1".
   SRF  0  3
@@ -983,10 +943,8 @@ L0:
   OR
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "i1".
   SRF  0  3
@@ -1005,10 +963,8 @@ L0:
   EQ
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "i1".
   SRF  0  3
@@ -1029,10 +985,8 @@ L0:
   AND
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "i1".
   SRF  0  3
@@ -1051,10 +1005,8 @@ L0:
   OR
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "i1".
   SRF  0  3
@@ -1071,10 +1023,8 @@ L0:
   AND
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "i1".
   SRF  0  3
@@ -1097,10 +1047,8 @@ L0:
   OR
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "i1".
   SRF  0  3
@@ -1121,10 +1069,8 @@ L0:
   AND
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "i1".
   SRF  0  3
@@ -1149,10 +1095,8 @@ L0:
   OR
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "i1".
   SRF  0  3
@@ -1173,10 +1117,8 @@ L0:
   AND
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
   STC 10
 ; --- Variable/parameter/function "i1".
@@ -1197,10 +1139,8 @@ L0:
   AND
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "i1".
   SRF  0  3
@@ -1219,10 +1159,8 @@ L0:
   GT
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "i1".
   SRF  0  3
@@ -1238,10 +1176,8 @@ L0:
   AND
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "i1".
   SRF  0  3
@@ -1260,10 +1196,8 @@ L0:
   OR
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "i1".
   SRF  0  3
@@ -1282,10 +1216,8 @@ L0:
   AND
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "i1".
   SRF  0  3
@@ -1314,10 +1246,8 @@ L0:
   OR
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "i1".
   SRF  0  3
@@ -1340,10 +1270,8 @@ L0:
   OR
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Variable/parameter/function "i1".
   SRF  0  3
@@ -1362,10 +1290,8 @@ L0:
   AND
 ; --- Variable/parameter/function "numformulas".
   SRF  0 15
-  DRF
 ; --- Variable/parameter/function "numtrues".
   SRF  0 16
-  DRF
   OSF 17  0 L1
 ; --- Write STRING "Debería haber llegado aquí sin problemas léxicos o sintácticos".
 ; --- Write CHAR "D".
@@ -1654,16 +1580,38 @@ L0:
   WRT  0
   STC  9
 ; --- Check if int is in range [0,255].
+; --- Check if int is in range [0,255].
   DUP
   STC  0
   GTE
   JMF L6
-  DUP
   STC 255
   LTE
   JMF L6
   JMP L7
 L6: 
+; --- Write STRING "Value ".
+; --- Write CHAR "V".
+  STC 86
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "u".
+  STC 117
+  WRT  0
+; --- Write CHAR "e".
+  STC 101
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+  WRT  1
+  STC 32
+  WRT  0
 ; --- Write STRING "invalid for int2char in line(67)".
 ; --- Write CHAR "i".
   STC 105
@@ -1766,6 +1714,7 @@ L6:
   WRT  0
   STC 10
   WRT  0
+  LVP
 L7: 
 ; --- Write CHAR "9".
   WRT  0
@@ -1821,16 +1770,38 @@ L7:
   WRT  0
   STC  9
 ; --- Check if int is in range [0,255].
+; --- Check if int is in range [0,255].
   DUP
   STC  0
   GTE
   JMF L8
-  DUP
   STC 255
   LTE
   JMF L8
   JMP L9
 L8: 
+; --- Write STRING "Value ".
+; --- Write CHAR "V".
+  STC 86
+  WRT  0
+; --- Write CHAR "a".
+  STC 97
+  WRT  0
+; --- Write CHAR "l".
+  STC 108
+  WRT  0
+; --- Write CHAR "u".
+  STC 117
+  WRT  0
+; --- Write CHAR "e".
+  STC 101
+  WRT  0
+; --- Write CHAR " ".
+  STC 32
+  WRT  0
+  WRT  1
+  STC 32
+  WRT  0
 ; --- Write STRING "invalid for int2char in line(68)".
 ; --- Write CHAR "i".
   STC 105
@@ -1933,6 +1904,7 @@ L8:
   WRT  0
   STC 10
   WRT  0
+  LVP
 L9: 
 ; --- Write CHAR "9".
   WRT  0

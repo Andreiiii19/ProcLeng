@@ -3,21 +3,25 @@
 ------------------------------------------------------------------------
 procedure tres_en_raya is
 
-  i: character;
-  j: integer;
+  i1: character;
+  i2: array(0..0) of character;
 
-function x return character is
+procedure x1(j: ref character) is
 begin
-  return 'a';
+  j:='b';
+end;
+
+procedure x2(j: ref array(0..0) of character) is
+begin
+  j(0):='b';
 end;
 
 -----------------------------------------------------------
 begin
---  put("Hola ");
---  put_line(" mundo!");
-  i:=int2char(j);
-
-  i:=int2char(220);
-
-  j:=char2int(x);
+  i1:='a';
+  i2(0):='a';
+  x1(i1);
+  x2(i2);
+  put_line(i1);
+  put_line(i2(0));
 end;
