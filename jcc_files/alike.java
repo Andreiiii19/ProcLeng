@@ -1871,8 +1871,8 @@ if(at.type!=Symbol.Types.INT)
                 String et = CGUtils.newLabel();
                 String et2 = CGUtils.newLabel();
 
-                cBlock.addComment("- Check if int is in range [0,255].");
                 cBlock.duplicateLastInst();
+                cBlock.addComment("- Check if int is in range [0,255].");
                 cBlock.addInst(PCodeInstruction.OpCode.DUP);
                 cBlock.addInst(PCodeInstruction.OpCode.STC, 0);
                 cBlock.addInst(PCodeInstruction.OpCode.GTE);
@@ -1896,12 +1896,12 @@ if(at.type!=Symbol.Types.INT)
                 cBlock.addInst(PCodeInstruction.OpCode.WRT,0);
 
                 code = "invalid for int2char in line(" + linea + ")";
-                if (code.startsWith("\"") && code.endsWith("\"")) {
-                        code = code.substring(1, code.length() - 1);
-                }
-                if (code.contains("\"\"")) {
-                        code = code.replace("\"\"", "\"");
-                }
+                /*if (code.startsWith("\"") && code.endsWith("\"")) {
+			code = code.substring(1, code.length() - 1);
+		}
+		if (code.contains("\"\"")) {
+			code = code.replace("\"\"", "\"");
+		}*/
 
 
 
@@ -2087,10 +2087,18 @@ char charValue = t.image.charAt(1);
                 }
                 cBlock.addComment("- Write STRING \"" + code + "\".");
                 for(char c: code.toCharArray()) {
-                        cBlock.addComment("- Write CHAR \"" + c + "\".");
-                        cBlock.addInst(PCodeInstruction.OpCode.STC, (int)c);
-                        cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+
+                        String texto = c+"";
+                        byte[] bytes = texto.getBytes();
+
+                        //System.out.println("La representación ASCII extendida de '" + texto + "' es: ");
+                        for (byte b : bytes) {
+                                cBlock.addComment("- Write CHAR \"" + c + "\".");
+                                cBlock.addInst(PCodeInstruction.OpCode.STC, (int)b);
+                                cBlock.addInst(PCodeInstruction.OpCode.WRT, 0);
+                        }
                 }
+
                 sf.asignar_valores(att,at,t.image,Symbol.Types.STRING, Symbol.ParameterClass.VAL, st.level,true);
       break;
       }
