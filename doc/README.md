@@ -12,6 +12,7 @@ Compilador alike.jar (V1.0)
 ------------------------------
 Análisis léxico y sintáctico
 Análisis semántico
+Generación de código
 
 
 Invocar como:
@@ -40,7 +41,7 @@ Para invocar las pruebas, ejecutar el script "test.sh" con el comando:
 ./test.sh
 -------------------------------------------------------------
 
-Nivel 4: El lenguaje permite el uso de par´ametros escalares y de vectores, tanto por
+Nivel 4: El lenguaje permite el uso de parámetros escalares y de vectores, tanto por
 valor como por referencia en procedimientos y funciones.
 
 Como se ha escogido el nivel 4 de complejidad, se han implementado todos los usos
